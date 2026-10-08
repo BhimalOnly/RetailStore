@@ -1,0 +1,117 @@
+{
+ "creation": "2026-10-08 19:30:00.000000",
+ "modified": "2026-10-08 19:30:00.000000",
+ "modified_by": "Administrator",
+ "owner": "Administrator",
+ "module": "Retail Store",
+ "engine": "InnoDB",
+ "docstatus": 0,
+ "idx": 0,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "links": [],
+ "doctype": "DocType",
+ "name": "Retail Staff Access",
+ "autoname": "field:user",
+ "naming_rule": "By fieldname",
+ "title_field": "full_name",
+ "show_title_field_in_link": 0,
+ "track_changes": 1,
+ "field_order": [
+  "user",
+  "full_name",
+  "column_break_1",
+  "enabled",
+  "locations_section",
+  "locations",
+  "roles_section",
+  "roles_html"
+ ],
+ "fields": [
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "label": "User",
+   "options": "User",
+   "reqd": 1,
+   "unique": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "full_name",
+   "fieldtype": "Data",
+   "label": "Full Name",
+   "fetch_from": "user.full_name",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enforce Location Restriction",
+   "default": "1",
+   "description": "Untick to remove all location restrictions for this user (e.g. a Store Owner)."
+  },
+  {
+   "fieldname": "locations_section",
+   "fieldtype": "Section Break",
+   "label": "Locations",
+   "description": "Warehouses (stores) this person works at. Add several for staff who rotate between locations. Roles are assigned on the User record and can be combined freely."
+  },
+  {
+   "fieldname": "locations",
+   "fieldtype": "Table",
+   "label": "Locations",
+   "options": "Retail Staff Location"
+  },
+  {
+   "fieldname": "roles_section",
+   "fieldtype": "Section Break",
+   "label": "Roles (read-only summary)",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "roles_html",
+   "fieldtype": "HTML",
+   "label": "Roles"
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "Store Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1
+  },
+  {
+   "role": "Store Owner",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1
+  }
+ ]
+}

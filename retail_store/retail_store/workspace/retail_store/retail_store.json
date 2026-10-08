@@ -1,0 +1,370 @@
+{
+ "creation": "2026-10-08 20:00:00.000000",
+ "modified": "2026-10-08 20:00:00.000000",
+ "modified_by": "Administrator",
+ "owner": "Administrator",
+ "docstatus": 0,
+ "idx": 0,
+ "doctype": "Workspace",
+ "name": "Retail Store",
+ "label": "Retail Store",
+ "title": "Retail Store",
+ "module": "Retail Store",
+ "app": "retail_store",
+ "icon": "store",
+ "public": 1,
+ "is_hidden": 0,
+ "hide_custom": 0,
+ "for_user": "",
+ "parent_page": "",
+ "sequence_id": 1.0,
+ "type": "Workspace",
+ "standard": 1,
+ "content": "[{\"id\": \"rs_hdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Today</b></span>\", \"col\": 12}}, {\"id\": \"rs_sc0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Point of Sale\", \"col\": 3}}, {\"id\": \"rs_sc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Sales Invoice\", \"col\": 3}}, {\"id\": \"rs_sc2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Customer\", \"col\": 3}}, {\"id\": \"rs_sc3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Item\", \"col\": 3}}, {\"id\": \"rs_sc4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Stock Balance\", \"col\": 3}}, {\"id\": \"rs_sc5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Material Request\", \"col\": 3}}, {\"id\": \"rs_sc6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Stock Entry\", \"col\": 3}}, {\"id\": \"rs_sc7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Loyalty Program\", \"col\": 3}}, {\"id\": \"rs_hdr2\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Everything else</b></span>\", \"col\": 12}}, {\"id\": \"rs_cd0\", \"type\": \"card\", \"data\": {\"card_name\": \"Selling\", \"col\": 4}}, {\"id\": \"rs_cd1\", \"type\": \"card\", \"data\": {\"card_name\": \"Stock\", \"col\": 4}}, {\"id\": \"rs_cd2\", \"type\": \"card\", \"data\": {\"card_name\": \"Catalogue\", \"col\": 4}}, {\"id\": \"rs_cd3\", \"type\": \"card\", \"data\": {\"card_name\": \"Loyalty\", \"col\": 4}}, {\"id\": \"rs_cd4\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"rs_cd5\", \"type\": \"card\", \"data\": {\"card_name\": \"Setup\", \"col\": 4}}]",
+ "shortcuts": [
+  {
+   "label": "Point of Sale",
+   "type": "Page",
+   "link_to": "point-of-sale",
+   "color": "Blue"
+  },
+  {
+   "label": "Sales Invoice",
+   "type": "DocType",
+   "link_to": "Sales Invoice",
+   "color": "Blue",
+   "doc_view": "List"
+  },
+  {
+   "label": "Customer",
+   "type": "DocType",
+   "link_to": "Customer",
+   "color": "Green",
+   "doc_view": "List"
+  },
+  {
+   "label": "Item",
+   "type": "DocType",
+   "link_to": "Item",
+   "color": "Orange",
+   "doc_view": "List"
+  },
+  {
+   "label": "Stock Balance",
+   "type": "Report",
+   "link_to": "Stock Balance",
+   "color": "Grey",
+   "report_ref_doctype": "Stock Ledger Entry"
+  },
+  {
+   "label": "Material Request",
+   "type": "DocType",
+   "link_to": "Material Request",
+   "color": "Yellow",
+   "doc_view": "List"
+  },
+  {
+   "label": "Stock Entry",
+   "type": "DocType",
+   "link_to": "Stock Entry",
+   "color": "Purple",
+   "doc_view": "List"
+  },
+  {
+   "label": "Loyalty Program",
+   "type": "DocType",
+   "link_to": "Loyalty Program",
+   "color": "Pink",
+   "doc_view": "List"
+  }
+ ],
+ "links": [
+  {
+   "type": "Card Break",
+   "label": "Selling",
+   "link_count": 5,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Link",
+   "label": "Point of Sale",
+   "link_type": "Page",
+   "link_to": "point-of-sale",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Link",
+   "label": "Sales Invoice",
+   "link_type": "DocType",
+   "link_to": "Sales Invoice",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Link",
+   "label": "POS Opening Entry",
+   "link_type": "DocType",
+   "link_to": "POS Opening Entry",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Link",
+   "label": "POS Closing Entry",
+   "link_type": "DocType",
+   "link_to": "POS Closing Entry",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Link",
+   "label": "Customer",
+   "link_type": "DocType",
+   "link_to": "Customer",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Card Break",
+   "label": "Stock",
+   "link_count": 4,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Link",
+   "label": "Material Request",
+   "link_type": "DocType",
+   "link_to": "Material Request",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Link",
+   "label": "Stock Entry",
+   "link_type": "DocType",
+   "link_to": "Stock Entry",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Link",
+   "label": "Stock Reconciliation",
+   "link_type": "DocType",
+   "link_to": "Stock Reconciliation",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Link",
+   "label": "Warehouse",
+   "link_type": "DocType",
+   "link_to": "Warehouse",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Card Break",
+   "label": "Catalogue",
+   "link_count": 4,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Link",
+   "label": "Item",
+   "link_type": "DocType",
+   "link_to": "Item",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Link",
+   "label": "Item Group",
+   "link_type": "DocType",
+   "link_to": "Item Group",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Link",
+   "label": "Item Attribute",
+   "link_type": "DocType",
+   "link_to": "Item Attribute",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Link",
+   "label": "Item Price",
+   "link_type": "DocType",
+   "link_to": "Item Price",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Card Break",
+   "label": "Loyalty",
+   "link_count": 2,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Link",
+   "label": "Loyalty Program",
+   "link_type": "DocType",
+   "link_to": "Loyalty Program",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Link",
+   "label": "Loyalty Point Entry",
+   "link_type": "DocType",
+   "link_to": "Loyalty Point Entry",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Card Break",
+   "label": "Reports",
+   "link_count": 4,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Link",
+   "label": "Stock Balance",
+   "link_type": "Report",
+   "link_to": "Stock Balance",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 1,
+   "report_ref_doctype": "Stock Ledger Entry"
+  },
+  {
+   "type": "Link",
+   "label": "Stock Projected Qty",
+   "link_type": "Report",
+   "link_to": "Stock Projected Qty",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 1,
+   "report_ref_doctype": "Bin"
+  },
+  {
+   "type": "Link",
+   "label": "Stock Ledger",
+   "link_type": "Report",
+   "link_to": "Stock Ledger",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 1,
+   "report_ref_doctype": "Stock Ledger Entry"
+  },
+  {
+   "type": "Link",
+   "label": "Sales Register",
+   "link_type": "Report",
+   "link_to": "Sales Register",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0,
+   "report_ref_doctype": "Sales Invoice"
+  },
+  {
+   "type": "Card Break",
+   "label": "Setup",
+   "link_count": 4,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Link",
+   "label": "Retail Store Settings",
+   "link_type": "DocType",
+   "link_to": "Retail Store Settings",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Link",
+   "label": "Retail Staff Access",
+   "link_type": "DocType",
+   "link_to": "Retail Staff Access",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Link",
+   "label": "POS Profile",
+   "link_type": "DocType",
+   "link_to": "POS Profile",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  },
+  {
+   "type": "Link",
+   "label": "User",
+   "link_type": "DocType",
+   "link_to": "User",
+   "link_count": 0,
+   "hidden": 0,
+   "onboard": 0,
+   "is_query_report": 0
+  }
+ ],
+ "charts": [],
+ "number_cards": [],
+ "quick_lists": [],
+ "custom_blocks": [],
+ "roles": []
+}

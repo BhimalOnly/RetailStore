@@ -5,270 +5,90 @@ app_description = "Reusable retail starter pack for ERPNext (stores, warehouses,
 app_email = "bhimalonly@gmail.com"
 app_license = "mit"
 
-# Apps
-# ------------------
+required_apps = ["erpnext"]
 
-# required_apps = []
-
-# Each item in the list will be shown as an app in the apps page
-# add_to_apps_screen = [
-# 	{
-# 		"name": "retail_store",
-# 		"logo": "/assets/retail_store/logo.png",
-# 		"title": "Retail Store",
-# 		"route": "/retail_store",
-# 		"has_permission": "retail_store.api.permission.has_app_permission",
-# 	}
-# ]
-
-# The dock, the rail down the left of the desk, is a document rather than a hook. Author it in
-# Manage Dock on a developer-mode site and press Export to App, and it is written to
-# `retail_store/dock/retail_store/retail_store.json` for git to carry. An app that ships none has no
-# rail: its sidebar gets a switcher in the header instead.
-#
-# A companion app, one that extends a host app rather than standing on its own, says so with
-# `mount_on` on that same record, and its entries are appended to the host's rail. Mounting keeps
-# the companion off the apps screen, so it takes precedence over any add_to_apps_screen above.
+# Apps screen / navigation
+# ------------------------
+# The logo is resolved per site from Retail Store Settings (see branding.py),
+# so the same app code can carry a different brand on every client site.
+add_to_apps_screen = [
+	{
+		"name": "retail_store",
+		"logo": "/assets/retail_store/images/retail-store-logo.svg",
+		"title": "Retail Store",
+		"route": "/desk/retail-store",
+		"has_permission": "retail_store.branding.has_app_permission",
+	}
+]
 
 # Includes in <head>
 # ------------------
+# Only sets CSS custom properties from per-site config. It never ships a theme,
+# so a Desk theme app can be added later without conflict (turn off
+# "Apply Brand Colours to Desk" in Retail Store Settings if the theme app owns colours).
+app_include_js = "/assets/retail_store/js/retail_store.js"
 
-# include js, css files in header of desk.html
-# app_include_css = "/assets/retail_store/css/retail_store.css"
-# app_include_js = "/assets/retail_store/js/retail_store.js"
+# POS: one card per product template + Size/Colour picker (see pos_variants.py).
+# Toggle: Retail Store Settings > Capabilities > "Group Variants in POS".
+page_js = {"point-of-sale": "public/js/pos_variant_picker.js"}
+override_whitelisted_methods = {
+	"erpnext.selling.page.point_of_sale.point_of_sale.get_items": "retail_store.pos_variants.get_items",
+}
 
-# include js, css files in header of web template
-# web_include_css = "/assets/retail_store/css/retail_store.css"
-# web_include_js = "/assets/retail_store/js/retail_store.js"
-
-# include custom scss in every website theme (without file extension ".scss")
-# website_theme_scss = "retail_store/public/scss/website"
-
-# include js, css files in header of web form
-# webform_include_js = {"doctype": "public/js/doctype.js"}
-# webform_include_css = {"doctype": "public/css/doctype.css"}
-
-# include js in page
-# page_js = {"page" : "public/js/file.js"}
-
-# include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
-# doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
-# doctype_kanban_js = {"doctype" : "public/js/doctype_kanban.js"}
-# doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
-# doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
-
-# Svg Icons
-# ------------------
-# include app icons in desk
-# app_include_icons = "retail_store/public/icons.svg"
-
-# Home Pages
-# ----------
-
-# application home page (will override Website Settings)
-# home_page = "login"
-
-# website user home page (by Role)
-# role_home_page = {
-# 	"Role": "home_page"
-# }
-
-# Generators
-# ----------
-
-# automatically create page for each record of this doctype
-# website_generators = ["Web Page"]
-
-# automatically load and sync documents of this doctype from downstream apps
-# importable_doctypes = [doctype_1]
-
-# Jinja
-# ----------
-
-# add methods and filters to jinja environment
-# jinja = {
-# 	"methods": "retail_store.utils.jinja_methods",
-# 	"filters": "retail_store.utils.jinja_filters"
-# }
+boot_session = "retail_store.branding.boot_session"
+update_website_context = "retail_store.branding.update_website_context"
 
 # Installation
 # ------------
-
-# before_install = "retail_store.install.before_install"
-# after_install = "retail_store.install.after_install"
-
-# Uninstallation
-# ------------
-
-# before_uninstall = "retail_store.uninstall.before_uninstall"
-# after_uninstall = "retail_store.uninstall.after_uninstall"
-
-# Integration Setup
-# ------------------
-# To set up dependencies/integrations with other apps
-# Name of the app being installed is passed as an argument
-
-# before_app_install = "retail_store.utils.before_app_install"
-# after_app_install = "retail_store.utils.after_app_install"
-
-# Integration Cleanup
-# -------------------
-# To clean up dependencies/integrations with other apps
-# Name of the app being uninstalled is passed as an argument
-
-# before_app_uninstall = "retail_store.utils.before_app_uninstall"
-# after_app_uninstall = "retail_store.utils.after_app_uninstall"
-
-# Build
-# ------------------
-# To hook into the build process
-
-# after_build = "retail_store.build.after_build"
-
-# Desk Notifications
-# ------------------
-# See frappe.core.notifications.get_notification_config
-
-# notification_config = "retail_store.notifications.get_notification_config"
-
-# Awesome Bar
-# -----------
-# Extra search results: list of dicts with label, description, route, index.
-# route: ["List", "ToDo"], "/desk/docs/some/page", or "https://example.com"
-# awesomebar_search = ["retail_store.search.awesomebar_results"]
+after_install = "retail_store.install.after_install"
+after_migrate = "retail_store.install.after_migrate"
+setup_wizard_complete = "retail_store.install.after_setup_wizard"
+before_uninstall = "retail_store.install.before_uninstall"
 
 # Permissions
 # -----------
-# Permissions evaluated in scripted ways
+# Stock Entry and Material Request move goods BETWEEN locations, so a plain
+# User Permission (which ANDs every warehouse field) would hide a transfer from
+# the receiving store. These hooks show the document when ANY of its warehouses
+# belongs to the user. Other transactional doctypes use native User Permissions.
+permission_query_conditions = {
+	"Stock Entry": "retail_store.permissions.stock_entry_query_conditions",
+	"Material Request": "retail_store.permissions.material_request_query_conditions",
+}
 
-# permission_query_conditions = {
-# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
-# }
-#
-# has_permission = {
-# 	"Event": "frappe.desk.doctype.event.event.has_permission",
-# }
+has_permission = {
+	"Stock Entry": "retail_store.permissions.stock_entry_has_permission",
+	"Material Request": "retail_store.permissions.material_request_has_permission",
+}
 
 # Document Events
 # ---------------
-# Hook on document methods and events
-
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
-
-# Scheduled Tasks
-# ---------------
-
-# scheduler_events = {
-# 	"all": [
-# 		"retail_store.tasks.all"
-# 	],
-# 	"daily": [
-# 		"retail_store.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"retail_store.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"retail_store.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"retail_store.tasks.monthly"
-# 	],
-# }
+doc_events = {
+	"Material Request": {
+		"validate": "retail_store.stock_transfer.validate_material_request",
+	},
+	"Stock Entry": {
+		"before_validate": "retail_store.stock_transfer.set_final_destination_on_receipt",
+		"validate": "retail_store.stock_transfer.validate_stock_entry",
+	},
+	"Sales Invoice": {
+		"validate": "retail_store.location.set_header_warehouse",
+	},
+	"POS Invoice": {
+		"validate": "retail_store.location.set_header_warehouse",
+	},
+	"POS Profile": {
+		"on_update": "retail_store.location.resync_users_for_pos_profile",
+	},
+}
 
 # Testing
 # -------
+before_tests = "retail_store.install.before_tests"
 
-# before_tests = "retail_store.install.before_tests"
-
-# Extend DocType Class
-# ------------------------------
-#
-# Specify custom mixins to extend the standard doctype controller.
-# extend_doctype_class = {
-# 	"Task": "retail_store.custom.task.CustomTaskMixin"
-# }
-
-# Overriding Methods
-# ------------------------------
-#
-# override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "retail_store.event.get_events"
-# }
-#
-# each overriding function accepts a `data` argument;
-# generated from the base implementation of the doctype dashboard,
-# along with any modifications made in other Frappe apps
-# override_doctype_dashboards = {
-# 	"Task": "retail_store.task.get_dashboard_data"
-# }
-
-# exempt linked doctypes from being automatically cancelled
-#
-# auto_cancel_exempted_doctypes = ["Auto Repeat"]
-
-# Ignore links to specified DocTypes when deleting documents
-# -----------------------------------------------------------
-
-# ignore_links_on_delete = ["Communication", "ToDo"]
-
-# Request Events
-# ----------------
-# before_request = ["retail_store.utils.before_request"]
-# after_request = ["retail_store.utils.after_request"]
-
-# Job Events
-# ----------
-# before_job = ["retail_store.utils.before_job"]
-# after_job = ["retail_store.utils.after_job"]
-
-# User Data Protection
-# --------------------
-
-# user_data_fields = [
-# 	{
-# 		"doctype": "{doctype_1}",
-# 		"filter_by": "{filter_by}",
-# 		"redact_fields": ["{field_1}", "{field_2}"],
-# 		"partial": 1,
-# 	},
-# 	{
-# 		"doctype": "{doctype_2}",
-# 		"filter_by": "{filter_by}",
-# 		"partial": 1,
-# 	},
-# 	{
-# 		"doctype": "{doctype_3}",
-# 		"strict": False,
-# 	},
-# 	{
-# 		"doctype": "{doctype_4}"
-# 	}
-# ]
-
-# Authentication and authorization
+# Extension points (not built yet)
 # --------------------------------
-
-# auth_hooks = [
-# 	"retail_store.auth.validate"
-# ]
-
-# Automatically update python controller files with type annotations for this app.
-# export_python_type_annotations = True
-
-# default_log_clearing_doctypes = {
-# 	"Logging DocType Name": 30  # days to retain logs
-# }
-
-# Translation
-# ------------
-# List of apps whose translatable strings should be excluded from this app's translations.
-# ignore_translatable_strings_from = []
-
+# WhatsApp / SMS: see README "Messaging extension point". Planned as a separate
+# app or module that listens to doc_events (Sales Invoice on_submit, Loyalty
+# Point Entry after_insert) and sends via the client's own WhatsApp Business
+# Account through a Meta Tech Provider. Nothing here sends messages today.

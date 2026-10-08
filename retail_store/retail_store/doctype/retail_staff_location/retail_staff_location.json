@@ -1,0 +1,40 @@
+{
+ "creation": "2026-10-08 19:30:00.000000",
+ "modified": "2026-10-08 19:30:00.000000",
+ "modified_by": "Administrator",
+ "owner": "Administrator",
+ "module": "Retail Store",
+ "engine": "InnoDB",
+ "docstatus": 0,
+ "idx": 0,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "links": [],
+ "doctype": "DocType",
+ "name": "Retail Staff Location",
+ "istable": 1,
+ "editable_grid": 1,
+ "field_order": [
+  "warehouse",
+  "is_default"
+ ],
+ "fields": [
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "is_default",
+   "fieldtype": "Check",
+   "label": "Default",
+   "in_list_view": 1,
+   "default": "0"
+  }
+ ],
+ "permissions": []
+}

@@ -1,0 +1,275 @@
+{
+ "creation": "2026-10-08 19:30:00.000000",
+ "modified": "2026-10-08 23:00:00.000000",
+ "modified_by": "Administrator",
+ "owner": "Administrator",
+ "module": "Retail Store",
+ "engine": "InnoDB",
+ "docstatus": 0,
+ "idx": 0,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "links": [],
+ "doctype": "DocType",
+ "name": "Retail Store Settings",
+ "issingle": 1,
+ "track_changes": 1,
+ "field_order": [
+  "branding_tab",
+  "brand_name",
+  "brand_logo",
+  "brand_favicon",
+  "column_break_brand",
+  "brand_color",
+  "accent_color",
+  "apply_brand_to_desk",
+  "capabilities_tab",
+  "core_section",
+  "enable_loyalty",
+  "default_loyalty_program",
+  "group_variants_in_pos",
+  "optional_section",
+  "enable_crm",
+  "enable_ecommerce",
+  "enable_buying",
+  "enable_hr",
+  "enable_manufacturing",
+  "column_break_opt",
+  "enable_quality",
+  "enable_support",
+  "enable_assets",
+  "enable_projects",
+  "messaging_section",
+  "stock_tab",
+  "main_warehouse",
+  "in_transit_warehouse",
+  "column_break_stock",
+  "require_request_approval",
+  "access_tab",
+  "location_scoped_doctypes",
+  "pos_scoped_doctypes"
+ ],
+ "fields": [
+  {
+   "fieldname": "branding_tab",
+   "fieldtype": "Tab Break",
+   "label": "Branding"
+  },
+  {
+   "fieldname": "brand_name",
+   "fieldtype": "Data",
+   "label": "Brand Name",
+   "description": "Shown in the navbar and browser title. Leave empty to use the Company name."
+  },
+  {
+   "fieldname": "brand_logo",
+   "fieldtype": "Attach Image",
+   "label": "Brand Logo",
+   "description": "Use a square mark (e.g. 256x256 PNG/SVG): it is shown as the app icon on the apps screen and in the desk."
+  },
+  {
+   "fieldname": "brand_favicon",
+   "fieldtype": "Attach Image",
+   "label": "Favicon"
+  },
+  {
+   "fieldname": "column_break_brand",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "brand_color",
+   "fieldtype": "Color",
+   "label": "Brand Colour",
+   "default": "#1F6FEB"
+  },
+  {
+   "fieldname": "accent_color",
+   "fieldtype": "Color",
+   "label": "Accent Colour",
+   "default": "#F59E0B"
+  },
+  {
+   "fieldname": "apply_brand_to_desk",
+   "fieldtype": "Check",
+   "label": "Apply Brand Colours to Desk",
+   "default": "1",
+   "description": "Maps the brand colour onto Desk's primary colour. Turn this off if a Desk theme app is installed and should own the colours."
+  },
+  {
+   "fieldname": "capabilities_tab",
+   "fieldtype": "Tab Break",
+   "label": "Capabilities"
+  },
+  {
+   "fieldname": "core_section",
+   "fieldtype": "Section Break",
+   "label": "Core (always on)",
+   "description": "Stock, Selling, Accounts and POS are always enabled. Customers can be created straight from POS without the CRM module."
+  },
+  {
+   "fieldname": "enable_loyalty",
+   "fieldtype": "Check",
+   "label": "Loyalty Program",
+   "default": "1",
+   "description": "Creates (or re-enables) a default points program and enrols new customers automatically."
+  },
+  {
+   "fieldname": "default_loyalty_program",
+   "fieldtype": "Link",
+   "label": "Default Loyalty Program",
+   "options": "Loyalty Program",
+   "read_only": 1
+  },
+  {
+   "fieldname": "group_variants_in_pos",
+   "fieldtype": "Check",
+   "label": "Group Variants in POS",
+   "default": "1",
+   "description": "POS shows one card per product (e.g. one per shoe model) and asks for Size/Colour when it is tapped. Scanning a barcode still adds the exact variant. Turn off to get ERPNext's standard one-card-per-variant list."
+  },
+  {
+   "fieldname": "optional_section",
+   "fieldtype": "Section Break",
+   "label": "Optional Modules",
+   "description": "Off by default. Ticking one un-hides its sidebar icon and grants it to Store Owner. Saving re-applies the navigation."
+  },
+  {
+   "fieldname": "enable_crm",
+   "fieldtype": "Check",
+   "label": "CRM (Leads, Opportunities, pipeline)",
+   "default": "0"
+  },
+  {
+   "fieldname": "enable_ecommerce",
+   "fieldtype": "Check",
+   "label": "Online Store / E-Commerce (needs the webshop app)",
+   "default": "0"
+  },
+  {
+   "fieldname": "enable_buying",
+   "fieldtype": "Check",
+   "label": "Buying (Suppliers, Purchase Orders)",
+   "default": "0"
+  },
+  {
+   "fieldname": "enable_hr",
+   "fieldtype": "Check",
+   "label": "HR (needs the hrms app)",
+   "default": "0"
+  },
+  {
+   "fieldname": "enable_manufacturing",
+   "fieldtype": "Check",
+   "label": "Manufacturing",
+   "default": "0"
+  },
+  {
+   "fieldname": "column_break_opt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "enable_quality",
+   "fieldtype": "Check",
+   "label": "Quality",
+   "default": "0"
+  },
+  {
+   "fieldname": "enable_support",
+   "fieldtype": "Check",
+   "label": "Support",
+   "default": "0"
+  },
+  {
+   "fieldname": "enable_assets",
+   "fieldtype": "Check",
+   "label": "Assets",
+   "default": "0"
+  },
+  {
+   "fieldname": "enable_projects",
+   "fieldtype": "Check",
+   "label": "Projects",
+   "default": "0"
+  },
+  {
+   "fieldname": "messaging_section",
+   "fieldtype": "Section Break",
+   "label": "Messaging (planned)",
+   "collapsible": 1,
+   "description": "WhatsApp/SMS is not built yet. See the app README, section 'Messaging extension point'."
+  },
+  {
+   "fieldname": "stock_tab",
+   "fieldtype": "Tab Break",
+   "label": "Stock Transfers"
+  },
+  {
+   "fieldname": "main_warehouse",
+   "fieldtype": "Link",
+   "label": "Main / Central Warehouse",
+   "options": "Warehouse",
+   "description": "Default source for store replenishment requests."
+  },
+  {
+   "fieldname": "in_transit_warehouse",
+   "fieldtype": "Link",
+   "label": "In-Transit Warehouse",
+   "options": "Warehouse",
+   "description": "Goods sit here between 'dispatched' and 'received at destination'."
+  },
+  {
+   "fieldname": "column_break_stock",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "require_request_approval",
+   "fieldtype": "Check",
+   "label": "Material Requests Need Approval",
+   "default": "1",
+   "description": "Staff submit requests for approval; a Store/Warehouse Manager or Store Owner approves."
+  },
+  {
+   "fieldname": "access_tab",
+   "fieldtype": "Tab Break",
+   "label": "Location Access"
+  },
+  {
+   "fieldname": "location_scoped_doctypes",
+   "fieldtype": "Small Text",
+   "label": "Doctypes Restricted by Location",
+   "default": "Sales Invoice\nPOS Invoice\nPOS Profile\nSales Order\nDelivery Note\nStock Reconciliation",
+   "description": "One per line. A staff member's warehouses are applied to these doctypes as native User Permissions ('Applicable For'). Stock Entry and Material Request are always scoped by this app, and reports like Stock Balance are never blocked."
+  },
+  {
+   "fieldname": "pos_scoped_doctypes",
+   "fieldtype": "Small Text",
+   "label": "Doctypes Restricted by POS Profile",
+   "default": "POS Opening Entry\nPOS Closing Entry",
+   "description": "One per line. Restricted to the POS Profiles of the staff member's warehouses."
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1
+  },
+  {
+   "role": "Store Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "Store Owner",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  }
+ ]
+}

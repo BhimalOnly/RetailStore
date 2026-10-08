@@ -1,0 +1,46 @@
+{
+ "creation": "2026-10-08 20:00:00.000000",
+ "modified": "2026-10-08 20:00:00.000000",
+ "modified_by": "Administrator",
+ "owner": "Administrator",
+ "docstatus": 0,
+ "idx": 0,
+ "doctype": "Dock",
+ "name": "retail_store",
+ "app": "retail_store",
+ "standard": 1,
+ "items": [
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "storefront-duotone",
+   "link_to": "Retail Store",
+   "link_type": "Sidebar",
+   "title": "Retail Store"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "shelf-rack-duotone",
+   "link_to": "Stock",
+   "link_type": "Sidebar",
+   "title": "Stock"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "contacts-cards-duotone",
+   "link_to": "Selling",
+   "link_type": "Sidebar",
+   "title": "Selling"
+  },
+  {
+   "added": 0,
+   "hidden": 0,
+   "icon": "calculator-duotone",
+   "link_to": "Accounts",
+   "link_type": "Sidebar",
+   "title": "Accounts"
+  }
+ ]
+}

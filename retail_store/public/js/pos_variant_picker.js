@@ -1,0 +1,192 @@
+// POS variant picker (Retail Store).
+// Server side groups variants under their template (retail_store.pos_variants.get_items).
+// Here: a template card shows "N options", and clicking it opens a Size/Colour
+// picker; the chosen variant then goes through ERPNext's normal cart path.
+// Methods are patched on the prototypes, which ERPNext looks up at call time,
+// so this works whenever the POS bundle finishes loading.
+
+frappe.provide("retail_store.pos");
+
+retail_store.pos.template_cache = new Map(); // item_code -> is template (bool)
+
+retail_store.pos.is_template = async function (item_code) {
+	const cache = retail_store.pos.template_cache;
+	if (!cache.has(item_code)) {
+		const r = await frappe.db.get_value("Item", item_code, "has_variants");
+		cache.set(item_code, !!(r.message && r.message.has_variants));
+	}
+	return cache.get(item_code);
+};
+
+retail_store.pos.pick_variant = function (controller, template) {
+	return new Promise((resolve) => {
+		frappe
+			.call({
+				method: "retail_store.pos_variants.get_variant_options",
+				args: {
+					template,
+					pos_profile: controller.pos_profile || controller.settings?.name,
+					price_list: controller.frm?.doc?.selling_price_list,
+				},
+			})
+			.then(({ message: data }) => {
+				if (!data || !data.variants.length) {
+					frappe.show_alert({ message: __("No sellable variants for {0}", [template]), indicator: "orange" });
+					return resolve(null);
+				}
+				retail_store.pos.show_picker(data, resolve);
+			});
+	});
+};
+
+retail_store.pos.show_picker = function (data, resolve) {
+	const selected = {};
+	let chosen = null;
+	let done = false;
+	const esc = frappe.utils.escape_html;
+
+	const matches = (variant, sel) =>
+		Object.entries(sel).every(([attr, val]) => variant.attributes[attr] === val);
+
+	const dialog = new frappe.ui.Dialog({
+		title: esc(data.item_name),
+		fields: [{ fieldtype: "HTML", fieldname: "picker" }],
+		primary_action_label: __("Add to Cart"),
+		primary_action() {
+			if (!chosen) return;
+			done = true;
+			dialog.hide();
+			resolve(chosen);
+		},
+		on_hide() {
+			if (!done) resolve(null);
+		},
+	});
+
+	function render() {
+		const $wrap = dialog.fields_dict.picker.$wrapper;
+		let html = "";
+		data.attributes.forEach((attr) => {
+			html += `<div class="rs-attr mb-3"><div class="text-muted small mb-1">${esc(__(attr))}</div><div>`;
+			data.options[attr].forEach((val) => {
+				// a value is offered only if some variant has it together with the other picks
+				const others = Object.fromEntries(Object.entries(selected).filter(([a]) => a !== attr));
+				const candidates = data.variants.filter((v) => v.attributes[attr] === val && matches(v, others));
+				const exists = candidates.length > 0;
+				const in_stock = candidates.some((v) => !v.is_stock_item || v.actual_qty > 0);
+				const active = selected[attr] === val;
+				const cls = active ? "btn-primary" : in_stock ? "btn-default" : "btn-default text-muted";
+				html += `<button class="btn btn-sm ${cls} rs-opt mr-1 mb-1" style="${
+					in_stock || active ? "" : "text-decoration: line-through;"
+				}" data-attr="${esc(attr)}" data-val="${esc(val)}" ${exists ? "" : "disabled"}>${esc(val)}</button>`;
+			});
+			html += `</div></div>`;
+		});
+
+		const complete = data.attributes.every((a) => selected[a]);
+		chosen = complete ? data.variants.find((v) => matches(v, selected)) || null : null;
+		if (chosen) {
+			const qty = chosen.is_stock_item ? chosen.actual_qty : __("Non stock item");
+			const indicator = !chosen.is_stock_item || chosen.actual_qty > 10 ? "green" : chosen.actual_qty > 0 ? "orange" : "red";
+			html += `<div class="mt-2 p-2 border rounded">
+				<div><b>${esc(chosen.item_code)}</b></div>
+				<div>${chosen.rate != null ? format_currency(chosen.rate, chosen.currency) : __("No price")}
+					&nbsp;<span class="indicator-pill ${indicator}">${__("In stock here")}: ${qty}</span></div>
+			</div>`;
+		} else {
+			html += `<div class="text-muted small mt-2">${__("Choose {0}", [data.attributes.map((a) => __(a)).join(" / ")])}</div>`;
+		}
+		$wrap.html(html);
+
+		const blocked = chosen && chosen.is_stock_item && chosen.actual_qty <= 0 && !data.allow_negative_stock;
+		dialog.get_primary_btn().prop("disabled", !chosen || chosen.rate == null || blocked);
+	}
+
+	dialog.fields_dict.picker.$wrapper.on("click", ".rs-opt", function () {
+		const attr = $(this).attr("data-attr");
+		const val = $(this).attr("data-val");
+		if (selected[attr] === val) delete selected[attr];
+		else selected[attr] = val;
+		render();
+	});
+
+	// pre-select attributes that only have one possible value
+	data.attributes.forEach((a) => {
+		if (data.options[a].length === 1) selected[a] = data.options[a][0];
+	});
+	render();
+	dialog.show();
+};
+
+retail_store.pos.patch = function () {
+	const PS = erpnext.PointOfSale;
+	if (!PS || !PS.Controller || !PS.ItemSelector) return false;
+	if (PS.Controller.prototype.__rs_patched) return true;
+
+	const original_on_cart_update = PS.Controller.prototype.on_cart_update;
+	PS.Controller.prototype.on_cart_update = async function (args) {
+		const item = args && args.item;
+		const from_selector = args && args.field === "qty" && args.value === "+1";
+		if (from_selector && item && item.item_code && (await retail_store.pos.is_template(item.item_code))) {
+			if (!this.frm.doc.customer) return this.raise_customer_selection_alert();
+			const variant = await retail_store.pos.pick_variant(this, item.item_code);
+			if (!variant) return;
+			retail_store.pos.template_cache.set(variant.item_code, false);
+			args = {
+				...args,
+				item: {
+					item_code: variant.item_code,
+					rate: variant.rate,
+					uom: variant.stock_uom,
+					stock_uom: variant.stock_uom,
+				},
+			};
+		}
+		return original_on_cart_update.call(this, args);
+	};
+
+	const original_get_item_html = PS.ItemSelector.prototype.get_item_html;
+	PS.ItemSelector.prototype.get_item_html = function (item) {
+		retail_store.pos.template_cache.set(item.item_code, !!item.rs_is_template);
+		const html = original_get_item_html.call(this, item);
+		if (!item.rs_is_template) return html;
+
+		const $card = $(html);
+		let label = __("{0} options", [item.rs_variant_count]);
+		if (item.rs_price_max && item.rs_price_max !== item.price_list_rate) {
+			label += ` · ${__("up to")} ${format_currency(item.rs_price_max, item.currency, 0)}`;
+		}
+		$card.addClass("rs-template-card");
+		$card.find(".item-detail").append(`<div class="rs-variant-badge small text-muted">${frappe.utils.escape_html(label)}</div>`);
+		return $card.prop("outerHTML");
+	};
+
+	PS.Controller.prototype.__rs_patched = true;
+	return true;
+};
+
+// The POS bundle loads asynchronously and may finish after our require callback,
+// so retry until ERPNext's classes exist. If the item grid was already drawn
+// unpatched, reload it once so template cards get their "N options" badge.
+retail_store.pos.ensure_patched = function (tries = 0) {
+	if (retail_store.pos.patch()) {
+		const selector = window.cur_pos && cur_pos.item_selector;
+		if (selector && selector.$items_container && !selector.$items_container.find(".rs-variant-badge").length) {
+			selector.load_items_data();
+		}
+		return;
+	}
+	if (tries < 600) setTimeout(() => retail_store.pos.ensure_patched(tries + 1), 50);
+};
+
+(function () {
+	const page = frappe.pages["point-of-sale"];
+	if (!page) return;
+	const original_on_page_load = page.on_page_load;
+	page.on_page_load = function (wrapper) {
+		const result = original_on_page_load.call(this, wrapper);
+		retail_store.pos.ensure_patched();
+		return result;
+	};
+	if (window.erpnext && erpnext.PointOfSale && erpnext.PointOfSale.Controller) retail_store.pos.ensure_patched();
+})();

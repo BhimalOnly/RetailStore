@@ -1,0 +1,301 @@
+"""Custom retail roles and their default Role Permissions.
+
+Roles are COMBINABLE: a person can hold Store Attendant + Store Cashier, or
+Warehouse Manager + Store Manager, and simply gets the union of rights. Nothing
+in this app assumes one role per person. All standard ERPNext roles are kept;
+accounting uses the stock "Accounts Manager" role unchanged.
+
+Permissions are written as Custom DocPerm rows (what Role Permissions Manager
+edits), so they can be adjusted per client in the UI afterwards. Re-running
+setup only ADDS rights listed here; it never removes a right someone granted
+by hand. To reset a doctype to this baseline use Role Permissions Manager >
+"Reset to defaults" and then `bench --site <site> migrate`.
+
+Codes: r read, w write, c create, d delete, s submit, x cancel, a amend,
+p print, e email, rep report, exp export, sh share.
+"""
+
+import frappe
+
+ROLES = {
+	"Store Attendant": "Shop-floor staff: helps customers, creates customers, drafts sales, requests stock.",
+	"Store Cashier": "Runs the till: POS sales, payments, opening/closing the register.",
+	"Store Manager": "Runs a store: approves requests, transfers and counts stock, cancels/amends sales.",
+	"Warehouse Attendant": "Picks/packs and counts stock, requests stock; cannot post transfers.",
+	"Warehouse Manager": "Runs a warehouse: approves requests, posts transfers, maintains the catalogue.",
+	"Store Owner": "Sees and does everything retail across all locations, including bulk transfers.",
+	"Store Admin": "Configures the store system: locations, staff access, POS profiles, catalogue, branding.",
+}
+
+ALL = list(ROLES)
+MANAGERS = ["Store Manager", "Warehouse Manager", "Store Owner"]
+
+READ = "r rep p"
+REF = "r"  # link targets that only need to be readable/selectable
+
+# Master data every retail role must be able to read to use the forms at all.
+_BASE_READ = {
+	"Item": READ,
+	"Item Group": REF,
+	"Item Attribute": REF,
+	"Item Price": REF,
+	"Price List": REF,
+	"UOM": REF,
+	"Brand": REF,
+	"Warehouse": REF,
+	"Customer Group": REF,
+	"Territory": REF,
+	"Company": REF,
+	"Currency": REF,
+	"Mode of Payment": REF,
+	"Loyalty Program": REF,
+	"Bin": READ,
+	"Stock Ledger Entry": READ,  # Stock Balance / Stock Ledger reports
+	"Batch": REF,
+	"Serial No": REF,
+	"Stock Entry Type": REF,
+	"Sales Taxes and Charges Template": REF,
+	"Item Tax Template": REF,
+	"Cost Center": REF,
+}
+
+_CUSTOMER = {"Customer": "r w c rep p e", "Contact": "r w c", "Address": "r w c"}
+_REQUEST = {"Material Request": "r w c rep p"}  # submit is done by approvers via workflow
+_TILL = {
+	"Sales Invoice": "r w c s rep p e",
+	"POS Invoice": "r w c s rep p e",
+	"POS Opening Entry": "r w c s",
+	"POS Closing Entry": "r w c s rep p",
+	"POS Profile": REF,
+	"POS Settings": REF,
+	"Stock Settings": REF,  # POS reads allow_negative_stock on load (v16 pos_controller.js)
+	"Payment Entry": "r w c s rep p e",
+	"Loyalty Point Entry": READ,
+	"Coupon Code": REF,
+	"Pricing Rule": REF,
+	"Account": REF,
+}
+_STOCK_POSTING = {
+	"Stock Entry": "r w c s x a rep p e",
+	"Material Request": "r w c s x a rep p e",
+	"Stock Reconciliation": "r w c s x a rep p",
+	"Delivery Note": "r w c s x a rep p e",
+	"Batch": "r w c",
+	"Serial No": "r w",
+}
+_CATALOGUE = {
+	"Item": "r w c rep p exp",
+	"Item Group": "r w c",
+	"Item Attribute": "r w c",
+	"Item Price": "r w c d rep",
+	"Price List": "r w c",
+	"Brand": "r w c",
+	"UOM": "r w c",
+}
+
+
+def _merge(*maps):
+	out = {}
+	for m in maps:
+		for dt, codes in m.items():
+			out[dt] = " ".join(sorted(set(out.get(dt, "").split()) | set(codes.split())))
+	return out
+
+
+PERMISSIONS = {
+	"Store Attendant": _merge(
+		_BASE_READ,
+		_CUSTOMER,
+		_REQUEST,
+		{"Sales Invoice": "r w c rep p", "Stock Entry": READ, "Delivery Note": READ},
+	),
+	"Store Cashier": _merge(_BASE_READ, _CUSTOMER, _REQUEST, _TILL, {"Stock Entry": READ}),
+	"Store Manager": _merge(
+		_BASE_READ,
+		_CUSTOMER,
+		_TILL,
+		_STOCK_POSTING,
+		{
+			"Sales Invoice": "r w c s x a rep p e exp",
+			"POS Invoice": "r w c s x a rep p e exp",
+			"POS Closing Entry": "r w c s x a rep p",
+			"POS Profile": "r w",
+			"Item Price": "r w c rep",
+			"Sales Order": "r w c s x a rep p e",
+			"Quotation": "r w c s rep p e",
+			"Pricing Rule": "r w c",
+			"Coupon Code": "r w c",
+			"Payment Entry": "r w c s x a rep p e",
+		},
+	),
+	"Warehouse Attendant": _merge(
+		_BASE_READ,
+		_REQUEST,
+		{
+			"Stock Entry": READ,
+			"Stock Reconciliation": "r w c rep p",  # count sheets; a manager submits
+			"Delivery Note": READ,
+			"Pick List": "r w c rep p",
+		},
+	),
+	"Warehouse Manager": _merge(
+		_BASE_READ,
+		_STOCK_POSTING,
+		_CATALOGUE,
+		{"Pick List": "r w c s x a rep p", "Item Attribute": "r w c", "Warehouse": "r rep"},
+	),
+	"Store Owner": _merge(
+		_BASE_READ,
+		_CUSTOMER,
+		_TILL,
+		_STOCK_POSTING,
+		_CATALOGUE,
+		{
+			"Customer": "r w c d rep p e exp",
+			"Sales Invoice": "r w c s x a rep p e exp",
+			"POS Invoice": "r w c s x a rep p e exp",
+			"POS Closing Entry": "r w c s x a rep p",
+			"POS Profile": "r w c d",
+			"POS Settings": "r w",
+			"Sales Order": "r w c s x a rep p e exp",
+			"Quotation": "r w c s x a rep p e",
+			"Payment Entry": "r w c s x a rep p e exp",
+			"Pricing Rule": "r w c d",
+			"Coupon Code": "r w c d",
+			"Loyalty Program": "r w c",
+			"Loyalty Point Entry": "r rep exp",
+			"Warehouse": "r w c rep",
+			"Item": "r w c d rep p exp",
+			"Pick List": "r w c s x a rep p",
+			"Stock Entry": "r w c s x a d rep p e exp",
+			"Material Request": "r w c s x a d rep p e exp",
+		},
+	),
+	"Store Admin": _merge(
+		_BASE_READ,
+		_CATALOGUE,
+		{
+			"Customer": "r w c rep",
+			"Warehouse": "r w c rep",
+			"POS Profile": "r w c d",
+			"POS Settings": "r w",
+			"Loyalty Program": "r w c",
+			"Mode of Payment": "r",
+			"Stock Entry Type": "r",
+			"User": "r",
+		},
+	),
+}
+
+# Reports and pages need the role listed on them too (stored as "Custom Role",
+# so ERPNext's own report definitions stay untouched).
+REPORT_ROLES = {
+	"Stock Balance": ALL,
+	"Stock Projected Qty": ALL,
+	"Stock Ledger": MANAGERS + ["Store Admin", "Warehouse Attendant"],
+	"Sales Register": ["Store Manager", "Store Owner"],
+	"Sales Analytics": ["Store Manager", "Store Owner"],
+	"Item-wise Sales Register": ["Store Manager", "Store Owner"],
+}
+PAGE_ROLES = {
+	"point-of-sale": ["Store Cashier", "Store Manager", "Store Owner"],
+}
+
+CODE_TO_FIELD = {
+	"r": "read",
+	"w": "write",
+	"c": "create",
+	"d": "delete",
+	"s": "submit",
+	"x": "cancel",
+	"a": "amend",
+	"p": "print",
+	"e": "email",
+	"rep": "report",
+	"exp": "export",
+	"sh": "share",
+}
+
+
+def create_roles():
+	for role, description in ROLES.items():
+		if frappe.db.exists("Role", role):
+			continue
+		frappe.get_doc(
+			{
+				"doctype": "Role",
+				"role_name": role,
+				"desk_access": 1,
+				"description": description,
+			}
+		).insert(ignore_permissions=True)
+
+
+def apply_role_permissions():
+	from frappe.permissions import setup_custom_perms
+
+	touched = set()
+	for role, perms in PERMISSIONS.items():
+		for doctype, codes in perms.items():
+			if not frappe.db.exists("DocType", doctype):
+				continue  # e.g. a doctype dropped in a future ERPNext version
+			meta = frappe.get_meta(doctype)
+			setup_custom_perms(doctype)
+			name = frappe.db.get_value(
+				"Custom DocPerm", {"parent": doctype, "role": role, "permlevel": 0, "if_owner": 0}
+			)
+			perm = (
+				frappe.get_doc("Custom DocPerm", name)
+				if name
+				else frappe.get_doc({"doctype": "Custom DocPerm", "parent": doctype, "role": role, "permlevel": 0})
+			)
+			changed = perm.is_new()
+			for code in codes.split():
+				field = CODE_TO_FIELD[code]
+				if field in ("submit", "cancel", "amend") and not meta.is_submittable:
+					continue
+				if not perm.get(field):
+					perm.set(field, 1)
+					changed = True
+			if changed:
+				perm.save(ignore_permissions=True)
+				touched.add(doctype)
+
+	for doctype in touched:
+		frappe.clear_cache(doctype=doctype)
+
+
+def apply_report_and_page_roles():
+	for field, mapping in (("report", REPORT_ROLES), ("page", PAGE_ROLES)):
+		doctype = "Report" if field == "report" else "Page"
+		for target, roles in mapping.items():
+			if not frappe.db.exists(doctype, target):
+				continue
+			name = frappe.db.get_value("Custom Role", {field: target})
+			doc = (
+				frappe.get_doc("Custom Role", name)
+				if name
+				else frappe.get_doc(
+					{
+						"doctype": "Custom Role",
+						field: target,
+						"ref_doctype": frappe.db.get_value("Report", target, "ref_doctype") if field == "report" else None,
+					}
+				)
+			)
+			if doc.is_new():
+				# Start from the standard roles so we only ever add access.
+				standard = frappe.get_all("Has Role", filters={"parenttype": doctype, "parent": target}, pluck="role")
+				for r in standard:
+					doc.append("roles", {"role": r})
+			have = {r.role for r in doc.roles}
+			for r in roles:
+				if r not in have:
+					doc.append("roles", {"role": r})
+			doc.save(ignore_permissions=True)
+
+
+def setup_roles_and_permissions():
+	create_roles()
+	apply_role_permissions()
+	apply_report_and_page_roles()
