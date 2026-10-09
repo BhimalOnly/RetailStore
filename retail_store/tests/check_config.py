@@ -112,6 +112,24 @@ def run():
 		frappe.set_user("Administrator")
 		check(f"{owner_like} can write permlevel 0 only", access == [0] or set(access) == {0}, access)
 
+	# --- Customer defaults: ERPNext leaves Customer Group / Territory blank
+	ss = frappe.get_single("Selling Settings")
+	check("Selling Settings has a default Customer Group", bool(ss.customer_group), ss.customer_group)
+	check("Selling Settings has a default Territory", bool(ss.territory), ss.territory)
+	check("Customer Group default is a leaf (assignable)", frappe.db.get_value("Customer Group", ss.customer_group, "is_group") == 0)
+	check("Territory default is a leaf (assignable)", frappe.db.get_value("Territory", ss.territory, "is_group") == 0)
+	check("Site default feeds ERPNext's Lead conversion", frappe.db.get_default("Customer Group") == ss.customer_group)
+	probe = frappe.get_doc({"doctype": "Customer", "customer_name": "ZZ Defaults Probe", "customer_type": "Individual"})
+	probe.insert(ignore_permissions=True)
+	check(
+		"A Customer created with neither gets both defaults",
+		(probe.customer_group, probe.territory) == (ss.customer_group, ss.territory),
+		(probe.customer_group, probe.territory),
+	)
+	frappe.delete_doc("Customer", probe.name, force=True, ignore_permissions=True)
+	for contact in frappe.get_all("Contact", filters={"first_name": "ZZ Defaults Probe"}, pluck="name"):
+		frappe.delete_doc("Contact", contact, force=True, ignore_permissions=True)
+
 	# --- navigation for a cashier
 	frappe.set_user("cashier.downtown@demo.example")
 	user = frappe.get_doc("User", "cashier.downtown@demo.example")

@@ -104,6 +104,9 @@ with sync_playwright() as p:
 		page.evaluate("cur_frm.doc.lead_name") == lead and page.evaluate("cur_frm.doc.opportunity_name") == opp,
 		(page.evaluate("cur_frm.doc.lead_name"), page.evaluate("cur_frm.doc.opportunity_name")),
 	)
+	group, territory = page.evaluate("cur_frm.doc.customer_group"), page.evaluate("cur_frm.doc.territory")
+	check("Converted Customer gets a default Customer Group and Territory", bool(group) and bool(territory), (group, territory))
+	print(f"      (Customer Group = {group!r}, Territory = {territory!r})")
 	status = ctx.request.get(f"{B}/api/resource/Lead/{lead}").json().get("data", {}).get("status")
 	check("Lead is marked Converted", status == "Converted", status)
 	check("No console/server errors during the owner flow", not bad, bad)

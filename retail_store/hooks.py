@@ -76,6 +76,9 @@ has_permission = {
 # Document Events
 # ---------------
 doc_events = {
+	"Customer": {
+		"before_validate": "retail_store.setup.company.fill_customer_defaults",
+	},
 	"User": {
 		"validate": "retail_store.workspace_access.set_default_landing",
 	},

@@ -243,9 +243,15 @@ What the toggle does, and for whom:
   brand colours; the theme's *progressive forms* collapse optional fields behind "Show N optional
   fields" (the Details tab can look sparse until expanded).
 
-Known gap: a Customer created from an Opportunity gets **no Customer Group or Territory**, because
-v16 does not require them and Selling Settings has no defaults on a fresh site. Set Selling
-Settings defaults per client if they report by group or territory.
+**Customer defaults.** ERPNext leaves a new Customer's *Customer Group* and *Territory* blank (v16 does
+not require them, and Lead/Opportunity conversion only fills the group, and only when a site default
+exists). The starter pack therefore sets Selling Settings defaults at install and on every migrate,
+only when blank: Customer Group **Individual** and Territory = the **company's country** (created
+under *All Territories* if ERPNext has none for it, e.g. Mauritius; otherwise *Rest Of The World*).
+A `Customer.before_validate` hook also fills a blank group/territory from those settings, so
+conversions, POS quick-create and API-created customers all get them. Change the defaults per client
+in Selling Settings; they are never overwritten once set. Verified: a Customer converted from an
+Opportunity arrives with both set (`tests/browser_crm.py`, `check_config`).
 
 Two optional modules are **separate apps in v16** and must be installed first
 (the toggle refuses to switch on and shows the commands):

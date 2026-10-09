@@ -18,9 +18,62 @@ def setup_company_defaults():
 	company = get_default_company()
 	if not company:
 		return
+	setup_selling_defaults(company)
 	setup_transfer_warehouses(company)
 	setup_loyalty_program(company)
 	setup_pos_defaults()
+
+
+RETAIL_CUSTOMER_GROUP = "Individual"
+FALLBACK_TERRITORY = "Rest Of The World"
+
+
+def default_territory(company):
+	"""The company's own country as a leaf Territory (created under All Territories if ERPNext
+	has none for it, e.g. Mauritius), else 'Rest Of The World'."""
+	country = frappe.db.get_value("Company", company, "country")
+	if country:
+		if frappe.db.exists("Territory", {"name": country, "is_group": 0}):
+			return country
+		if not frappe.db.exists("Territory", country) and frappe.db.exists("Territory", "All Territories"):
+			frappe.get_doc(
+				{"doctype": "Territory", "territory_name": country, "parent_territory": "All Territories", "is_group": 0}
+			).insert(ignore_permissions=True)
+			return country
+	return FALLBACK_TERRITORY if frappe.db.exists("Territory", FALLBACK_TERRITORY) else None
+
+
+def setup_selling_defaults(company):
+	"""Give every new Customer a Customer Group and Territory (ERPNext leaves both blank).
+
+	Retail customers are individuals by default; territory is the company's country. Only blank
+	settings are filled, so a client's own choice is never overwritten. Saved through the
+	document (not set_single_value) because Selling Settings stores these as site defaults on
+	validate, which is what ERPNext's Lead -> Customer conversion reads."""
+	settings = frappe.get_single("Selling Settings")
+	changed = False
+	if not settings.customer_group and frappe.db.exists("Customer Group", {"name": RETAIL_CUSTOMER_GROUP, "is_group": 0}):
+		settings.customer_group = RETAIL_CUSTOMER_GROUP
+		changed = True
+	if not settings.territory:
+		territory = default_territory(company)
+		if territory:
+			settings.territory = territory
+			changed = True
+	if changed:
+		settings.flags.ignore_permissions = True
+		settings.save()
+
+
+def fill_customer_defaults(doc, method=None):
+	"""Customer.before_validate: fill a blank Customer Group / Territory from Selling Settings.
+
+	Covers conversions from a Lead/Opportunity/Prospect (ERPNext only fills the group, and only
+	when its site default is set), POS quick-create and API-created customers."""
+	if not doc.get("customer_group"):
+		doc.customer_group = frappe.db.get_single_value("Selling Settings", "customer_group") or doc.get("customer_group")
+	if not doc.get("territory"):
+		doc.territory = frappe.db.get_single_value("Selling Settings", "territory") or doc.get("territory")
 
 
 def setup_transfer_warehouses(company):
