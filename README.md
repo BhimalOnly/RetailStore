@@ -50,7 +50,19 @@ Manager**, unchanged.
 | Warehouse Attendant | Picks/packs, drafts stock counts, requests stock; cannot post transfers |
 | Warehouse Manager | Runs a warehouse: approves requests, posts transfers, maintains the catalogue |
 | Store Owner | Everything retail, across all locations, including bulk transfers |
-| Store Admin | Configures the system: locations, staff access, POS profiles, catalogue, branding, with no financial postings |
+| Store Admin | Configures day-to-day operations: locations, staff access, POS profiles, catalogue, pricing, loyalty tuning, with no financial postings. **Not** branding or Capabilities (System Manager only, see sections 5 and 6) |
+
+**Retail Store Settings is split by field level (permlevel), not by doctype:**
+
+| Part of Retail Store Settings | System Manager | Store Owner | Store Admin | Everyone else |
+|---|---|---|---|---|
+| Operational (permlevel 0): Stock Transfers tab (main / in-transit warehouse, request approval), Location Access, Loyalty program and Group Variants in POS | RW | RW | RW | – |
+| **Branding** tab (permlevel 1): name, logo, favicon, brand and accent colours, apply to Desk | RW | hidden | hidden | – |
+| **Capabilities** optional-module toggles (permlevel 1): CRM, Online Store, Buying, HR, Manufacturing, Quality, Support, Assets, Projects, messaging | RW | hidden | hidden | – |
+
+Hidden means the tab/section is not shown, the values are not returned by the API, the
+change history of those fields is not shown, and a save that tries to change them is
+silently ignored. Frappe's Administrator is a System Manager.
 
 Default permissions (R read, W write, C create, S submit, X cancel, A amend, D delete):
 
@@ -173,6 +185,11 @@ returns immediately.
 
 ### 5. Capabilities (Retail Store Settings → Capabilities)
 
+**Who can change what:** the optional-module toggles below are **System Manager only**
+(permlevel 1). Store Owner and Store Admin do not see that section; they still see and tune the
+always-on settings on the same tab (Loyalty Program, Group Variants in POS). Decision for a
+client who wants a module (CRM, Online Store, HR...): a System Manager ticks the toggle.
+
 **Always on:** Stock, Selling, Accounts, POS. Customers are created straight
 from POS or Customer, with no CRM module needed.
 
@@ -208,7 +225,8 @@ Two optional modules are **separate apps in v16** and must be installed first
 
 ### 6. Branding (per site)
 
-Branding lives in *Retail Store Settings → Branding*: name, logo, favicon,
+Branding lives in *Retail Store Settings → Branding* (**System Manager only**, permlevel 1; Store
+Owner and Store Admin do not see the tab): name, logo, favicon,
 brand colour and accent colour. Because it's stored in the site's database,
 each client site has its own branding while sharing the same code.
 

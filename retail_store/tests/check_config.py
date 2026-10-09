@@ -76,6 +76,32 @@ def run():
 	check("Logo pushed to Navbar Settings", frappe.db.get_single_value("Navbar Settings", "app_logo") == "/files/acme.png")
 	check("Brand name pushed to Website Settings", frappe.db.get_single_value("Website Settings", "app_name") == "Acme Shoes")
 
+	# --- Branding + optional-module toggles are System Manager only (permlevel 1)
+	meta = frappe.get_meta("Retail Store Settings")
+	level1 = {df.fieldname for df in meta.fields if df.permlevel == 1}
+	check(
+		"Branding and optional-module toggles sit at permlevel 1",
+		{"brand_name", "brand_logo", "brand_color", "accent_color", "enable_crm", "enable_ecommerce", "enable_buying"} <= level1,
+		sorted(level1),
+	)
+	check(
+		"Operational settings stay at permlevel 0",
+		not ({"main_warehouse", "require_request_approval", "default_loyalty_program", "enable_loyalty"} & level1),
+	)
+	grants = {
+		(r.role, r.permlevel): (r.read, r.write)
+		for r in frappe.get_all("Custom DocPerm", filters={"parent": "Retail Store Settings"}, fields=["role", "permlevel", "read", "write"])
+	}
+	check("Only System Manager holds permlevel 1", {k[0] for k in grants if k[1] == 1} == {"System Manager"}, grants)
+	check("System Manager can read+write permlevel 1", grants.get(("System Manager", 1)) == (1, 1))
+	for role in ("Store Owner", "Store Admin"):
+		check(f"{role} keeps operational (permlevel 0) read+write", grants.get((role, 0)) == (1, 1))
+	for owner_like in ("owner@demo.example", "admin@demo.example"):
+		frappe.set_user(owner_like)
+		access = frappe.get_doc("Retail Store Settings").get_permlevel_access("write")
+		frappe.set_user("Administrator")
+		check(f"{owner_like} can write permlevel 0 only", access == [0] or set(access) == {0}, access)
+
 	# --- navigation for a cashier
 	frappe.set_user("cashier.downtown@demo.example")
 	user = frappe.get_doc("User", "cashier.downtown@demo.example")

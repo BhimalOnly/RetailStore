@@ -54,47 +54,55 @@
   {
    "fieldname": "branding_tab",
    "fieldtype": "Tab Break",
-   "label": "Branding"
+   "label": "Branding",
+   "permlevel": 1
   },
   {
    "fieldname": "brand_name",
    "fieldtype": "Data",
    "label": "Brand Name",
-   "description": "Shown in the navbar and browser title. Leave empty to use the Company name."
+   "description": "Shown in the navbar and browser title. Leave empty to use the Company name.",
+   "permlevel": 1
   },
   {
    "fieldname": "brand_logo",
    "fieldtype": "Attach Image",
    "label": "Brand Logo",
-   "description": "Use a square mark (e.g. 256x256 PNG/SVG): it is shown as the app icon on the apps screen and in the desk."
+   "description": "Use a square mark (e.g. 256x256 PNG/SVG): it is shown as the app icon on the apps screen and in the desk.",
+   "permlevel": 1
   },
   {
    "fieldname": "brand_favicon",
    "fieldtype": "Attach Image",
-   "label": "Favicon"
+   "label": "Favicon",
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_brand",
-   "fieldtype": "Column Break"
+   "fieldtype": "Column Break",
+   "permlevel": 1
   },
   {
    "fieldname": "brand_color",
    "fieldtype": "Color",
    "label": "Brand Colour",
-   "default": "#1F6FEB"
+   "default": "#1F6FEB",
+   "permlevel": 1
   },
   {
    "fieldname": "accent_color",
    "fieldtype": "Color",
    "label": "Accent Colour",
-   "default": "#F59E0B"
+   "default": "#F59E0B",
+   "permlevel": 1
   },
   {
    "fieldname": "apply_brand_to_desk",
    "fieldtype": "Check",
    "label": "Apply Brand Colours to Desk",
    "default": "1",
-   "description": "Maps the brand colour onto Desk's primary colour. Turn this off if a Desk theme app is installed and should own the colours."
+   "description": "Maps the brand colour onto Desk's primary colour. Turn this off if a Desk theme app is installed and should own the colours.",
+   "permlevel": 1
   },
   {
    "fieldname": "capabilities_tab",
@@ -132,72 +140,84 @@
    "fieldname": "optional_section",
    "fieldtype": "Section Break",
    "label": "Optional Modules",
-   "description": "Off by default. Ticking one un-hides its sidebar icon and grants it to Store Owner. Saving re-applies the navigation."
+   "description": "Off by default. Ticking one un-hides its sidebar icon and grants it to Store Owner. Saving re-applies the navigation.",
+   "permlevel": 1
   },
   {
    "fieldname": "enable_crm",
    "fieldtype": "Check",
    "label": "CRM (Leads, Opportunities, pipeline)",
-   "default": "0"
+   "default": "0",
+   "permlevel": 1
   },
   {
    "fieldname": "enable_ecommerce",
    "fieldtype": "Check",
    "label": "Online Store / E-Commerce (needs the webshop app)",
-   "default": "0"
+   "default": "0",
+   "permlevel": 1
   },
   {
    "fieldname": "enable_buying",
    "fieldtype": "Check",
    "label": "Buying (Suppliers, Purchase Orders)",
-   "default": "0"
+   "default": "0",
+   "permlevel": 1
   },
   {
    "fieldname": "enable_hr",
    "fieldtype": "Check",
    "label": "HR (needs the hrms app)",
-   "default": "0"
+   "default": "0",
+   "permlevel": 1
   },
   {
    "fieldname": "enable_manufacturing",
    "fieldtype": "Check",
    "label": "Manufacturing",
-   "default": "0"
+   "default": "0",
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_opt",
-   "fieldtype": "Column Break"
+   "fieldtype": "Column Break",
+   "permlevel": 1
   },
   {
    "fieldname": "enable_quality",
    "fieldtype": "Check",
    "label": "Quality",
-   "default": "0"
+   "default": "0",
+   "permlevel": 1
   },
   {
    "fieldname": "enable_support",
    "fieldtype": "Check",
    "label": "Support",
-   "default": "0"
+   "default": "0",
+   "permlevel": 1
   },
   {
    "fieldname": "enable_assets",
    "fieldtype": "Check",
    "label": "Assets",
-   "default": "0"
+   "default": "0",
+   "permlevel": 1
   },
   {
    "fieldname": "enable_projects",
    "fieldtype": "Check",
    "label": "Projects",
-   "default": "0"
+   "default": "0",
+   "permlevel": 1
   },
   {
    "fieldname": "messaging_section",
    "fieldtype": "Section Break",
    "label": "Messaging (planned)",
    "collapsible": 1,
-   "description": "WhatsApp/SMS is not built yet. See the app README, section 'Messaging extension point'."
+   "description": "WhatsApp/SMS is not built yet. See the app README, section 'Messaging extension point'.",
+   "permlevel": 1
   },
   {
    "fieldname": "stock_tab",
@@ -252,6 +272,7 @@
  "permissions": [
   {
    "role": "System Manager",
+   "permlevel": 0,
    "read": 1,
    "write": 1,
    "create": 1,
@@ -260,13 +281,21 @@
    "share": 1
   },
   {
+   "role": "System Manager",
+   "permlevel": 1,
+   "read": 1,
+   "write": 1
+  },
+  {
    "role": "Store Admin",
+   "permlevel": 0,
    "read": 1,
    "write": 1,
    "create": 1
   },
   {
    "role": "Store Owner",
+   "permlevel": 0,
    "read": 1,
    "write": 1,
    "create": 1

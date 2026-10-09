@@ -315,8 +315,60 @@ def apply_report_and_page_roles():
 			doc.save(ignore_permissions=True)
 
 
+# Retail Store Settings: operational settings (stock, access, loyalty, POS) are open to Store
+# Owner / Store Admin at permlevel 0. Branding and the optional-module toggles (Capabilities) sit
+# at permlevel 1, which only System Manager is granted: they change what the whole product shows
+# and offers, so they are a configuration decision, not day-to-day operations.
+SETTINGS_DOCTYPE = "Retail Store Settings"
+SETTINGS_PERMISSIONS = {
+	("System Manager", 0): {"read": 1, "write": 1, "create": 1, "print": 1, "email": 1, "share": 1},
+	("System Manager", 1): {"read": 1, "write": 1},
+	("Store Admin", 0): {"read": 1, "write": 1, "create": 1},
+	("Store Owner", 0): {"read": 1, "write": 1, "create": 1},
+}
+
+
+def apply_settings_permissions():
+	"""Make Retail Store Settings' Custom DocPerm rows exactly SETTINGS_PERMISSIONS.
+
+	Custom DocPerm rows replace the doctype's standard ones entirely, and they exist on this
+	doctype, so the JSON alone is not enough. Extra rows (e.g. a permlevel-1 grant to anyone
+	else, made in Role Permission Manager) are removed."""
+	from frappe.permissions import setup_custom_perms
+
+	if not frappe.db.exists("DocType", SETTINGS_DOCTYPE):
+		return
+	setup_custom_perms(SETTINGS_DOCTYPE)
+	have = {}
+	for row in frappe.get_all(
+		"Custom DocPerm", filters={"parent": SETTINGS_DOCTYPE}, fields=["name", "role", "permlevel", "if_owner"]
+	):
+		if row.if_owner:
+			frappe.delete_doc("Custom DocPerm", row.name, ignore_permissions=True, force=True)
+			continue
+		key = (row.role, row.permlevel)
+		if key not in SETTINGS_PERMISSIONS or key in have:
+			frappe.delete_doc("Custom DocPerm", row.name, ignore_permissions=True, force=True)
+		else:
+			have[key] = row.name
+	for (role, level), flags in SETTINGS_PERMISSIONS.items():
+		if (role, level) in have:
+			doc = frappe.get_doc("Custom DocPerm", have[(role, level)])
+		else:
+			doc = frappe.get_doc({"doctype": "Custom DocPerm", "parent": SETTINGS_DOCTYPE, "role": role, "permlevel": level})
+		changed = doc.is_new()
+		for field, value in flags.items():
+			if doc.get(field) != value:
+				doc.set(field, value)
+				changed = True
+		if changed:
+			doc.save(ignore_permissions=True)
+	frappe.clear_cache(doctype=SETTINGS_DOCTYPE)
+
+
 def setup_roles_and_permissions():
 	create_roles()
 	apply_role_permissions()
+	apply_settings_permissions()
 	revoke_permissions()
 	apply_report_and_page_roles()
