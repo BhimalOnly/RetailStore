@@ -26,13 +26,15 @@ add_to_apps_screen = [
 # Only sets CSS custom properties from per-site config. It never ships a theme,
 # so a Desk theme app can be added later without conflict (turn off
 # "Apply Brand Colours to Desk" in Retail Store Settings if the theme app owns colours).
-app_include_js = "/assets/retail_store/js/retail_store.js"
+app_include_js = ["/assets/retail_store/js/retail_store.js", "/assets/retail_store/js/landing.js"]
 
 # POS: one card per product template + Size/Colour picker (see pos_variants.py).
 # Toggle: Retail Store Settings > Capabilities > "Group Variants in POS".
 page_js = {"point-of-sale": "public/js/pos_variant_picker.js"}
 override_whitelisted_methods = {
 	"erpnext.selling.page.point_of_sale.point_of_sale.get_items": "retail_store.pos_variants.get_items",
+	# Refuse (403) workspaces the user's roles don't allow, not just hide them.
+	"frappe.desk.desktop.get_desktop_page": "retail_store.workspace_access.get_desktop_page",
 }
 
 boot_session = "retail_store.branding.boot_session"
@@ -57,6 +59,7 @@ permission_query_conditions = {
 }
 
 has_permission = {
+	"Workspace": "retail_store.workspace_access.has_permission",
 	"Stock Entry": "retail_store.permissions.stock_entry_has_permission",
 	"Material Request": "retail_store.permissions.material_request_has_permission",
 }
@@ -64,6 +67,9 @@ has_permission = {
 # Document Events
 # ---------------
 doc_events = {
+	"User": {
+		"validate": "retail_store.workspace_access.set_default_landing",
+	},
 	"Material Request": {
 		"validate": "retail_store.stock_transfer.validate_material_request",
 	},

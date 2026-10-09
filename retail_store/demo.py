@@ -430,3 +430,76 @@ def delete_demo_data():
 	frappe.flags.ignore_links = False
 	frappe.db.commit()
 	print("DEMO data removed.")
+
+
+def refresh_pos_openings():
+	"""Close any DEMO register opened on an earlier day and open a fresh one for today.
+
+	ERPNext's POS refuses an opening entry from a previous day ("Outdated POS Opening
+	Entry"), so demo/test tills go stale overnight. Run:
+	    bench --site retail.localhost execute retail_store.demo.refresh_pos_openings
+	"""
+	from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import make_closing_entry_from_opening
+
+	today = frappe.utils.today()
+	done = []
+	for row in frappe.get_all(
+		"POS Opening Entry",
+		filters={"pos_profile": ["like", "DEMO POS %"], "status": "Open", "docstatus": 1},
+		fields=["name", "user", "pos_profile", "company", "period_start_date"],
+	):
+		if str(row.period_start_date)[:10] >= today:
+			continue
+		closing = frappe.get_doc(make_closing_entry_from_opening(frappe.get_doc("POS Opening Entry", row.name).as_dict()))
+		closing.period_end_date = frappe.utils.now_datetime()
+		closing.posting_date = today
+		for pr in closing.payment_reconciliation:
+			pr.closing_amount = pr.expected_amount
+		closing.insert(ignore_permissions=True)
+		closing.submit()
+		opening = frappe.get_doc(
+			{
+				"doctype": "POS Opening Entry",
+				"pos_profile": row.pos_profile,
+				"user": row.user,
+				"company": row.company,
+				"period_start_date": frappe.utils.now_datetime(),
+				"posting_date": today,
+				"balance_details": [{"mode_of_payment": "Cash", "opening_amount": 0}],
+			}
+		)
+		opening.insert(ignore_permissions=True)
+		opening.submit()
+		done.append((row.pos_profile, row.name, closing.name, opening.name))
+	frappe.db.commit()
+	return done
+
+
+def restock_pos_test_items(qty=10):
+	"""Top the Downtown test variants back up (tests/browser_pos.py sells one of each per run).
+
+	    bench --site retail.localhost execute retail_store.demo.restock_pos_test_items
+	"""
+	company = "Demo Retail Co"
+	abbr = frappe.db.get_value("Company", company, "abbr")
+	warehouse = f"DEMO Store Downtown - {abbr}"
+	rows = []
+	for item in ("DEMO-SNEAKER-42-WHIT", "DEMO-TEE-M-NAVY"):
+		have = frappe.db.get_value("Bin", {"item_code": item, "warehouse": warehouse}, "actual_qty") or 0
+		if have < qty:
+			rows.append({"item_code": item, "qty": qty - have, "t_warehouse": warehouse, "basic_rate": 1000})
+	if not rows:
+		return "already stocked"
+	se = frappe.get_doc(
+		{
+			"doctype": "Stock Entry",
+			"stock_entry_type": "Material Receipt",
+			"company": company,
+			"remarks": "DEMO restock for browser POS test",
+			"items": rows,
+		}
+	)
+	se.insert(ignore_permissions=True)
+	se.submit()
+	frappe.db.commit()
+	return se.name

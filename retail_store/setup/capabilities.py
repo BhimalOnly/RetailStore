@@ -80,6 +80,12 @@ def apply_capabilities(settings=None):
 		frappe.db.set_single_value("Webshop Settings", "enabled", 1)
 
 	_sync_module_profile(sorted(set(blocked)))
+	from retail_store.workspace_access import apply_workspace_access
+
+	apply_workspace_access()
+	from retail_store.workspace_access import backfill_default_landing
+
+	backfill_default_landing()
 	frappe.cache.delete_value("desktop_icons")
 
 

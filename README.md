@@ -216,6 +216,19 @@ each client site has its own branding while sharing the same code.
 * The colours are exposed as CSS variables `--rs-brand` / `--rs-accent`. With *Apply Brand Colours to Desk* on, they are also mapped onto Desk's `--primary`.
 * No stylesheet or theme is shipped. If a Desk theme app is added later, turn off *Apply Brand Colours to Desk* and let the theme own colours.
 
+**Client onboarding: collect BOTH logo formats up front.**
+
+| File | Needed for | Rules |
+|---|---|---|
+| **Square mark** (SVG preferred, at least 256 px) | Desk icon rail tile, apps screen, login page, favicon | **Required.** Must be self-contained and readable on both light and dark backgrounds (give it its own solid tile or outline). With a Desk theme such as Solvronix Desk, ONE logo field feeds the 72 px rail tile *and* the login panel. |
+| **Horizontal wordmark** | Print formats, website, email letterhead | Ask for it, but do not put it in the theme's logo field. Wide logos shrink to an unreadable smudge in the rail, and dark-coloured text vanishes on a dark login panel (both happened in the first Solvronix Desk trial). |
+
+Also collect two brand colours (primary and accent) as hex. A theme's own tokens
+(buttons, active menu, links) may still hold their default colour after the two
+brand colours are set; check them in the theme editor. Known leftover on the demo
+site: link text and dates are still the theme's default orange (to fix in a later
+branding-token pass).
+
 ---
 
 ### 7. Navigation
@@ -226,6 +239,24 @@ Retail Store sidebar has: Point of Sale, Sales Invoice, Customer, Loyalty
 Program, Stock Balance, Material Request, Stock Entry, Stock Reconciliation,
 Warehouse, the catalogue, the till documents, and Setup. Frappe trims each
 user's sidebar to what their roles can open.
+
+**Generic ERPNext workspaces are locked server-side.** Hiding a workspace from
+the sidebar is only navigation in Frappe: any desk user could still open
+`/desk/accounting` (and see its numbers) by URL or API. `workspace_access.py`
+therefore (a) sets roles on every module workspace on each migrate, and (b)
+overrides `get_desktop_page` and the Workspace read permission so the server
+answers **403**. *Retail Store* and *Home* stay open to every desk user; Accounting,
+Financial Reports, Invoicing, Payments, Selling, Stock, Buying and the rest need a
+back-office role (System Manager, Store Owner, Store Admin, or the matching native
+ERPNext role such as Accounts User for Accounting). *Build* is System Manager only.
+Retail staff (cashier, attendant, store/warehouse manager) work entirely from the
+Retail Store workspace. Edit `NATIVE_ROLES` / `BACK_OFFICE` in that file to change it.
+
+**Landing page.** Desk users open on *Retail Store*: `User.default_workspace` is
+set for every desk user (backfilled on migrate, defaulted for new users), and
+`public/js/landing.js` redirects the generic desktop screen to it on first load.
+Do not use `boot.home_page` for this: it expects a Page, and for workspace slugs it
+shows a "Not permitted" dialog to anyone without Page access.
 
 ---
 
@@ -258,7 +289,16 @@ env/bin/python apps/retail_store/retail_store/tests/e2e_section7.py http://<site
 bench --site <site> execute retail_store.tests.check_config.run
 # real browser, as the Downtown cashier: grid -> picker -> cart -> barcode scan (needs Playwright)
 python apps/retail_store/retail_store/tests/browser_pos.py <barcode>
+# who may open which workspace, as each demo user, over HTTP (expects 403 where blocked)
+python3 apps/retail_store/retail_store/tests/workspace_access.py
 ```
+
+POS refuses an opening entry from a previous day ("Outdated POS Opening Entry"), so
+demo tills go stale overnight. Refresh them (closes yesterday's, opens today's):
+`bench --site <site> execute retail_store.demo.refresh_pos_openings`.
+`browser_pos.py` also sells one unit per run and fails with a disabled "Add to Cart" once
+Downtown's test variants hit zero; top up with
+`bench --site <site> execute retail_store.demo.restock_pos_test_items`.
 
 ---
 
