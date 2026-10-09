@@ -86,7 +86,13 @@ def run():
 	from frappe.utils.modules import is_module_visible
 
 	check("Manufacturing hidden for cashier", not is_module_visible("Manufacturing"))
-	check("Stock visible for cashier", is_module_visible("Stock"))
+	# Accounts / Selling / Stock rail buttons are for back-office roles only: a cashier must not
+	# be shown a button that answers "Not permitted" (workspace_access.py enforces the same roles).
+	for module in ("Stock", "Selling", "Accounts"):
+		check(f"{module} hidden for cashier", not is_module_visible(module))
+	frappe.set_user("owner@demo.example")
+	for module in ("Stock", "Selling", "Accounts"):
+		check(f"{module} visible for owner", is_module_visible(module))
 	frappe.set_user("Administrator")
 
 	# --- restore

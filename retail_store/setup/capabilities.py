@@ -139,59 +139,86 @@ def _set_owner_grants(grants, enabled):
 			frappe.clear_cache(doctype=doctype)
 
 
-def _sync_module_profile(blocked):
-	if not frappe.db.exists("Module Profile", MODULE_PROFILE):
+def _write_profile(name, blocked):
+	"""Create or update a Module Profile so it blocks exactly `blocked`."""
+	if not frappe.db.exists("Module Profile", name):
 		frappe.get_doc(
 			{
 				"doctype": "Module Profile",
-				"module_profile_name": MODULE_PROFILE,
+				"module_profile_name": name,
 				"block_modules": [{"module": m} for m in blocked],
 			}
 		).insert(ignore_permissions=True)
-	else:
-		current = frappe.get_all(
-			"Block Module", filters={"parent": MODULE_PROFILE, "parenttype": "Module Profile"}, pluck="module"
-		)
-		if set(current) != set(blocked):
-			# Write the rows directly: Module Profile.save() queues update_all_users and
-			# locks the document, so a second toggle in the same request would fail.
-			# Users are synced below instead (that job also skips users blocking nothing).
-			frappe.db.delete("Block Module", {"parent": MODULE_PROFILE, "parenttype": "Module Profile"})
-			for idx, module in enumerate(blocked, start=1):
-				frappe.get_doc(
-					{
-						"doctype": "Block Module",
-						"parent": MODULE_PROFILE,
-						"parenttype": "Module Profile",
-						"parentfield": "block_modules",
-						"module": module,
-						"idx": idx,
-					}
-				).db_insert()
-			frappe.clear_document_cache("Module Profile", MODULE_PROFILE)
+		return
+	current = frappe.get_all("Block Module", filters={"parent": name, "parenttype": "Module Profile"}, pluck="module")
+	if set(current) != set(blocked):
+		# Write the rows directly: Module Profile.save() queues update_all_users and
+		# locks the document, so a second toggle in the same request would fail.
+		# Users are synced by apply_module_profile instead.
+		frappe.db.delete("Block Module", {"parent": name, "parenttype": "Module Profile"})
+		for idx, module in enumerate(blocked, start=1):
+			frappe.get_doc(
+				{
+					"doctype": "Block Module",
+					"parent": name,
+					"parenttype": "Module Profile",
+					"parentfield": "block_modules",
+					"module": module,
+					"idx": idx,
+				}
+			).db_insert()
+		frappe.clear_document_cache("Module Profile", name)
 
-	for user in frappe.get_all("User", filters={"module_profile": MODULE_PROFILE}, pluck="name"):
+
+def _sync_module_profile(blocked):
+	_write_profile(MODULE_PROFILE, blocked)
+	# Variants for users who also lose Accounts / Selling / Stock (see _role_gated_modules).
+	for variant in frappe.get_all("Module Profile", filters={"name": ["like", f"{MODULE_PROFILE} - %"]}, pluck="name"):
+		gated = variant[len(MODULE_PROFILE) + 3 :].split("/")
+		_write_profile(variant, sorted(set(blocked) | set(gated)))
+
+	for user in frappe.get_all("User", filters={"module_profile": ["like", f"{MODULE_PROFILE}%"]}, pluck="name"):
 		apply_module_profile(user)
+
+
+# Core modules whose rail buttons (and workspaces) only back-office users may use. A retail
+# user who lacks BOTH a back-office role and the module's native ERPNext role gets the module
+# blocked, so the Dock never shows a button that answers "Not permitted". Same role lists as
+# workspace_access, so navigation and enforcement cannot drift apart.
+def _role_gated_modules(roles):
+	from retail_store.workspace_access import BACK_OFFICE, NATIVE_ROLES
+
+	gated = {
+		"Accounts": NATIVE_ROLES["Accounting"],
+		"Selling": NATIVE_ROLES["Selling"],
+		"Stock": NATIVE_ROLES["Stock"],
+	}
+	return [m for m, native in gated.items() if not set(roles) & set(BACK_OFFICE + native)]
 
 
 def apply_module_profile(user):
 	"""Give a retail user the retail navigation (blocked modules + land in the
-	Retail Store app). System Managers keep the full desk."""
+	Retail Store app). System Managers keep the full desk. Core modules the user's roles
+	cannot open (Accounts / Selling / Stock) are blocked too, via a profile variant."""
 	roles = set(frappe.get_roles(user))
 	if user in ("Administrator", "Guest") or "System Manager" in roles or not roles & set(ROLES):
 		return
 	doc = frappe.get_doc("User", user)
-	blocked = frappe.get_all("Block Module", filters={"parent": MODULE_PROFILE, "parenttype": "Module Profile"}, pluck="module")
+	base = frappe.get_all("Block Module", filters={"parent": MODULE_PROFILE, "parenttype": "Module Profile"}, pluck="module")
+	gated = _role_gated_modules(roles)
+	profile = MODULE_PROFILE if not gated else f"{MODULE_PROFILE} - {'/'.join(gated)}"
+	blocked = sorted(set(base) | set(gated))
+	_write_profile(profile, blocked)
 	wants_default_app = doc.meta.has_field("default_app") and not doc.get("default_app")
 	if (
-		doc.module_profile == MODULE_PROFILE
+		doc.module_profile == profile
 		and {d.module for d in doc.block_modules} == set(blocked)
 		and not wants_default_app
 	):
 		return
 	if wants_default_app:
 		doc.default_app = "retail_store"
-	doc.module_profile = MODULE_PROFILE
+	doc.module_profile = profile
 	doc.set("block_modules", [{"module": m} for m in blocked])
 	doc.flags.ignore_permissions = True
 	doc.save()

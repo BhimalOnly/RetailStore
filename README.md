@@ -263,8 +263,12 @@ clicking through as a cashier, so the lock is now deny-by-default:
 
 Known and accepted: every desk user can still list colleagues' *names/emails* (Frappe's
 native User list; individual User records are 403) and read the Company record (POS needs it).
-Retail staff work entirely from the Retail Store workspace; its rail may still show Stock /
-Selling / Accounts module buttons that now answer "Not permitted" for staff without those roles.
+Retail staff work entirely from the Retail Store workspace. The rail matches that: Accounts,
+Selling and Stock module buttons are blocked per user (via generated Module Profile variants,
+e.g. "Retail Store Staff - Accounts/Selling/Stock") for any retail user without a back-office
+or native module role, so the Dock never shows a button that answers "Not permitted". Store
+Owner / Store Admin keep them. The sidebar's company-name header still links to Frappe's
+generic desktop screen, which answers "Not permitted" for retail staff (cosmetic, unaddressed).
 
 **Landing page.** Desk users open on *Retail Store*: `User.default_workspace` is
 set for every desk user (backfilled on migrate, defaulted for new users), and
