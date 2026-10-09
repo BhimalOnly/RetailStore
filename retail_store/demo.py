@@ -475,31 +475,43 @@ def refresh_pos_openings():
 	return done
 
 
-def restock_pos_test_items(qty=10):
-	"""Top the Downtown test variants back up (tests/browser_pos.py sells one of each per run).
+def restock_pos_test_items(qty=10, main_qty=60):
+	"""Top the demo test variants back up so the test suites can be re-run.
 
+	tests/browser_pos.py sells one Downtown unit per run, and tests/e2e_section7.py moves
+	units out of the Main warehouse every run, so both drain over repeated runs:
 	    bench --site retail.localhost execute retail_store.demo.restock_pos_test_items
 	"""
 	company = "Demo Retail Co"
 	abbr = frappe.db.get_value("Company", company, "abbr")
-	warehouse = f"DEMO Store Downtown - {abbr}"
-	rows = []
-	for item in ("DEMO-SNEAKER-42-WHIT", "DEMO-TEE-M-NAVY"):
-		have = frappe.db.get_value("Bin", {"item_code": item, "warehouse": warehouse}, "actual_qty") or 0
-		if have < qty:
-			rows.append({"item_code": item, "qty": qty - have, "t_warehouse": warehouse, "basic_rate": 1000})
-	if not rows:
-		return "already stocked"
-	se = frappe.get_doc(
-		{
-			"doctype": "Stock Entry",
-			"stock_entry_type": "Material Receipt",
-			"company": company,
-			"remarks": "DEMO restock for browser POS test",
-			"items": rows,
-		}
-	)
-	se.insert(ignore_permissions=True)
-	se.submit()
+	targets = [
+		(f"DEMO Store Downtown - {abbr}", "DEMO-SNEAKER-42-WHIT", qty),
+		(f"DEMO Store Downtown - {abbr}", "DEMO-TEE-M-NAVY", qty),
+		(f"DEMO Main Warehouse - {abbr}", "DEMO-SNEAKER-41-BLAC", main_qty),
+		(f"DEMO Main Warehouse - {abbr}", "DEMO-TEE-M-NAVY", main_qty),
+	]
+	made = []
+	for warehouse in sorted({w for w, _, _ in targets}):
+		rows = []
+		for wh, item, want in targets:
+			if wh != warehouse:
+				continue
+			have = frappe.db.get_value("Bin", {"item_code": item, "warehouse": wh}, "actual_qty") or 0
+			if have < want:
+				rows.append({"item_code": item, "qty": want - have, "t_warehouse": wh, "basic_rate": 1000})
+		if not rows:
+			continue
+		se = frappe.get_doc(
+			{
+				"doctype": "Stock Entry",
+				"stock_entry_type": "Material Receipt",
+				"company": company,
+				"remarks": "DEMO restock for test suites",
+				"items": rows,
+			}
+		)
+		se.insert(ignore_permissions=True)
+		se.submit()
+		made.append(se.name)
 	frappe.db.commit()
-	return se.name
+	return made or "already stocked"

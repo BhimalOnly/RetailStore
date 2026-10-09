@@ -4,6 +4,10 @@ Hiding a workspace from the sidebar is navigation only; this checks the server
 itself refuses (PermissionError / HTTP 403) when someone requests it directly
 by URL or API. Exit code 1 if any expectation fails.
 
+Every workspace that exists on the site is checked (enumerated, not a fixed list), so a
+workspace added later is covered automatically. Allowlist: retail-only roles may open
+ONLY "Retail Store".
+
 Run (bench running on 8001):
     python3 apps/retail_store/retail_store/tests/workspace_access.py
 """
@@ -16,25 +20,17 @@ from http.cookiejar import CookieJar
 BASE = "http://retail.localhost:8001"
 PWD = "RetailDemo#2026"
 
-RETAIL_ROLES_ONLY = [
+RETAIL_ONLY = [
 	"cashier.downtown@demo.example",
 	"cashier.mall@demo.example",
+	"floater@demo.example",
 	"manager.downtown@demo.example",
 	"wh.attendant@demo.example",
 	"wh.manager@demo.example",
 ]
-LOCKED = ["Accounting", "Selling", "Stock", "Buying", "Financial Reports", "Invoicing", "Payments", "Build"]
-OPEN = ["Retail Store", "Home"]
-
-# user -> workspaces they must be able to open (everything else in LOCKED must be refused)
-EXPECT_OPEN = {
-	"Administrator": set(LOCKED + OPEN),
-	"owner@demo.example": set(LOCKED[:-1] + OPEN),  # everything but the developer "Build"
-	"admin@demo.example": set(LOCKED[:-1] + OPEN),
-	"accountant@demo.example": {"Accounting", "Financial Reports", "Invoicing", "Payments"} | set(OPEN),
-}
-for u in RETAIL_ROLES_ONLY:
-	EXPECT_OPEN[u] = set(OPEN)
+ALWAYS_OPEN = {"Retail Store"}
+SYSTEM_MANAGER_ONLY = {"Build", "Users"}  # everyone back-office except these is allowed the rest
+ACCOUNTANT = {"Accounting", "Financial Reports", "Invoicing", "Payments", "Assets"}
 
 
 def session(user, pwd):
@@ -56,20 +52,45 @@ def status(op, url, form=None):
 		return e.code, e.read()
 
 
+def all_workspaces():
+	op = session("Administrator", "admin")
+	code, body = status(op, f"{BASE}/api/resource/Workspace?limit_page_length=1000&fields=%5B%22name%22%5D")
+	assert code == 200, code
+	return sorted(d["name"] for d in json.loads(body)["data"])
+
+
+def expected_open(user, workspaces):
+	everything = set(workspaces)
+	if user == "Administrator":
+		return everything
+	if user in ("owner@demo.example", "admin@demo.example"):
+		return everything - SYSTEM_MANAGER_ONLY
+	if user == "accountant@demo.example":
+		return (ACCOUNTANT | ALWAYS_OPEN) & everything
+	return ALWAYS_OPEN & everything
+
+
 def run():
+	workspaces = all_workspaces()
+	print(f"{len(workspaces)} workspaces on site: {', '.join(workspaces)}\n")
+	users = ["Administrator", "owner@demo.example", "admin@demo.example", "accountant@demo.example"] + RETAIL_ONLY
 	failures = []
-	print(f"{'user':34}{'workspace':20}{'page API':>9}{'doc API':>9}  expected")
-	for user, should_open in EXPECT_OPEN.items():
+	for user in users:
 		op = session(user, "admin" if user == "Administrator" else PWD)
-		for ws in LOCKED + OPEN:
+		want_open = expected_open(user, workspaces)
+		bad = []
+		for ws in workspaces:
 			page_code, _ = status(op, f"{BASE}/api/method/frappe.desk.desktop.get_desktop_page",
 				{"page": json.dumps({"name": ws, "title": ws})})
 			doc_code, _ = status(op, f"{BASE}/api/resource/Workspace/{urllib.parse.quote(ws)}")
-			want = ws in should_open
+			want = ws in want_open
 			ok = (page_code == 200 and doc_code == 200) if want else (page_code == 403 and doc_code in (403, 404))
-			print(f"{user:34}{ws:20}{page_code:>9}{doc_code:>9}  {'open' if want else 'BLOCK'} {'ok' if ok else '<-- FAIL'}")
 			if not ok:
-				failures.append((user, ws, page_code, doc_code, want))
+				bad.append((ws, page_code, doc_code, "should open" if want else "should BLOCK"))
+		print(f"{user:34} opens {len(want_open):>2}/{len(workspaces)}  {'ok' if not bad else 'FAIL'}")
+		for b in bad:
+			print(f"    {b[0]:22} page={b[1]} doc={b[2]}  {b[3]}")
+		failures += [(user,) + b for b in bad]
 	print(f"\n{len(failures)} failure(s)")
 	return 1 if failures else 0
 

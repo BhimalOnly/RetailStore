@@ -104,3 +104,75 @@ def stock_entry_has_permission(doc, ptype=None, user=None, debug=False):
 
 def material_request_has_permission(doc, ptype=None, user=None, debug=False):
 	return _has_location_access(doc, user or frappe.session.user, material_request_warehouses)
+
+
+# --- Stock figures (quantity, valuation, stock value) -----------------------------------
+# ERPNext lets any role with read on Bin / Stock Ledger Entry see EVERY warehouse, which
+# bypasses a store user's Warehouse User Permission and leaks other locations' stock value
+# (e.g. the "Total Stock Value" number card, or GET /api/resource/Bin). Scope both to the
+# user's own warehouses; users with no warehouse restriction (Store Owner...) are unchanged.
+
+
+def _warehouse_conditions(doctype, user=None):
+	user = user or frappe.session.user
+	warehouses = get_user_warehouses(user)
+	if not warehouses:
+		return ""
+	return _in(f"`tab{doctype}`.warehouse", warehouses)
+
+
+def bin_query_conditions(user=None, doctype=None):
+	return _warehouse_conditions("Bin", user)
+
+
+def stock_ledger_entry_query_conditions(user=None, doctype=None):
+	return _warehouse_conditions("Stock Ledger Entry", user)
+
+
+def _warehouse_has_permission(doc, user=None):
+	warehouses = get_user_warehouses(user or frappe.session.user)
+	return not warehouses or not doc.get("warehouse") or doc.get("warehouse") in warehouses
+
+
+def bin_has_permission(doc, ptype=None, user=None, debug=False):
+	return _warehouse_has_permission(doc, user)
+
+
+def stock_ledger_entry_has_permission(doc, ptype=None, user=None, debug=False):
+	return _warehouse_has_permission(doc, user)
+
+
+# --- Narrow client lookups on doctypes till staff may only SELECT -----------------------
+# The POS screen asks frappe.client.get_value for Account.account_currency of the debtors
+# account, which needs READ on Account; granting read would expose the whole chart of
+# accounts. Allow exactly these harmless lookups (and only for an account, by exact name).
+SAFE_SELECT_LOOKUPS = {"Account": {"account_currency"}}
+
+
+@frappe.whitelist()
+def get_value(doctype, fieldname, filters=None, as_dict=True, debug=False, parent=None):
+	from frappe.client import get_safe_filters
+	from frappe.client import get_value as core_get_value
+
+	allowed = SAFE_SELECT_LOOKUPS.get(doctype)
+	if allowed and not frappe.has_permission(doctype, "read"):
+		try:
+			fields = frappe.parse_json(fieldname)
+		except (TypeError, ValueError):
+			fields = fieldname
+		fields = [fields] if isinstance(fields, str) else fields
+		safe_filters = get_safe_filters(filters)
+		if isinstance(safe_filters, str):
+			safe_filters = {"name": safe_filters}
+		by_name = isinstance(safe_filters, dict) and set(safe_filters) == {"name"} and isinstance(safe_filters["name"], str)
+		if (
+			by_name
+			and isinstance(fields, list)
+			and set(fields) <= allowed
+			and frappe.has_permission(doctype, "select")
+		):
+			value = frappe.db.get_value(doctype, safe_filters["name"], fields, as_dict=True) or {}
+			if as_dict:
+				return value
+			return value.get(fields[0]) if len(fields) == 1 else [value.get(f) for f in fields]
+	return core_get_value(doctype, fieldname, filters, as_dict, debug, parent)

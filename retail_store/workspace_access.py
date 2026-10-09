@@ -18,8 +18,11 @@ import json
 import frappe
 from frappe.utils import has_common
 
-# Open to every Desk User; trimmed by their own sidebar / module profile instead.
-OPEN_WORKSPACES = {"Retail Store", "Home"}
+# ALLOWLIST: the only workspaces any desk user may open. Everything else, including
+# workspaces added later by installing CRM, Online Store, HR..., is denied unless the
+# user holds a back-office role or a role explicitly set on that workspace.
+# ("Home" is NOT here: it is the Setup landing with Company, Users and stock value.)
+OPEN_WORKSPACES = {"Retail Store"}
 # Already carry their own roles (Users: System Manager). Never rewritten here.
 LEAVE_ALONE = {"Users"}
 
@@ -46,7 +49,7 @@ NATIVE_ROLES = {
 
 
 def allowed_roles_for(workspace):
-	"""Roles that may open `workspace`, or None to leave it open to all Desk Users."""
+	"""Roles that may open `workspace`, or None for the allowlisted open workspaces."""
 	if workspace in OPEN_WORKSPACES or workspace in LEAVE_ALONE:
 		return None
 	if workspace in DEVELOPER_ONLY:
@@ -81,11 +84,18 @@ def apply_workspace_access():
 
 
 def _role_allowed(workspace_name, for_user=None, user=None):
-	"""Roles-only check (module visibility stays navigation). True when no roles are set."""
+	"""Allowlist check (module visibility stays navigation).
+
+	Allowed when: the workspace is on the allowlist, OR the user holds one of the roles set
+	on it, OR (no roles set yet, e.g. created since the last migrate) the user holds a
+	back-office role. A workspace with no roles is therefore DENIED to retail staff."""
+	if workspace_name in OPEN_WORKSPACES:
+		return True
+	user_roles = frappe.get_roles(user)
 	roles = frappe.get_all("Has Role", filters={"parent": workspace_name, "parenttype": "Workspace"}, pluck="role")
 	if not roles:
-		return True
-	return bool(has_common(frappe.get_roles(user), roles))
+		return bool(has_common(user_roles, BACK_OFFICE))
+	return bool(has_common(user_roles, roles))
 
 
 def has_permission(doc, ptype=None, user=None, debug=False):
@@ -137,3 +147,43 @@ def backfill_default_landing():
 		"User", filters={"user_type": "System User", "default_workspace": ["in", ["", None]]}, pluck="name"
 	):
 		frappe.db.set_value("User", name, "default_workspace", LANDING_WORKSPACE, update_modified=False)
+
+
+# --- Module dashboards (/desk/<module>/dashboard-view/<Name>) ----------------------------
+# Dashboard documents carry "Desk User: read", so the rail's Stock / Selling / Accounts
+# buttons opened ERPNext's module dashboards (stock value, sales/purchase totals) for every
+# retail role. Same default-deny as workspaces: only back-office or native module roles.
+
+DASHBOARD_ROLES = sorted(set(BACK_OFFICE + [r for roles in NATIVE_ROLES.values() for r in roles] + ["Dashboard Manager"]))
+
+
+def dashboard_has_permission(doc, ptype=None, user=None, debug=False):
+	return bool(has_common(frappe.get_roles(user or frappe.session.user), DASHBOARD_ROLES))
+
+
+def dashboard_query_conditions(user=None, doctype=None):
+	if has_common(frappe.get_roles(user or frappe.session.user), DASHBOARD_ROLES):
+		return ""
+	return "1=0"
+
+
+def _require_dashboard_access(dashboard_name):
+	if not has_common(frappe.get_roles(), DASHBOARD_ROLES):
+		frappe.throw(frappe._("Not permitted to open dashboard {0}").format(dashboard_name), frappe.PermissionError)
+
+
+@frappe.whitelist()
+def get_permitted_cards(dashboard_name):
+	"""core get_permitted_cards, but only for roles allowed to open module dashboards."""
+	from frappe.desk.doctype.dashboard.dashboard import get_permitted_cards as core
+
+	_require_dashboard_access(dashboard_name)
+	return core(dashboard_name)
+
+
+@frappe.whitelist()
+def get_permitted_charts(dashboard_name):
+	from frappe.desk.doctype.dashboard.dashboard import get_permitted_charts as core
+
+	_require_dashboard_access(dashboard_name)
+	return core(dashboard_name)

@@ -34,7 +34,10 @@ page_js = {"point-of-sale": "public/js/pos_variant_picker.js"}
 override_whitelisted_methods = {
 	"erpnext.selling.page.point_of_sale.point_of_sale.get_items": "retail_store.pos_variants.get_items",
 	# Refuse (403) workspaces the user's roles don't allow, not just hide them.
+	"frappe.client.get_value": "retail_store.permissions.get_value",
 	"frappe.desk.desktop.get_desktop_page": "retail_store.workspace_access.get_desktop_page",
+	"frappe.desk.doctype.dashboard.dashboard.get_permitted_cards": "retail_store.workspace_access.get_permitted_cards",
+	"frappe.desk.doctype.dashboard.dashboard.get_permitted_charts": "retail_store.workspace_access.get_permitted_charts",
 }
 
 boot_session = "retail_store.branding.boot_session"
@@ -56,12 +59,18 @@ before_uninstall = "retail_store.install.before_uninstall"
 permission_query_conditions = {
 	"Stock Entry": "retail_store.permissions.stock_entry_query_conditions",
 	"Material Request": "retail_store.permissions.material_request_query_conditions",
+	"Bin": "retail_store.permissions.bin_query_conditions",
+	"Dashboard": "retail_store.workspace_access.dashboard_query_conditions",
+	"Stock Ledger Entry": "retail_store.permissions.stock_ledger_entry_query_conditions",
 }
 
 has_permission = {
 	"Workspace": "retail_store.workspace_access.has_permission",
+	"Dashboard": "retail_store.workspace_access.dashboard_has_permission",
 	"Stock Entry": "retail_store.permissions.stock_entry_has_permission",
 	"Material Request": "retail_store.permissions.material_request_has_permission",
+	"Bin": "retail_store.permissions.bin_has_permission",
+	"Stock Ledger Entry": "retail_store.permissions.stock_ledger_entry_has_permission",
 }
 
 # Document Events

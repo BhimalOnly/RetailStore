@@ -240,17 +240,31 @@ Program, Stock Balance, Material Request, Stock Entry, Stock Reconciliation,
 Warehouse, the catalogue, the till documents, and Setup. Frappe trims each
 user's sidebar to what their roles can open.
 
-**Generic ERPNext workspaces are locked server-side.** Hiding a workspace from
-the sidebar is only navigation in Frappe: any desk user could still open
-`/desk/accounting` (and see its numbers) by URL or API. `workspace_access.py`
-therefore (a) sets roles on every module workspace on each migrate, and (b)
-overrides `get_desktop_page` and the Workspace read permission so the server
-answers **403**. *Retail Store* and *Home* stay open to every desk user; Accounting,
-Financial Reports, Invoicing, Payments, Selling, Stock, Buying and the rest need a
-back-office role (System Manager, Store Owner, Store Admin, or the matching native
-ERPNext role such as Accounts User for Accounting). *Build* is System Manager only.
-Retail staff (cashier, attendant, store/warehouse manager) work entirely from the
-Retail Store workspace. Edit `NATIVE_ROLES` / `BACK_OFFICE` in that file to change it.
+**Server-side allowlist (not a blocklist).** Hiding something from the sidebar is only
+navigation in Frappe: any desk user could still open `/desk/accounting`, `/desk/setup/home`,
+the module dashboards or the Chart of Accounts by URL or API. Found one at a time by
+clicking through as a cashier, so the lock is now deny-by-default:
+
+* **Workspaces** (`workspace_access.py`): only *Retail Store* is open to everyone. Every other
+  workspace, **including ones added later** (CRM, Online Store, HR...), is refused (403) unless
+  the user holds a back-office role (System Manager, Store Owner, Store Admin), a native
+  ERPNext role for that module (e.g. Accounts User for Accounting), or a role set on the
+  workspace. Roles are also written onto each workspace on every migrate. *Home* (Setup landing:
+  Company, Users, stock value) and *Build* are not open to retail staff. Edit `NATIVE_ROLES` /
+  `BACK_OFFICE` to change it.
+* **Module dashboards** (Stock / Selling / Accounts `dashboard-view`): the Dashboard document
+  and its `get_permitted_cards/charts` calls need a back-office or native module role.
+* **Chart of Accounts:** till staff (Cashier, Manager) have `select` but not `read` on Account,
+  so POS and Sales Invoice validation work but the chart cannot be browsed. The one lookup POS
+  needs (`Account.account_currency` by exact name) is allowed by a narrow `get_value` override.
+* **Stock figures:** `Bin` and `Stock Ledger Entry` are scoped to the user's own warehouses
+  (ERPNext otherwise lets any reader see every location's quantities and stock value).
+  Users without warehouse restrictions (Store Owner) see everything.
+
+Known and accepted: every desk user can still list colleagues' *names/emails* (Frappe's
+native User list; individual User records are 403) and read the Company record (POS needs it).
+Retail staff work entirely from the Retail Store workspace; its rail may still show Stock /
+Selling / Accounts module buttons that now answer "Not permitted" for staff without those roles.
 
 **Landing page.** Desk users open on *Retail Store*: `User.default_workspace` is
 set for every desk user (backfilled on migrate, defaulted for new users), and
@@ -289,7 +303,8 @@ env/bin/python apps/retail_store/retail_store/tests/e2e_section7.py http://<site
 bench --site <site> execute retail_store.tests.check_config.run
 # real browser, as the Downtown cashier: grid -> picker -> cart -> barcode scan (needs Playwright)
 python apps/retail_store/retail_store/tests/browser_pos.py <barcode>
-# who may open which workspace, as each demo user, over HTTP (expects 403 where blocked)
+# who may open which workspace, as each demo user, over HTTP. Enumerates EVERY workspace on the
+# site (expects 403 for all but Retail Store for retail-only roles)
 python3 apps/retail_store/retail_store/tests/workspace_access.py
 ```
 

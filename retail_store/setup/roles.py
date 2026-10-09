@@ -73,7 +73,9 @@ _TILL = {
 	"Loyalty Point Entry": READ,
 	"Coupon Code": REF,
 	"Pricing Rule": REF,
-	"Account": REF,
+	# SELECT only: Sales Invoice / POS validation must resolve the income & receivable
+	# accounts, but till staff must not READ (browse) the chart of accounts.
+	"Account": "sel",
 }
 _STOCK_POSTING = {
 	"Stock Entry": "r w c s x a rep p e",
@@ -151,6 +153,7 @@ PERMISSIONS = {
 		_STOCK_POSTING,
 		_CATALOGUE,
 		{
+			"Account": REF,  # owners may see the chart of accounts; till staff may not
 			"Customer": "r w c d rep p e exp",
 			"Sales Invoice": "r w c s x a rep p e exp",
 			"POS Invoice": "r w c s x a rep p e exp",
@@ -214,6 +217,7 @@ CODE_TO_FIELD = {
 	"rep": "report",
 	"exp": "export",
 	"sh": "share",
+	"sel": "select",
 }
 
 
@@ -229,6 +233,22 @@ def create_roles():
 				"description": description,
 			}
 		).insert(ignore_permissions=True)
+
+
+# Till/floor staff may SELECT these (so links and validation resolve) but never READ them.
+# apply_role_permissions only ever adds, so the read bit is cleared here on every run.
+SELECT_ONLY = {
+	"Store Cashier": ["Account"],
+	"Store Manager": ["Account"],
+}
+
+
+def revoke_permissions():
+	for role, doctypes in SELECT_ONLY.items():
+		for doctype in doctypes:
+			for name in frappe.get_all("Custom DocPerm", filters={"parent": doctype, "role": role}, pluck="name"):
+				frappe.db.set_value("Custom DocPerm", name, {"read": 0, "select": 1})
+			frappe.clear_cache(doctype=doctype)
 
 
 def apply_role_permissions():
@@ -298,4 +318,5 @@ def apply_report_and_page_roles():
 def setup_roles_and_permissions():
 	create_roles()
 	apply_role_permissions()
+	revoke_permissions()
 	apply_report_and_page_roles()
