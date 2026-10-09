@@ -253,6 +253,63 @@ conversions, POS quick-create and API-created customers all get them. Change the
 in Selling Settings; they are never overwritten once set. Verified: a Customer converted from an
 Opportunity arrives with both set (`tests/browser_crm.py`, `check_config`).
 
+#### Online Store (proven working)
+
+Switching **Online Store** on (System Manager) needs the `webshop` app and its dependency `payments`
+(`bench get-app payments --branch version-16 && bench get-app webshop --branch version-16`, then
+`install-app payments webshop`). Tested end to end in a real browser (`tests/browser_store.py`, 22 checks):
+a customer buys a **variant**, pays in store, and the Store Owner fulfils it in Desk.
+
+What a customer sees: `/` is the shop (not the login screen); products list with Desk prices; a
+product page with **Select Variant** (Size/Colour dropdowns, standard ERPNext Item Configurator),
+which resolves the exact variant and its price (equal to the Desk *Item Price*) and adds it to the cart;
+the cart shows the rate and total with **Place Order**; the order page confirms the order. A first-time
+visitor is created as a Customer automatically (group *Individual*, home-country territory) and adds
+their address in the cart. Ordering more than is in stock is refused ("Only N in Stock").
+
+**Variants need no picker of their own** (unlike POS): the Item Configurator already handles them.
+Publish the *template* as the Website Item; its website warehouse is used for every variant (see below).
+
+**Stock, in two stages** (both at the Main warehouse, which fulfils online orders):
+
+| Stage | actual | reserved | projected |
+|---|---|---|---|
+| before the order | 50 | 0 | 50 |
+| order placed on the storefront | 50 | **1** | 49 |
+| Delivery Note submitted (Store Owner, Desk) | **49** | 0 | 49 |
+
+Placing the order only *reserves* stock; the physical quantity drops when the Delivery Note is posted.
+Invoice and take payment in Desk as usual (Sales Order > Create > Sales Invoice / Payment Entry).
+
+**Defaults applied the first time it is switched on** (never overwritten afterwards; System Manager edits
+*Webshop Settings*): selling price list, price and stock shown, variant picker on, and an **offline payment
+gateway "Pay in Store or on Delivery"** pointing at the company's cash account. Webshop refuses to show
+*Place Order* without a Payment Gateway Account (it silently falls back to "Request for Quote", with no
+prices in the cart), so a retailer taking cash needs one. **For online card payments** add a real gateway
+(Payments app) and choose its Payment Gateway Account in Webshop Settings; the app then stops hiding
+the order page's *Pay* link (it is hidden only while the offline gateway is active, because it opens a bare 403).
+
+**Branding on the public site:** the brand logo in the navbar, an accent rule and brand-coloured
+buttons/links (`public/css/storefront.css`, driven by the per-site colours; the themed login page is
+left alone), the brand name in the footer instead of "Powered by ERPNext", and the shop as the home page.
+The logo is the same **square mark** used for Desk (README, Branding).
+
+Gaps this testing found and fixed (each would have hit a real customer):
+
+* **Variants had no warehouse:** the cart reads the warehouse from the Website Item of the exact item bought,
+  and only the template has one, so lines fell to Stock Settings' default ("Stores", which holds no stock) and
+  nothing was reserved where the stock is. Cart quotations *and* Sales Orders now take the template's website
+  warehouse, else Main (`storefront.py`; webshop's `place_order` re-reads it per line, so both are needed).
+* **Customers saw "Not Permitted" on their own order page:** webshop's order page looks up loyalty points,
+  which needs read permission on Customer. Portal ("Customer" role) users now have read on Customer,
+  confined by hooks to the customers they are a Portal User of (they cannot list, read or write any other).
+* **Store Owner could not save a Website Item:** no read on *Website Slideshow*; granted (`tests/capability_links.py`).
+* **The Pay link led to a bare 403** for the offline gateway; hidden while it is active.
+
+Known limits: demo products have no images (placeholders show); the template product page does not show
+per-variant availability (it is checked at order time); the first-time address form requires choosing an
+Address Type; cancelled test orders cannot be deleted normally (`demo.purge_cancelled_test_orders`).
+
 Two optional modules are **separate apps in v16** and must be installed first
 (the toggle refuses to switch on and shows the commands):
 
@@ -363,6 +420,9 @@ env/bin/python apps/retail_store/retail_store/tests/e2e_section7.py http://<site
 bench --site <site> execute retail_store.tests.check_config.run
 # real browser, as the Downtown cashier: grid -> picker -> cart -> barcode scan (needs Playwright)
 python apps/retail_store/retail_store/tests/browser_pos.py <barcode>
+# Online Store in a real browser (needs the webshop app + toggle on + demo data): a customer buys a
+# variant, stock reserves then deducts on delivery, branding on the public site; cancels what it creates
+python apps/retail_store/retail_store/tests/browser_store.py
 # CRM capability in a real browser (needs CRM switched on): Lead -> Opportunity -> Customer as
 # Store Owner, and that no other retail role can see or reach CRM; cleans up after itself
 python apps/retail_store/retail_store/tests/browser_crm.py

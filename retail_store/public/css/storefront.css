@@ -1,0 +1,54 @@
+/* Public site (storefront, cart, orders): brand skin.
+   Colours come from the site's own Retail Store Settings via the --rs-brand / --rs-accent custom
+   properties that branding.py injects, so each client site carries its own brand on the same code.
+   The Desk-theme login page (body.sl-split) owns its look and is left alone. */
+body:not(.sl-split) {
+	--rs-b: var(--rs-brand, #171717);
+	--rs-a: var(--rs-accent, var(--rs-brand, #171717));
+}
+
+body:not(.sl-split) .btn-primary,
+body:not(.sl-split) .btn-primary:disabled {
+	background-color: var(--rs-b);
+	border-color: var(--rs-b);
+	color: #fff;
+}
+body:not(.sl-split) .btn-primary:hover,
+body:not(.sl-split) .btn-primary:focus,
+body:not(.sl-split) .btn-primary:active {
+	background-color: var(--rs-b);
+	border-color: var(--rs-b);
+	color: #fff;
+	filter: brightness(1.15);
+}
+
+body:not(.sl-split) nav.navbar {
+	border-bottom: 3px solid var(--rs-a);
+}
+body:not(.sl-split) nav.navbar .navbar-brand img {
+	height: 34px;
+	width: auto;
+	max-height: 34px;
+}
+body:not(.sl-split) nav.navbar .nav-link:hover,
+body:not(.sl-split) nav.navbar .nav-link.active,
+body:not(.sl-split) nav.navbar .active > .nav-link {
+	color: var(--rs-b);
+}
+
+body:not(.sl-split) .page-content a:not(.btn):hover,
+body:not(.sl-split) .breadcrumb a:hover {
+	color: var(--rs-b);
+}
+
+/* in-stock / price accents on product cards */
+body:not(.sl-split) .item-card .product-price,
+body:not(.sl-split) .product-container .product-price {
+	color: var(--rs-b);
+}
+body:not(.sl-split) input:focus,
+body:not(.sl-split) select:focus,
+body:not(.sl-split) textarea:focus {
+	border-color: var(--rs-a);
+	box-shadow: 0 0 0 2px color-mix(in srgb, var(--rs-a) 25%, transparent);
+}

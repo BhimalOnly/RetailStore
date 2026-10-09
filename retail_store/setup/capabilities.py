@@ -44,7 +44,7 @@ OPTIONAL = {
 	"enable_ecommerce": {
 		"modules": ["Webshop"],
 		"icons": ["Webshop"],
-		"grants": {"Website Item": FULL},
+		"grants": {"Website Item": FULL, "Website Slideshow": FULL},
 	},
 	"enable_buying": {
 		"modules": ["Buying"],
@@ -92,6 +92,7 @@ def apply_capabilities(settings=None):
 
 	if settings.get("enable_ecommerce") and "webshop" in frappe.get_installed_apps():
 		frappe.db.set_single_value("Webshop Settings", "enabled", 1)
+		setup_webshop_defaults()
 
 	_sync_module_profile(sorted(set(blocked)))
 	from retail_store.workspace_access import apply_workspace_access
@@ -101,6 +102,76 @@ def apply_capabilities(settings=None):
 
 	backfill_default_landing()
 	frappe.cache.delete_value("desktop_icons")
+
+
+OFFLINE_GATEWAY = "Pay in Store or on Delivery"
+
+
+def setup_webshop_defaults():
+	"""First-time storefront defaults. Each part runs only while its setting is still blank, so a
+	client's own choices (a real price list, a real payment gateway) are never overwritten.
+
+	A fresh Webshop Settings shows no prices, no stock and no variant picker, which is a blank
+	shop; and without a Payment Gateway Account the cart can only "Request for Quote" (Webshop
+	silently switches checkout off). So we also provide an OFFLINE gateway, "Pay in Store or on
+	Delivery", pointing at the company's cash account: "Place Order" then creates a Sales Order
+	and payment is taken in person. Switch to a real gateway per client (README)."""
+	ws = frappe.get_single("Webshop Settings")
+	company = ws.company or frappe.defaults.get_global_default("company") or frappe.db.get_value("Company", {}, "name")
+	changed = False
+	if not ws.price_list:
+		price_list = frappe.db.get_value("Price List", {"selling": 1, "enabled": 1, "name": "Standard Selling"}) or frappe.db.get_value(
+			"Price List", {"selling": 1, "enabled": 1}
+		)
+		if price_list:
+			ws.company = company
+			ws.price_list = price_list
+			ws.default_customer_group = ws.default_customer_group or frappe.db.get_single_value("Selling Settings", "customer_group")
+			ws.show_price = 1
+			ws.show_stock_availability = 1
+			ws.enable_variants = 1
+			changed = True
+	if not ws.payment_gateway_account and company:
+		account = _ensure_offline_gateway_account(company)
+		if account:
+			ws.payment_gateway_account = account
+			ws.enable_checkout = 1
+			changed = True
+	if changed:
+		ws.flags.ignore_permissions = True
+		ws.save()
+	# The public home page is the shop, not the login screen (only while no home page is chosen)
+	if not frappe.db.get_single_value("Website Settings", "home_page"):
+		frappe.db.set_single_value("Website Settings", "home_page", "all-products")
+
+
+def _ensure_offline_gateway_account(company):
+	if "payments" not in frappe.get_installed_apps():
+		return None
+	cash = frappe.db.get_value("Company", company, "default_cash_account")
+	currency = frappe.db.get_value("Company", company, "default_currency")
+	if not (cash and currency):
+		return None
+	if not frappe.db.exists("Payment Gateway", OFFLINE_GATEWAY):
+		frappe.get_doc({"doctype": "Payment Gateway", "gateway": OFFLINE_GATEWAY}).insert(ignore_permissions=True)
+	name = frappe.db.get_value("Payment Gateway Account", {"payment_gateway": OFFLINE_GATEWAY, "company": company})
+	if name:
+		return name
+	return (
+		frappe.get_doc(
+			{
+				"doctype": "Payment Gateway Account",
+				"payment_gateway": OFFLINE_GATEWAY,
+				"payment_channel": "Other",
+				"company": company,
+				"payment_account": cash,
+				"currency": currency,
+				"is_default": 1,
+			}
+		)
+		.insert(ignore_permissions=True)
+		.name
+	)
 
 
 def _set_icons_hidden(labels, hidden):

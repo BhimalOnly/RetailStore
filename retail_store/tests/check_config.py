@@ -66,6 +66,43 @@ def run():
 		check("E-commerce toggle refuses without webshop app", "webshop" in str(e))
 	s.reload()
 
+	# --- Online Store (only meaningful where the webshop app is installed)
+	if "webshop" in frappe.get_installed_apps():
+		from retail_store.setup.capabilities import OFFLINE_GATEWAY
+		from retail_store.storefront import set_online_order_warehouse, website_warehouse
+		from retail_store.tests.capability_links import missing as missing_links
+
+		s.enable_ecommerce = 1
+		s.save()
+		ws = frappe.get_single("Webshop Settings")
+		check("Online Store: Webshop switched on", ws.enabled)
+		check("Online Store: shows prices, stock and the variant picker", ws.show_price and ws.show_stock_availability and ws.enable_variants)
+		check("Online Store: a selling price list is chosen", bool(ws.price_list) and bool(frappe.db.get_value("Price List", ws.price_list, "selling")), ws.price_list)
+		gateway = frappe.db.get_value("Payment Gateway Account", ws.payment_gateway_account, "payment_gateway") if ws.payment_gateway_account else None
+		check("Online Store: checkout is on (Place Order), via the offline gateway when none is chosen", ws.enable_checkout and bool(gateway), (ws.enable_checkout, gateway, OFFLINE_GATEWAY))
+		site = frappe.get_single("Website Settings")
+		check("Online Store: the shop is the public home page", bool(site.home_page), site.home_page)
+		check("Online Store: public navbar carries the brand logo", bool(s.brand_logo) and site.banner_image == s.brand_logo, site.banner_image)
+		check("Online Store: footer carries the brand name", site.footer_powered == s.brand_name, site.footer_powered)
+		check("Store Owner holds Website Item and Website Slideshow", all(frappe.db.exists("Custom DocPerm", {"parent": dt, "role": "Store Owner"}) for dt in ("Website Item", "Website Slideshow")))
+		gaps = missing_links("enable_ecommerce", "owner@demo.example")
+		check("Store Owner can read every Online Store lookup (no 403 on save)", set(gaps) <= {"DocType"}, gaps)
+		check("Portal customers may read Customer (own record only, via hooks)", frappe.db.exists("Custom DocPerm", {"parent": "Customer", "role": "Customer", "read": 1}))
+		main = frappe.db.get_single_value("Retail Store Settings", "main_warehouse")
+		generic = frappe.db.get_single_value("Stock Settings", "default_warehouse")
+		cart = frappe._dict(order_type="Shopping Cart", items=[frappe._dict(item_code="ZZ-NO-WEBSITE-ITEM", warehouse=generic)])
+		set_online_order_warehouse(cart)
+		check("A cart line left on the generic default warehouse moves to Main", cart["items"][0].warehouse == main, (cart["items"][0].warehouse, main, generic))
+		other = frappe._dict(order_type="Sales Invoice", items=[frappe._dict(item_code="ZZ-NO-WEBSITE-ITEM", warehouse=generic)])
+		set_online_order_warehouse(other)
+		check("Non-cart documents are left alone", other["items"][0].warehouse == generic)
+		if frappe.db.exists("Website Item", {"item_code": "DEMO-SNEAKER"}) and frappe.db.exists("Item", "DEMO-SNEAKER-42-WHIT"):
+			template_wh = frappe.db.get_value("Website Item", {"item_code": "DEMO-SNEAKER"}, "website_warehouse")
+			check("A VARIANT takes its template's website warehouse", website_warehouse("DEMO-SNEAKER-42-WHIT") == template_wh, (website_warehouse("DEMO-SNEAKER-42-WHIT"), template_wh))
+			line = frappe._dict(order_type="Shopping Cart", items=[frappe._dict(item_code="DEMO-SNEAKER-42-WHIT", warehouse=None)])
+			set_online_order_warehouse(line)
+			check("...and a blank cart line for that variant gets it", line["items"][0].warehouse == template_wh, line["items"][0].warehouse)
+
 	# --- loyalty toggle
 	s.enable_loyalty = 0
 	s.save()

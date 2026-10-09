@@ -26,6 +26,8 @@ add_to_apps_screen = [
 # Only sets CSS custom properties from per-site config. It never ships a theme,
 # so a Desk theme app can be added later without conflict (turn off
 # "Apply Brand Colours to Desk" in Retail Store Settings if the theme app owns colours).
+# Public site (storefront/cart/orders) brand skin, driven by the per-site brand colours
+web_include_css = "/assets/retail_store/css/storefront.css"
 app_include_js = ["/assets/retail_store/js/retail_store.js", "/assets/retail_store/js/landing.js"]
 
 # POS: one card per product template + Size/Colour picker (see pos_variants.py).
@@ -41,7 +43,10 @@ override_whitelisted_methods = {
 }
 
 boot_session = "retail_store.branding.boot_session"
-update_website_context = "retail_store.branding.update_website_context"
+update_website_context = [
+	"retail_store.branding.update_website_context",
+	"retail_store.storefront.hide_pay_link_for_offline_gateway",
+]
 
 # Installation
 # ------------
@@ -60,6 +65,7 @@ permission_query_conditions = {
 	"Stock Entry": "retail_store.permissions.stock_entry_query_conditions",
 	"Material Request": "retail_store.permissions.material_request_query_conditions",
 	"Bin": "retail_store.permissions.bin_query_conditions",
+	"Customer": "retail_store.storefront.customer_query_conditions",
 	"Dashboard": "retail_store.workspace_access.dashboard_query_conditions",
 	"Stock Ledger Entry": "retail_store.permissions.stock_ledger_entry_query_conditions",
 }
@@ -70,12 +76,20 @@ has_permission = {
 	"Stock Entry": "retail_store.permissions.stock_entry_has_permission",
 	"Material Request": "retail_store.permissions.material_request_has_permission",
 	"Bin": "retail_store.permissions.bin_has_permission",
+	"Customer": "retail_store.storefront.customer_has_permission",
 	"Stock Ledger Entry": "retail_store.permissions.stock_ledger_entry_has_permission",
 }
 
 # Document Events
 # ---------------
 doc_events = {
+	"Quotation": {
+		"before_validate": "retail_store.storefront.set_online_order_warehouse",
+	},
+	# webshop's place_order re-reads each line's warehouse from Website Item(variant), blank for variants
+	"Sales Order": {
+		"before_validate": "retail_store.storefront.set_online_order_warehouse",
+	},
 	"Customer": {
 		"before_validate": "retail_store.setup.company.fill_customer_defaults",
 	},

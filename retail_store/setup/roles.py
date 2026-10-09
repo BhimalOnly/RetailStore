@@ -366,9 +366,27 @@ def apply_settings_permissions():
 	frappe.clear_cache(doctype=SETTINGS_DOCTYPE)
 
 
+def apply_portal_permissions():
+	"""Portal ("Customer" role) users may read Customer; storefront.py confines it to their own.
+
+	Needed by webshop's order page (see storefront.py). Only when webshop is installed."""
+	from frappe.permissions import setup_custom_perms
+
+	if "webshop" not in frappe.get_installed_apps() or not frappe.db.exists("Role", "Customer"):
+		return
+	setup_custom_perms("Customer")
+	name = frappe.db.get_value("Custom DocPerm", {"parent": "Customer", "role": "Customer", "permlevel": 0, "if_owner": 0})
+	if not name:
+		frappe.get_doc({"doctype": "Custom DocPerm", "parent": "Customer", "role": "Customer", "permlevel": 0, "read": 1}).insert(
+			ignore_permissions=True
+		)
+	frappe.clear_cache(doctype="Customer")
+
+
 def setup_roles_and_permissions():
 	create_roles()
 	apply_role_permissions()
 	apply_settings_permissions()
+	apply_portal_permissions()
 	revoke_permissions()
 	apply_report_and_page_roles()

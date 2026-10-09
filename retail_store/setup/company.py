@@ -65,15 +65,23 @@ def setup_selling_defaults(company):
 		settings.save()
 
 
-def fill_customer_defaults(doc, method=None):
-	"""Customer.before_validate: fill a blank Customer Group / Territory from Selling Settings.
+def _is_assignable(doctype, name):
+	"""A real leaf value, not blank and not a tree group node such as 'All Territories'."""
+	return bool(name) and frappe.db.get_value(doctype, name, "is_group") == 0
 
-	Covers conversions from a Lead/Opportunity/Prospect (ERPNext only fills the group, and only
-	when its site default is set), POS quick-create and API-created customers."""
-	if not doc.get("customer_group"):
-		doc.customer_group = frappe.db.get_single_value("Selling Settings", "customer_group") or doc.get("customer_group")
-	if not doc.get("territory"):
-		doc.territory = frappe.db.get_single_value("Selling Settings", "territory") or doc.get("territory")
+
+def fill_customer_defaults(doc, method=None):
+	"""Customer.before_validate: fill a missing Customer Group / Territory from Selling Settings.
+
+	"Missing" includes a tree group node: the Online Store creates a first-time customer with the
+	root "All Territories", which is not a place anyone lives. Covers conversions from a
+	Lead/Opportunity/Prospect (ERPNext fills only the group, and only when a site default is set),
+	Online Store sign-ups, POS quick-create and API-created customers."""
+	for field, doctype in (("customer_group", "Customer Group"), ("territory", "Territory")):
+		if not _is_assignable(doctype, doc.get(field)):
+			default = frappe.db.get_single_value("Selling Settings", field)
+			if _is_assignable(doctype, default):
+				doc.set(field, default)
 
 
 def setup_transfer_warehouses(company):

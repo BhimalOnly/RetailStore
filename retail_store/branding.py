@@ -69,6 +69,9 @@ def apply_branding(settings):
 	changed = False
 	for field, value in (
 		("app_logo", settings.brand_logo),
+		# the public site's navbar logo and footer line (otherwise: plain "Home" text and "Powered by ERPNext")
+		("banner_image", settings.brand_logo),
+		("footer_powered", settings.brand_name),
 		("favicon", settings.brand_favicon),
 		("app_name", settings.brand_name),
 	):

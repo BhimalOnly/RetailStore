@@ -95,6 +95,8 @@ def create_demo_data():
 	_pos_profiles(company, warehouses, price_list)
 	_opening_stock(company, warehouses, variants)
 	_users(warehouses)
+	publish_demo_website_items()
+	create_demo_shopper()
 	frappe.db.commit()
 	print("DEMO data created. Users log in with password:", DEMO_PASSWORD)
 	return {"warehouses": len(warehouses) - 1, "variants": len(variants)}
@@ -363,6 +365,22 @@ def delete_demo_data():
 	demo_items = frappe.get_all("Item", filters={"item_code": ["like", "DEMO-%"]}, pluck="name")
 	frappe.flags.ignore_links = True
 
+	# Online Store leftovers: storefront shopper, quotations and the Website Items for DEMO products
+	for dt, filters in (("Address", {"address_title": "DEMO Jane Shopper"}), ("Contact", {"user": SHOPPER_EMAIL})):
+		for name in frappe.get_all(dt, filters=filters, pluck="name"):
+			frappe.delete_doc(dt, name, force=True, ignore_permissions=True)
+	if frappe.db.exists("User", SHOPPER_EMAIL):
+		frappe.delete_doc("User", SHOPPER_EMAIL, force=True, ignore_permissions=True)
+	if frappe.db.exists("DocType", "Website Item"):
+		for name in frappe.get_all("Quotation Item", filters={"item_code": ["in", demo_items], "parenttype": "Quotation"}, pluck="parent", distinct=True) if demo_items else []:
+			quotation = frappe.get_doc("Quotation", name)
+			if quotation.docstatus == 1:
+				quotation.flags.ignore_links = True
+				quotation.cancel()
+			frappe.delete_doc("Quotation", name, force=True, ignore_permissions=True)
+		for name in frappe.get_all("Website Item", filters={"item_code": ["in", demo_items]}, pluck="name") if demo_items else []:
+			frappe.delete_doc("Website Item", name, force=True, ignore_permissions=True)
+
 	child_map = [
 		("POS Invoice", "POS Invoice Item", "warehouse"),
 		("Sales Invoice", "Sales Invoice Item", "warehouse"),
@@ -370,6 +388,8 @@ def delete_demo_data():
 		("Stock Entry", "Stock Entry Detail", "t_warehouse"),
 		("Material Request", "Material Request Item", "warehouse"),
 		("Stock Reconciliation", "Stock Reconciliation Item", "warehouse"),
+		("Delivery Note", "Delivery Note Item", "warehouse"),
+		("Sales Order", "Sales Order Item", "warehouse"),
 	]
 	# Collect every touching transaction, then cancel newest-first ACROSS doctypes:
 	# a transit receipt must be cancelled before the dispatch it came from.
@@ -489,6 +509,9 @@ def restock_pos_test_items(qty=10, main_qty=60):
 		(f"DEMO Store Downtown - {abbr}", "DEMO-TEE-M-NAVY", qty),
 		(f"DEMO Main Warehouse - {abbr}", "DEMO-SNEAKER-41-BLAC", main_qty),
 		(f"DEMO Main Warehouse - {abbr}", "DEMO-TEE-M-NAVY", main_qty),
+		# Online Store test orders (tests/browser_store.py) are fulfilled from Main
+		(f"DEMO Main Warehouse - {abbr}", "DEMO-SNEAKER-42-WHIT", main_qty),
+		(f"DEMO Main Warehouse - {abbr}", "DEMO-TOTE", main_qty),
 	]
 	made = []
 	for warehouse in sorted({w for w, _, _ in targets}):
@@ -515,3 +538,129 @@ def restock_pos_test_items(qty=10, main_qty=60):
 		made.append(se.name)
 	frappe.db.commit()
 	return made or "already stocked"
+
+
+WEBSITE_DEMO_ITEMS = {
+	"DEMO-SNEAKER": "Everyday sneaker with cushioned sole. Choose your size and colour.",
+	"DEMO-TEE": "Soft cotton tee. Choose your size and colour.",
+	"DEMO-TOTE": "Canvas tote bag.",
+}
+
+
+def publish_demo_website_items():
+	"""Publish the demo products on the Online Store (needs the webshop app).
+
+	No-op when webshop is not installed. Stock shown on the storefront comes from the Main
+	warehouse, which fulfils online orders. Safe to run again.
+	    bench --site retail.localhost execute retail_store.demo.publish_demo_website_items
+	"""
+	if not frappe.db.exists("DocType", "Website Item"):
+		return []
+	from webshop.webshop.doctype.website_item.website_item import make_website_item
+
+	company = get_default_company()
+	abbr = frappe.db.get_value("Company", company, "abbr")
+	main = f"DEMO Main Warehouse - {abbr}"
+	made = []
+	for item_code, blurb in WEBSITE_DEMO_ITEMS.items():
+		if not frappe.db.exists("Item", item_code):
+			continue
+		name = frappe.db.get_value("Website Item", {"item_code": item_code})
+		if not name:
+			name = make_website_item(frappe.get_doc("Item", item_code), save=True)[0]
+		doc = frappe.get_doc("Website Item", name)
+		doc.published = 1
+		doc.website_warehouse = main if frappe.db.exists("Warehouse", main) else doc.website_warehouse
+		doc.short_description = doc.short_description or blurb
+		doc.flags.ignore_permissions = True
+		doc.save()
+		made.append(name)
+	frappe.db.commit()
+	return made
+
+
+SHOPPER_EMAIL = "shopper@demo.example"
+
+
+def create_demo_shopper():
+	"""A storefront customer who can log in and order: portal user + contact + delivery address,
+	all linked to the demo customer 'DEMO Jane Shopper' (Online Store testing).
+
+	    bench --site retail.localhost execute retail_store.demo.create_demo_shopper
+	"""
+	customer = "DEMO Jane Shopper"
+	if not frappe.db.exists("Customer", customer):
+		return None
+	if not frappe.db.exists("User", SHOPPER_EMAIL):
+		frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": SHOPPER_EMAIL,
+				"first_name": "DEMO Jane",
+				"last_name": "Shopper",
+				"user_type": "Website User",
+				"send_welcome_email": 0,
+				"new_password": DEMO_PASSWORD,
+				"roles": [{"role": "Customer"}],
+			}
+		).insert(ignore_permissions=True)
+	contact = frappe.db.get_value("Contact", {"email_id": SHOPPER_EMAIL})
+	if not contact:
+		doc = frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": "DEMO Jane",
+				"last_name": "Shopper",
+				"user": SHOPPER_EMAIL,
+				"email_ids": [{"email_id": SHOPPER_EMAIL, "is_primary": 1}],
+				"links": [{"link_doctype": "Customer", "link_name": customer}],
+			}
+		)
+		doc.insert(ignore_permissions=True)
+	if not frappe.db.exists("Address", {"address_title": "DEMO Jane Shopper"}):
+		country = frappe.db.get_value("Company", get_default_company(), "country") or "Mauritius"
+		frappe.get_doc(
+			{
+				"doctype": "Address",
+				"address_title": "DEMO Jane Shopper",
+				"address_type": "Shipping",
+				"address_line1": "12 Royal Road",
+				"city": "Port Louis",
+				"country": country,
+				"is_primary_address": 1,
+				"is_shipping_address": 1,
+				"links": [{"link_doctype": "Customer", "link_name": customer}],
+			}
+		).insert(ignore_permissions=True)
+	customer_doc = frappe.get_doc("Customer", customer)
+	if not any(r.user == SHOPPER_EMAIL for r in customer_doc.get("portal_users") or []):
+		customer_doc.append("portal_users", {"user": SHOPPER_EMAIL})
+		customer_doc.flags.ignore_permissions = True
+		customer_doc.save()
+	frappe.db.commit()
+	return SHOPPER_EMAIL
+
+
+def purge_cancelled_test_orders():
+	"""Delete CANCELLED storefront test documents (delivery notes, orders, quotations) for DEMO items.
+
+	tests/browser_store.py cleans up by cancelling, which is what ERPNext allows: a cancelled
+	document stays linked to its reversal ledger entries and cannot be deleted normally. On a demo
+	site that clutter can be removed with the same ledger purge delete_demo_data uses:
+	    bench --site retail.localhost execute retail_store.demo.purge_cancelled_test_orders
+	"""
+	frappe.flags.ignore_links = True
+	removed = []
+	for doctype, child in (
+		("Delivery Note", "Delivery Note Item"),
+		("Sales Order", "Sales Order Item"),
+		("Quotation", "Quotation Item"),
+	):
+		names = frappe.get_all(child, filters={"item_code": ["like", "DEMO-%"], "parenttype": doctype}, pluck="parent", distinct=True)
+		for name in names:
+			if frappe.db.get_value(doctype, name, "docstatus") == 2:
+				frappe.delete_doc(doctype, name, force=True, ignore_permissions=True)
+				_purge_ledgers(doctype, name)
+				removed.append((doctype, name))
+	frappe.db.commit()
+	return removed
