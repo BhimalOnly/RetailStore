@@ -30,6 +30,8 @@ RETAIL_ONLY = [
 ]
 ALWAYS_OPEN = {"Retail Store"}
 SYSTEM_MANAGER_ONLY = {"Build", "Users"}  # everyone back-office except these is allowed the rest
+# Optional-capability workspaces: Store Owner holds their grants, Store Admin does not.
+OWNER_ONLY = {"CRM", "Buying", "Assets", "Projects", "Manufacturing", "Quality", "Support"}
 ACCOUNTANT = {"Accounting", "Financial Reports", "Invoicing", "Payments", "Assets"}
 
 
@@ -63,8 +65,10 @@ def expected_open(user, workspaces):
 	everything = set(workspaces)
 	if user == "Administrator":
 		return everything
-	if user in ("owner@demo.example", "admin@demo.example"):
+	if user == "owner@demo.example":
 		return everything - SYSTEM_MANAGER_ONLY
+	if user == "admin@demo.example":
+		return everything - SYSTEM_MANAGER_ONLY - OWNER_ONLY
 	if user == "accountant@demo.example":
 		return (ACCOUNTANT | ALWAYS_OPEN) & everything
 	return ALWAYS_OPEN & everything

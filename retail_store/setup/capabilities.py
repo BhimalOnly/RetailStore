@@ -20,12 +20,26 @@ OWNER = "Store Owner"
 
 FULL = {"read": 1, "write": 1, "create": 1, "report": 1, "print": 1, "email": 1, "export": 1}
 SUBMIT = {**FULL, "submit": 1, "cancel": 1, "amend": 1}
+# Lookup masters a form links to (Opportunity Type, Sales Stage...): without read, saving the
+# main document fails with a 403 on a harmless dropdown. tests/capability_links.py lists them.
+LOOKUP = {"read": 1}
 
 OPTIONAL = {
 	"enable_crm": {
 		"modules": ["CRM"],
 		"icons": ["CRM"],
-		"grants": {"Lead": FULL, "Opportunity": FULL, "Prospect": FULL, "Campaign": FULL},
+		"grants": {
+			"Lead": FULL,
+			"Opportunity": FULL,
+			"Prospect": FULL,
+			"Campaign": FULL,
+			"Opportunity Type": LOOKUP,
+			"Sales Stage": LOOKUP,
+			"Opportunity Lost Reason": LOOKUP,
+			"Competitor": LOOKUP,
+			"Industry Type": LOOKUP,
+			"Market Segment": LOOKUP,
+		},
 	},
 	"enable_ecommerce": {
 		"modules": ["Webshop"],
@@ -185,15 +199,25 @@ def _sync_module_profile(blocked):
 # user who lacks BOTH a back-office role and the module's native ERPNext role gets the module
 # blocked, so the Dock never shows a button that answers "Not permitted". Same role lists as
 # workspace_access, so navigation and enforcement cannot drift apart.
-def _role_gated_modules(roles):
-	from retail_store.workspace_access import BACK_OFFICE, NATIVE_ROLES
+# Module -> the workspace whose role list decides who may use it.
+GATED_MODULES = {
+	"Accounts": "Accounting",
+	"Selling": "Selling",
+	"Stock": "Stock",
+	"CRM": "CRM",
+	"Buying": "Buying",
+	"Assets": "Assets",
+	"Projects": "Projects",
+	"Manufacturing": "Manufacturing",
+	"Quality Management": "Quality",
+	"Support": "Support",
+}
 
-	gated = {
-		"Accounts": NATIVE_ROLES["Accounting"],
-		"Selling": NATIVE_ROLES["Selling"],
-		"Stock": NATIVE_ROLES["Stock"],
-	}
-	return [m for m, native in gated.items() if not set(roles) & set(BACK_OFFICE + native)]
+
+def _role_gated_modules(roles):
+	from retail_store.workspace_access import allowed_roles_for
+
+	return [m for m, ws in GATED_MODULES.items() if not set(roles) & set(allowed_roles_for(ws) or [])]
 
 
 def apply_module_profile(user):

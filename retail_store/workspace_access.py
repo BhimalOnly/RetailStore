@@ -48,12 +48,20 @@ NATIVE_ROLES = {
 }
 
 
+# Optional-capability workspaces (Retail Store Settings > Capabilities). Store Owner holds their
+# doctype grants (setup/capabilities.py); Store Admin does not, so it gets no door to an empty room.
+OPTIONAL_CAPABILITY_WORKSPACES = {"CRM", "Buying", "Assets", "Projects", "Manufacturing", "Quality", "Support"}
+OWNER_LEVEL = ["System Manager", "Store Owner"]
+
+
 def allowed_roles_for(workspace):
 	"""Roles that may open `workspace`, or None for the allowlisted open workspaces."""
 	if workspace in OPEN_WORKSPACES or workspace in LEAVE_ALONE:
 		return None
 	if workspace in DEVELOPER_ONLY:
 		return ["System Manager"]
+	if workspace in OPTIONAL_CAPABILITY_WORKSPACES:
+		return OWNER_LEVEL + NATIVE_ROLES.get(workspace, [])
 	return BACK_OFFICE + NATIVE_ROLES.get(workspace, [])
 
 

@@ -215,6 +215,38 @@ grants Store Owner the main doctypes (Lead/Opportunity, Supplier/PO/PR/PI,
 Website Item). For other modules, give the person the matching standard
 ERPNext role (e.g. *Manufacturing User*).
 
+#### CRM (proven working)
+
+Switching **CRM** on (System Manager, Retail Store Settings > Capabilities) was tested end to end
+in a real browser as Store Owner and is covered by `tests/browser_crm.py`:
+
+1. **Lead:** create a Lead (name, email, company).
+2. **Lead -> Opportunity:** *Create > Opportunity* first opens a **Create Prospect** dialog (checked
+   by default, named after the company). Confirm it and the Opportunity form opens prefilled
+   with the Lead. Converting a Lead therefore also creates a **Prospect** and a **Contact**.
+3. **Opportunity -> Customer:** *Create > Customer* opens a Customer prefilled from the Opportunity;
+   the Lead becomes *Converted* and the Customer links back to both (`lead_name`, `opportunity_name`).
+
+What the toggle does, and for whom:
+
+* **Store Owner** (and System Manager): full Lead, Opportunity, Prospect and Campaign access,
+  plus **read** on the lookup tables those forms link to (Opportunity Type, Sales Stage,
+  Opportunity Lost Reason, Competitor, Industry Type, Market Segment). Without those, saving an
+  Opportunity failed with a 403 on a dropdown; `tests/capability_links.py` lists any such gap for
+  any capability and user.
+* **Everyone else** (Store Admin, Store Manager, Cashier, Attendant, warehouse roles): no CRM in
+  the rail, every CRM route (`/desk/lead`, `/desk/opportunity`, `/desk/crm`...) is blocked, and no
+  CRM data appears. Store Admin deliberately gets no CRM (it holds none of the grants); the
+  module and its workspace are hidden from it from the same role list, so there is no empty page.
+* Turning the toggle off reverses all of it (module blocked, Dock hidden, grants revoked).
+* Reads correctly in the Desk theme (Solvronix Desk): Lead / Opportunity / Customer forms show the
+  brand colours; the theme's *progressive forms* collapse optional fields behind "Show N optional
+  fields" (the Details tab can look sparse until expanded).
+
+Known gap: a Customer created from an Opportunity gets **no Customer Group or Territory**, because
+v16 does not require them and Selling Settings has no defaults on a fresh site. Set Selling
+Settings defaults per client if they report by group or territory.
+
 Two optional modules are **separate apps in v16** and must be installed first
 (the toggle refuses to switch on and shows the commands):
 
@@ -325,6 +357,9 @@ env/bin/python apps/retail_store/retail_store/tests/e2e_section7.py http://<site
 bench --site <site> execute retail_store.tests.check_config.run
 # real browser, as the Downtown cashier: grid -> picker -> cart -> barcode scan (needs Playwright)
 python apps/retail_store/retail_store/tests/browser_pos.py <barcode>
+# CRM capability in a real browser (needs CRM switched on): Lead -> Opportunity -> Customer as
+# Store Owner, and that no other retail role can see or reach CRM; cleans up after itself
+python apps/retail_store/retail_store/tests/browser_crm.py
 # who may open which workspace, as each demo user, over HTTP. Enumerates EVERY workspace on the
 # site (expects 403 for all but Retail Store for retail-only roles)
 python3 apps/retail_store/retail_store/tests/workspace_access.py

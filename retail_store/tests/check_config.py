@@ -24,6 +24,11 @@ def run():
 	frappe.set_user("Administrator")
 	s = frappe.get_doc("Retail Store Settings")
 	original = s.as_dict()
+	# Pin the baseline: the site may have capabilities switched on (e.g. CRM). Originals are
+	# restored at the end.
+	for f in ("enable_crm", "enable_buying", "enable_hr", "enable_manufacturing", "enable_quality", "enable_support", "enable_assets", "enable_projects"):
+		s.set(f, 0)
+	s.save()
 
 	# --- defaults
 	dock = _dock()
@@ -38,10 +43,15 @@ def run():
 	check("CRM toggle grants Store Owner Lead access", frappe.db.exists("Custom DocPerm", {"parent": "Lead", "role": "Store Owner"}))
 	blocked = frappe.get_all("Block Module", filters={"parent": "Retail Store Staff"}, pluck="module")
 	check("CRM unblocked for retail staff", "CRM" not in blocked, blocked)
-	check(
-		"Cashier user's blocked modules updated",
-		"CRM" not in frappe.get_all("Block Module", filters={"parent": "cashier.downtown@demo.example"}, pluck="module"),
-	)
+	from retail_store.tests.capability_links import missing
+
+	gaps = missing("enable_crm", "owner@demo.example")
+	check("Store Owner can read every CRM lookup master (no 403 on save)", set(gaps) <= {"DocType"}, gaps)
+	blocked_for = lambda user: frappe.get_all("Block Module", filters={"parent": user}, pluck="module")
+	check("CRM stays blocked for Store Admin (holds no CRM grants)", "CRM" in blocked_for("admin@demo.example"))
+	check("CRM visible for Store Owner", "CRM" not in blocked_for("owner@demo.example"))
+	check("CRM stays blocked for Cashier", "CRM" in blocked_for("cashier.downtown@demo.example"))
+	check("Store Admin holds no CRM doctype grant", not frappe.db.exists("Custom DocPerm", {"parent": "Lead", "role": "Store Admin"}))
 	s.enable_crm = 0
 	s.save()
 	check("CRM toggle off hides it again", _dock().get("CRM") == 1)
