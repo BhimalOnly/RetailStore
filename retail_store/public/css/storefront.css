@@ -308,3 +308,30 @@ body:not(.sl-split) .rs-prod-price { font-size: 14px; font-weight: 700; margin-t
 body:not(.sl-split) .rs-more { margin: 24px 0 8px; }
 body:not(.sl-split) .rs-more a { color: var(--rs-b); font-weight: 600; }
 body:not(.sl-split) .rs-empty { color: #6b665e; }
+
+/* ---- Cart on a phone ------------------------------------------------------------------------
+   Webshop hides the Subtotal and remove columns up to 992px, but the "Net Total" row still has a
+   cell with colspan=3, so the table is laid out three columns wider than it is allowed to be and
+   pushes the total 13px past the card edge. Lay that row out as a flex line instead. */
+@media (max-width: 992px) {
+  body:not(.sl-split) .cart-table { width: 100%; table-layout: auto; }
+  body:not(.sl-split) .cart-table tfoot.cart-tax-items tr { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  body:not(.sl-split) .cart-table tfoot.cart-tax-items th { display: block; width: auto; white-space: nowrap; padding-left: 0; padding-right: 0; }
+  body:not(.sl-split) .cart-table tfoot.cart-tax-items th:empty { display: none; }
+}
+
+/* Frappe's footer .container has no side padding at tablet width, so its .row's -15px gutters poke
+   out 15px (every store page at 768px, an iPad in portrait). Give the container the gutter back. */
+@media (max-width: 991.98px) {
+  body:not(.sl-split) footer.web-footer .container { padding-left: 15px; padding-right: 15px; }
+}
+
+/* "Out of stock" (Webshop's #f47a7a on white is ~2.8:1): darker, so it reads as a state, not a hint */
+body:not(.sl-split) .out-of-stock { color: #b3261e; font-weight: 600; }
+
+/* Phone details: the order page's header row gives the customer name a 2-of-12 column (55px), so the
+   name overflows the screen; and the cart's main buttons were 29px tall, under a comfortable tap size. */
+@media (max-width: 767.98px) {
+  body:not(.sl-split) .indicator-container > .text-right { flex: 1 1 auto; max-width: 100%; min-width: 0; overflow-wrap: anywhere; }
+  body:not(.sl-split) .btn-place-order, body:not(.sl-split) .btn-request-for-quotation { min-height: 44px; }
+}

@@ -384,8 +384,16 @@ The audit of the Online Store found it could not onboard a real customer. What c
   new-customer journey (guest Add to Cart -> sign up -> email -> set password -> address -> Place
   Order -> an order on their own Customer). It leaves one test Customer per run; clear with
   `bench --site <site> execute retail_store.demo.purge_signup_test_customers`.
-* Not done: out-of-stock product page, search that filters on Enter, the empty Filters panel
-  (Webshop field/attribute filters are off), and mobile cart overflow (13px): the next storefront task.
+* **Phone and tablet pass** (`tests/browser_mobile.py`, 23 checks; screenshots in `shots/mobile/`).
+  The cart overflowed 13px at 390px: Webshop hides the Subtotal/remove columns up to 992px but the
+  "Net Total" row still has a `colspan=3` cell, so the table was laid out three columns too wide; that
+  row is now a flex line. Also fixed: the footer pushed every store page 15px sideways at 768px (stock
+  Frappe: its `.container` has no side padding there), the order page's customer name sat in a 55px
+  column, the Place Order button was 29px tall (now 44px), and Webshop's pale-pink "Out of stock"
+  is now a readable dark red. An out-of-stock product shows the message, no Add to Cart, and fits at
+  desktop and phone width (the test empties the item's website warehouse and always restores it).
+* Not done: search that filters on Enter, the empty Filters panel (Webshop field/attribute filters are
+  off), a stock empty white card under every product page, the material card, bundles.
 
 Gaps this testing found and fixed (each would have hit a real customer):
 
