@@ -335,3 +335,14 @@ body:not(.sl-split) .out-of-stock { color: #b3261e; font-weight: 600; }
   body:not(.sl-split) .indicator-container > .text-right { flex: 1 1 auto; max-width: 100%; min-width: 0; overflow-wrap: anywhere; }
   body:not(.sl-split) .btn-place-order, body:not(.sl-split) .btn-request-for-quotation { min-height: 44px; }
 }
+
+/* ---- Search results: "no results" state and the suggestion dropdown ------------------------------- */
+body:not(.sl-split) .rs-noresults { text-align: center; padding: 56px 16px 64px; }
+body:not(.sl-split) .rs-noresults h2 { font-family: var(--rs-display); font-weight: 400; font-size: 26px; margin: 0 0 10px; overflow-wrap: anywhere; }
+body:not(.sl-split) .rs-noresults p { color: #6b665e; margin: 0 0 22px; }
+body:not(.sl-split) .rs-noresults-btn { display: inline-block; margin: 4px; padding: 11px 22px; border-radius: var(--rs-r); background: var(--rs-b); color: #fff; font-weight: 700; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; text-decoration: none; }
+body:not(.sl-split) .rs-noresults-btn.rs-alt { background: transparent; color: var(--rs-b); border: 1px solid var(--rs-b); }
+
+/* Mobile "Filters" button (storefront.js): Webshop collapses the panel on phones with no way to open it */
+body:not(.sl-split) .rs-filter-toggle { display: block; width: 100%; min-height: 44px; margin: 0 0 16px; border: 1px solid var(--rs-line); border-radius: var(--rs-r); background: #fff; color: var(--rs-ink); font-weight: 700; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; }
+@media (min-width: 768px) { body:not(.sl-split) .rs-filter-toggle { display: none; } }

@@ -392,8 +392,28 @@ The audit of the Online Store found it could not onboard a real customer. What c
   column, the Place Order button was 29px tall (now 44px), and Webshop's pale-pink "Out of stock"
   is now a readable dark red. An out-of-stock product shows the message, no Add to Cart, and fits at
   desktop and phone width (the test empties the item's website warehouse and always restores it).
-* Not done: search that filters on Enter, the empty Filters panel (Webshop field/attribute filters are
-  off), a stock empty white card under every product page, the material card, bundles.
+* **Search and filters** (`tests/browser_search.py`, 43 checks, desktop + phone; shots in `shots/search/`).
+  Webshop's search box only autocompletes: pressing Enter did nothing, although its product query
+  (`get_product_filter_data`) already accepts a `search` term that the page JS never sends. So
+  `storefront.js` (which loads before Webshop's bundle, so it wraps `frappe.call` rather than patching
+  classes) makes Enter reload the listing with `?search=`, adds the term to every product query on the
+  page (so it combines with category/attribute filters), keeps it in the box, and renders a styled
+  "No results for ..." state with *Clear search* / *Browse all products*. Suggestions showed a grey
+  placeholder because `Website Item.thumbnail` is only built for File-attached images and ours are URLs:
+  a Website Item `validate` hook now reuses the photo, and existing rows are backfilled.
+  **Filters** were off (an empty "Filters / Clear All"); `setup_webshop_defaults` now enables Category
+  (Item Group) and every Item Attribute used by a published template, only while the client has not set
+  any of their own. Webshop collapses the panel under 768px with **no button to open it**, so
+  `storefront.js` adds a Filters / Hide filters button on phones.
+  **Attribute filters were dead on a variant shop** (every Colour/Size click returned zero products).
+  Webshop matches *published Items* carrying the attribute, but a variant shop publishes only the
+  template (variants have `published_in_website=0`) and the template's own attribute rows are empty.
+  `storefront.get_product_filter_data` (an `override_whitelisted_methods` entry) resolves the filter
+  through the variants instead: a template matches when ONE variant has every selected value (White +
+  42 means a white size-42 variant), then hands the codes on to Webshop as an item filter.
+  Not natively available in Webshop, so not offered: **price range** and **in-stock only** filters (its
+  only numeric filter is a discount range driven by Pricing Rules). Adding them means a custom filter.
+* Not done: a stock empty white card under every product page, the material card, bundles.
 
 Gaps this testing found and fixed (each would have hit a real customer):
 

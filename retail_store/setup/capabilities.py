@@ -93,6 +93,7 @@ def apply_capabilities(settings=None):
 	if settings.get("enable_ecommerce") and "webshop" in frappe.get_installed_apps():
 		frappe.db.set_single_value("Webshop Settings", "enabled", 1)
 		setup_webshop_defaults()
+		backfill_thumbnails()
 
 	from retail_store.portal_access import apply_portal_menu
 
@@ -109,6 +110,26 @@ def apply_capabilities(settings=None):
 
 
 OFFLINE_GATEWAY = "Pay in Store or on Delivery"
+
+
+def _website_item_attributes():
+	"""Item Attributes used by the variant templates that are published on the website."""
+	templates = frappe.get_all("Website Item", filters={"published": 1}, pluck="item_code")
+	if not templates:
+		return []
+	return frappe.get_all(
+		"Item Variant Attribute",
+		filters={"parent": ["in", templates], "parenttype": "Item"},
+		pluck="attribute",
+		distinct=True,
+		order_by="attribute",
+	)
+
+
+def backfill_thumbnails():
+	"""Website Items with a photo but no thumbnail (see storefront.default_thumbnail)."""
+	for name in frappe.get_all("Website Item", filters={"thumbnail": ["is", "not set"], "website_image": ["is", "set"]}, pluck="name"):
+		frappe.db.set_value("Website Item", name, "thumbnail", frappe.db.get_value("Website Item", name, "website_image"))
 
 
 def setup_webshop_defaults():
@@ -140,6 +161,20 @@ def setup_webshop_defaults():
 		if account:
 			ws.payment_gateway_account = account
 			ws.enable_checkout = 1
+			changed = True
+	# Filters panel: off by default it is an empty "Filters / Clear All" heading. Category (Item Group) as
+	# a field filter, and every Item Attribute that a published template item uses (size, colour...).
+	# Only while the client has not configured any, so their own choices are never overwritten.
+	if not ws.filter_fields and not ws.enable_field_filters:
+		ws.enable_field_filters = 1
+		ws.append("filter_fields", {"fieldname": "item_group"})
+		changed = True
+	if not ws.filter_attributes and not ws.enable_attribute_filters:
+		attributes = _website_item_attributes()
+		if attributes:
+			ws.enable_attribute_filters = 1
+			for attribute in attributes:
+				ws.append("filter_attributes", {"attribute": attribute})
 			changed = True
 	# Guests who press Add to Cart go to the SHOPPER login (/account/login), not Solvronix's staff /login
 	if not ws.redirect_on_action:

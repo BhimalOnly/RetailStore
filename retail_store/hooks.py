@@ -27,8 +27,8 @@ add_to_apps_screen = [
 # so a Desk theme app can be added later without conflict (turn off
 # "Apply Brand Colours to Desk" in Retail Store Settings if the theme app owns colours).
 # Public site (storefront/cart/orders) brand skin, driven by the per-site brand colours
-web_include_css = "/assets/retail_store/css/storefront.css?v=16"
-web_include_js = "/assets/retail_store/js/storefront.js?v=1"
+web_include_css = "/assets/retail_store/css/storefront.css?v=18"
+web_include_js = "/assets/retail_store/js/storefront.js?v=3"
 # POS item cards + cart restyle (visual only, token-driven; loads after solvronix_desk per apps.txt)
 app_include_css = "/assets/retail_store/css/pos_restyle.css?v=3"
 app_include_js = ["/assets/retail_store/js/retail_store.js", "/assets/retail_store/js/landing.js"]
@@ -37,6 +37,8 @@ app_include_js = ["/assets/retail_store/js/retail_store.js", "/assets/retail_sto
 # Toggle: Retail Store Settings > Capabilities > "Group Variants in POS".
 page_js = {"point-of-sale": "public/js/pos_variant_picker.js"}
 override_whitelisted_methods = {
+	# Attribute filters (colour, size) on a variant shop: see storefront._items_with_attributes
+	"webshop.webshop.api.get_product_filter_data": "retail_store.storefront.get_product_filter_data",
 	"erpnext.selling.page.point_of_sale.point_of_sale.get_items": "retail_store.pos_variants.get_items",
 	# Refuse (403) workspaces the user's roles don't allow, not just hide them.
 	"frappe.client.get_value": "retail_store.permissions.get_value",
@@ -96,6 +98,9 @@ doc_events = {
 	# webshop's place_order re-reads each line's warehouse from Website Item(variant), blank for variants
 	"Sales Order": {
 		"before_validate": "retail_store.storefront.set_online_order_warehouse",
+	},
+	"Website Item": {
+		"validate": "retail_store.storefront.default_thumbnail",
 	},
 	"Customer": {
 		"before_validate": "retail_store.setup.company.fill_customer_defaults",

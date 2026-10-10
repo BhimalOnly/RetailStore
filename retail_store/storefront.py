@@ -99,3 +99,65 @@ def shopper_login_url(context):
 	the partials fall back to /login, so nothing ever links to the shopper page."""
 	if store_is_on():
 		context.rs_login_url = SHOPPER_LOGIN
+
+
+def default_thumbnail(doc, method=None):
+	"""Website Item validate: a thumbnail for the search suggestions and cards.
+
+	Webshop only builds a thumbnail for images stored as File records; a photo given as a plain URL
+	(/assets/... as the demo photos are, or an external link) leaves `thumbnail` empty, and the search
+	dropdown then shows its grey placeholder icon for an item that has a real photo. Reuse the image."""
+	if doc.get("website_image") and not doc.get("thumbnail"):
+		doc.thumbnail = doc.website_image
+
+
+NO_MATCH = "__no_match__"
+
+
+def _items_with_attributes(attributes):
+	"""Website Item codes whose variants (or the item itself) carry EVERY selected attribute value.
+
+	Webshop's own attribute filter looks for *published Items* carrying the attribute. A variant shop
+	publishes only the template (the variants are not on the website), and the template's own
+	attribute rows are empty, so every attribute filter came back with zero products. Resolve it
+	through the variants instead: a template matches when a single variant satisfies all selected
+	attributes (White AND 42 means a White size-42 variant, not "some white one and some 42 one")."""
+	per_attribute = []
+	for attribute, values in attributes.items():
+		values = values if isinstance(values, list) else [values]
+		if not values:
+			continue
+		rows = frappe.get_all(
+			"Item Variant Attribute",
+			filters={"attribute": attribute, "attribute_value": ["in", values], "parenttype": "Item"},
+			pluck="parent",
+		)
+		per_attribute.append(set(rows))
+	if not per_attribute:
+		return None
+	matching = set.intersection(*per_attribute)
+	if not matching:
+		return set()
+	items = frappe.get_all("Item", filters={"name": ["in", list(matching)], "disabled": 0}, fields=["name", "variant_of"])
+	return {item.variant_of or item.name for item in items}
+
+
+@frappe.whitelist(allow_guest=True)
+def get_product_filter_data(query_args=None):
+	"""override of webshop.webshop.api.get_product_filter_data: same answer, but attribute filters
+	are resolved through the variants (see _items_with_attributes) and handed on as an item_code filter."""
+	if isinstance(query_args, str):
+		query_args = frappe.parse_json(query_args)
+	query_args = frappe._dict(query_args or {})
+	attributes = frappe.parse_json(query_args.get("attribute_filters")) or {}
+	if attributes:
+		codes = _items_with_attributes(attributes)
+		field_filters = frappe.parse_json(query_args.get("field_filters")) or {}
+		if codes is not None:
+			field_filters["item_code"] = sorted(codes) or [NO_MATCH]
+		query_args["field_filters"] = field_filters
+		query_args["attribute_filters"] = {}
+
+	from webshop.webshop.api import get_product_filter_data as webshop_get_product_filter_data
+
+	return webshop_get_product_filter_data(query_args)
