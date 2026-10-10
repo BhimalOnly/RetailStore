@@ -174,7 +174,7 @@ with sync_playwright() as p:
 		q = urllib.parse.quote
 		cart_quotes = [
 			x["name"]
-			for x in (api(admin, "/api/resource/Quotation?filters=" + q(json.dumps([["order_type", "=", "Shopping Cart"]])) + "&fields=" + q(json.dumps(["name", "docstatus"]))) or [])
+			for x in (api(admin, "/api/resource/Quotation?filters=" + q(json.dumps([["order_type", "=", "Shopping Cart"], ["docstatus", "=", 0]])) + "&limit_page_length=0&fields=" + q(json.dumps(["name", "docstatus"]))) or [])
 		]
 		# ERPNext keeps a cancelled document linked to its reversal ledger entries, so it cannot be
 		# deleted: cancelled IS the clean end state (purge: retail_store.demo.purge_cancelled_test_orders)

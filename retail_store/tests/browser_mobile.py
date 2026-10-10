@@ -6,6 +6,8 @@ pointed at an empty warehouse for a moment and ALWAYS restored. Playwright as in
 """
 import json
 import os
+import shutil
+import subprocess
 import sys
 
 from playwright.sync_api import sync_playwright
@@ -15,12 +17,21 @@ OUT = "shots/mobile"
 os.makedirs(OUT, exist_ok=True)
 PHONE = {"width": 390, "height": 844}
 OOS_ITEM, OOS_ROUTE, MAIN_WH, EMPTY_WH = "WEB-ITM-0004", "demo-indian-wear/demo-mens-kurta-pajama-j8lny", "DEMO Main Warehouse - DRC", "Stores - DRC"
+BENCH = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", ".."))
 results = []
 
 
 def check(name, ok, detail=""):
 	results.append(bool(ok))
 	print(("PASS " if ok else "FAIL ") + name + (f"  [{detail}]" if detail and not ok else ""))
+
+
+def restore_demo_photos():
+	"""Saving a Website Item over REST (to empty its warehouse) blanks a website_image that is a plain
+	/assets URL, as the demo photos are (webshop keeps only images that are File records). Put them back."""
+	if shutil.which("bench"):
+		subprocess.run(["bench", "--site", "retail.localhost", "execute", "retail_store.demo.apply_demo_images"], cwd=BENCH, capture_output=True)
+		subprocess.run(["bench", "--site", "retail.localhost", "execute", "retail_store.setup.capabilities.backfill_thumbnails"], cwd=BENCH, capture_output=True)
 
 
 def overflow(page):
@@ -97,6 +108,7 @@ with sync_playwright() as p:
 		page.screenshot(path=f"{OUT}/out-of-stock-list-390.png", full_page=True)
 	finally:
 		check("out of stock: warehouse restored", put(MAIN_WH).ok)
+		restore_demo_photos()
 	check("no uncaught JS errors", not bad, "; ".join(bad[:3]))
 	br.close()
 

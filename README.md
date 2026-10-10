@@ -421,6 +421,28 @@ The audit of the Online Store found it could not onboard a real customer. What c
   *New* badge (the listing payload carries no creation date and the cards are built in JS, so it needs
   Python + JS, and on a freshly loaded catalogue every item would be "new") and a *second image on
   hover* (cards receive only `website_image`; no Website Item has a slideshow).
+* **Shopping UI** (`public/js/shop_ui.js`, `tests/browser_shop_ui.py`, 65 checks, desktop + phone; shots in
+  `shots/shop_ui/`). **Variant swatches** on grid cards (real colour/size values, colour circles painted
+  in the colour, sizes as chips, only on variant templates), a **quick-view modal** (bottom sheet on a
+  phone: image, name, price, stock, option pickers, quantity, Add to cart) and a **cart drawer** that
+  slides in after any Add to cart without a page reload (lines, quantity +/-, remove, subtotal,
+  Checkout / View cart; the navbar cart icon opens it too; guests are still sent to `/account/login`).
+  Everything real goes through Webshop's endpoints: `update_cart`, `get_cart_quotation`,
+  `variant_selector.get_next_attribute_and_values`, and `get_attributes_and_values` (batched for a page
+  of cards by `storefront.get_card_variants`). The script loads before Webshop's bundle, so it wraps
+  `frappe.call` to learn the listing's products and to notice a successful add. Choices: a card swatch
+  opens quick view pre-selected rather than re-pricing the card; one photo per item (no gallery).
+  **Three Webshop gaps found and fixed in our app** (`override_whitelisted_methods`, nothing edited in
+  webshop): (1) the variant picker's `available_qty` was 0 for every variant, because it reads the
+  VARIANT's Website Item, which a template-only shop does not have, so every variant looked out of stock;
+  (2) `update_cart` with quantity 0 on the last line crashed (HTTP 500, rolled back, line stayed), because
+  it returns `quotation.name` for a quotation it just deleted; (3) `get_cart_quotation` is wrapped only to
+  add server-formatted amounts, so the drawer prints "Rs 2,700.00" like the rest of the store.
+  **Test hygiene:** saving a Website Item over REST (the tests do it to empty a warehouse) blanks a
+  `website_image` that is a plain `/assets/...` URL, as the demo photos are; real client photos are File
+  records and unaffected. The tests re-apply the demo photos afterwards (`apply_demo_images`).
+  Not built: a multi-image gallery (one photo per item). On a phone the navbar cart icon lives inside the
+  hamburger menu (stock Webshop), and is hidden while the cart is empty.
 * Not done: a stock empty white card under every product page, the material card, bundles.
 
 Gaps this testing found and fixed (each would have hit a real customer):

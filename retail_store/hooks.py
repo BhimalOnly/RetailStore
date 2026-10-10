@@ -27,8 +27,11 @@ add_to_apps_screen = [
 # so a Desk theme app can be added later without conflict (turn off
 # "Apply Brand Colours to Desk" in Retail Store Settings if the theme app owns colours).
 # Public site (storefront/cart/orders) brand skin, driven by the per-site brand colours
-web_include_css = "/assets/retail_store/css/storefront.css?v=20"
-web_include_js = "/assets/retail_store/js/storefront.js?v=3"
+web_include_css = "/assets/retail_store/css/storefront.css?v=21"
+web_include_js = [
+	"/assets/retail_store/js/storefront.js?v=3",
+	"/assets/retail_store/js/shop_ui.js?v=3",
+]
 # POS item cards + cart restyle (visual only, token-driven; loads after solvronix_desk per apps.txt)
 app_include_css = "/assets/retail_store/css/pos_restyle.css?v=3"
 app_include_js = ["/assets/retail_store/js/retail_store.js", "/assets/retail_store/js/landing.js"]
@@ -39,6 +42,11 @@ page_js = {"point-of-sale": "public/js/pos_variant_picker.js"}
 override_whitelisted_methods = {
 	# Attribute filters (colour, size) on a variant shop: see storefront._items_with_attributes
 	"webshop.webshop.api.get_product_filter_data": "retail_store.storefront.get_product_filter_data",
+	"webshop.webshop.shopping_cart.cart.get_cart_quotation": "retail_store.storefront.get_cart_quotation",
+	# removing the last cart line crashes webshop's update_cart (see storefront.update_cart)
+	"webshop.webshop.shopping_cart.cart.update_cart": "retail_store.storefront.update_cart",
+	# ...and the variant picker's stock for a variant (webshop reads a Website Item the variant lacks)
+	"webshop.webshop.variant_selector.utils.get_next_attribute_and_values": "retail_store.storefront.get_next_attribute_and_values",
 	"erpnext.selling.page.point_of_sale.point_of_sale.get_items": "retail_store.pos_variants.get_items",
 	# Refuse (403) workspaces the user's roles don't allow, not just hide them.
 	"frappe.client.get_value": "retail_store.permissions.get_value",

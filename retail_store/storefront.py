@@ -161,3 +161,76 @@ def get_product_filter_data(query_args=None):
 	from webshop.webshop.api import get_product_filter_data as webshop_get_product_filter_data
 
 	return webshop_get_product_filter_data(query_args)
+
+
+@frappe.whitelist(allow_guest=True)
+def get_card_variants(item_codes):
+	"""Colour/size options for the variant templates on a product grid (swatches, quick view).
+
+	One call for a whole page of cards. Each template's options come from webshop's own
+	variant_selector.get_attributes_and_values, the function behind the product page's picker, so the
+	values are exactly the ones that exist as real variants, in the order the Item Attribute defines.
+	Only published templates are answered for (this is open to guests)."""
+	from webshop.webshop.variant_selector.utils import get_attributes_and_values
+
+	codes = frappe.parse_json(item_codes) or []
+	published = set(
+		frappe.get_all("Website Item", filters={"item_code": ["in", codes[:60]], "published": 1, "has_variants": 1}, pluck="item_code")
+	)
+	out = {}
+	for code in codes[:60]:
+		if code in published:
+			out[code] = [{"attribute": a["attribute"], "values": a["values"]} for a in get_attributes_and_values(code) if a.get("values")]
+	return out
+
+
+@frappe.whitelist(allow_guest=True)
+def get_next_attribute_and_values(item_code, selected_attributes):
+	"""override of webshop's variant_selector.get_next_attribute_and_values: correct stock for a variant.
+
+	It computes `available_qty` from the Website Item of the matched VARIANT's warehouse, but a variant
+	shop publishes only the template, so a variant with 60 units in the website warehouse came back as 0
+	("out of stock") from the picker. webshop's own get_web_item_qty_in_stock already falls back to the
+	template's warehouse for a variant (the cards and the cart use it), so reuse that for the match."""
+	from webshop.webshop.variant_selector.utils import get_next_attribute_and_values as webshop_next
+	from webshop.webshop.utils.product import get_web_item_qty_in_stock
+
+	result = webshop_next(item_code, selected_attributes)
+	matched = result.get("exact_match") or []
+	if len(matched) == 1:
+		result["available_qty"] = get_web_item_qty_in_stock(matched[0], "website_warehouse").stock_qty
+	return result
+
+
+@frappe.whitelist()
+def get_cart_quotation(doc=None):
+	"""override of webshop's get_cart_quotation, same answer plus the amounts formatted the way the
+	cart page prints them ("Rs 2,700.00"), so the cart drawer matches the rest of the store."""
+	from webshop.webshop.shopping_cart.cart import get_cart_quotation as webshop_cart
+
+	result = webshop_cart(doc)
+	quotation = result["doc"]
+	result["formatted"] = {
+		"total": quotation.get_formatted("total"),
+		"lines": {row.item_code: {"amount": row.get_formatted("amount"), "rate": row.get_formatted("rate")} for row in quotation.get("items", [])},
+	}
+	return result
+
+
+@frappe.whitelist()
+def update_cart(item_code, qty, additional_notes=None, with_items=False):
+	"""override of webshop's update_cart: removing the LAST line no longer crashes.
+
+	Webshop deletes an emptied cart Quotation and then returns {"name": quotation.name} for a
+	quotation it has just set to None: AttributeError, HTTP 500, and the request rolls back, so the line
+	stays in the cart. (Its cart page avoids this only because it always asks for the rendered cart, with
+	with_items.) The delete has already succeeded by then, so answer for that one case and re-raise
+	anything else."""
+	from webshop.webshop.shopping_cart.cart import update_cart as webshop_update_cart
+
+	try:
+		return webshop_update_cart(item_code, qty, additional_notes, with_items)
+	except AttributeError:
+		if frappe.utils.flt(qty) == 0 and not frappe.utils.cint(with_items):
+			return {"name": None}
+		raise
