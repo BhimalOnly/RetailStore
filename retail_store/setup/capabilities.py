@@ -94,6 +94,10 @@ def apply_capabilities(settings=None):
 		frappe.db.set_single_value("Webshop Settings", "enabled", 1)
 		setup_webshop_defaults()
 
+	from retail_store.portal_access import apply_portal_menu
+
+	apply_portal_menu()
+
 	_sync_module_profile(sorted(set(blocked)))
 	from retail_store.workspace_access import apply_workspace_access
 
@@ -137,12 +141,22 @@ def setup_webshop_defaults():
 			ws.payment_gateway_account = account
 			ws.enable_checkout = 1
 			changed = True
+	# Guests who press Add to Cart go to the SHOPPER login (/account/login), not Solvronix's staff /login
+	if not ws.redirect_on_action:
+		ws.redirect_on_action = "/account/login"
+		changed = True
 	if changed:
 		ws.flags.ignore_permissions = True
 		ws.save()
-	# The public home page is the shop, not the login screen (only while no home page is chosen)
+	# People who sign up themselves get NO roles unless Portal Settings names a default one, and the
+	# "Customer" role is what lets them read their own Customer record (without it their own order
+	# confirmation page says "Not Permitted" and the portal sidebar is empty). Only while blank.
+	if frappe.db.exists("Role", "Customer") and not frappe.db.get_single_value("Portal Settings", "default_role"):
+		frappe.db.set_single_value("Portal Settings", "default_role", "Customer")
+	# The public home page is the store front page (banner, categories, new arrivals), not the login
+	# screen (only while no home page is chosen; "all-products" stays available as a choice)
 	if not frappe.db.get_single_value("Website Settings", "home_page"):
-		frappe.db.set_single_value("Website Settings", "home_page", "all-products")
+		frappe.db.set_single_value("Website Settings", "home_page", "store-home")
 
 
 def _ensure_offline_gateway_account(company):

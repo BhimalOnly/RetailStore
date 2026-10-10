@@ -24,6 +24,10 @@
   "brand_color",
   "accent_color",
   "apply_brand_to_desk",
+  "storefront_section",
+  "storefront_headline",
+  "storefront_tagline",
+  "storefront_hero_image",
   "capabilities_tab",
   "core_section",
   "enable_loyalty",
@@ -103,6 +107,33 @@
    "default": "1",
    "description": "Maps the brand colour onto Desk's primary colour. Turn this off if a Desk theme app is installed and should own the colours.",
    "permlevel": 1
+  },
+  {
+   "permlevel": 1,
+   "fieldname": "storefront_section",
+   "fieldtype": "Section Break",
+   "label": "Storefront Home Page"
+  },
+  {
+   "permlevel": 1,
+   "fieldname": "storefront_headline",
+   "fieldtype": "Data",
+   "label": "Headline",
+   "description": "Large text on the home page banner, e.g. 'Made for everyday'."
+  },
+  {
+   "permlevel": 1,
+   "fieldname": "storefront_tagline",
+   "fieldtype": "Small Text",
+   "label": "Tagline",
+   "description": "One or two sentences under the headline."
+  },
+  {
+   "permlevel": 1,
+   "fieldname": "storefront_hero_image",
+   "fieldtype": "Attach Image",
+   "label": "Banner Image",
+   "description": "Wide photo behind the headline (optional; a brand-coloured band is used without one)."
   },
   {
    "fieldname": "capabilities_tab",

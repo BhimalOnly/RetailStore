@@ -125,6 +125,11 @@ def _item_groups():
 	for name in ITEM_GROUPS:
 		if not frappe.db.exists("Item Group", name):
 			frappe.get_doc({"doctype": "Item Group", "item_group_name": name, "parent_item_group": parent}).insert()
+		# a web route makes the group a category page the storefront home can link to
+		group = frappe.get_doc("Item Group", name)
+		if not group.route or not group.show_in_website:
+			group.show_in_website = 1
+			group.save(ignore_permissions=True)
 
 
 def _attributes():
@@ -707,5 +712,40 @@ def purge_cancelled_test_orders():
 				frappe.delete_doc(doctype, name, force=True, ignore_permissions=True)
 				_purge_ledgers(doctype, name)
 				removed.append((doctype, name))
+	frappe.db.commit()
+	return removed
+
+
+def purge_signup_test_customers():
+	"""Remove what tests/browser_shopper.py leaves behind: its sign-up users ('signup-test-*@demo.example')
+	and the Customer, Contact, Address, Quotation and (cancelled) Sales Order each one created.
+
+	A cancelled order stays linked to its Customer and ledger entries, so the browser test can only
+	cancel it; this uses the same forced delete + ledger purge as purge_cancelled_test_orders.
+	    bench --site retail.localhost execute retail_store.demo.purge_signup_test_customers
+	"""
+	frappe.flags.ignore_links = True
+	users = frappe.get_all("User", filters={"name": ["like", "signup-test-%@demo.example"]}, pluck="name")
+	customers = set()
+	if users:
+		customers |= set(frappe.get_all("Portal User", filters={"user": ["in", users], "parenttype": "Customer"}, pluck="parent"))
+	removed = {"customers": len(customers), "users": len(users)}
+	for customer in customers:
+		for dt in ("Sales Order", "Quotation"):
+			for name in frappe.get_all(dt, filters={"customer_name": frappe.db.get_value("Customer", customer, "customer_name"), "party_name": customer} if dt == "Quotation" else {"customer": customer}, pluck="name"):
+				if frappe.db.get_value(dt, name, "docstatus") == 1:
+					doc = frappe.get_doc(dt, name)
+					doc.flags.ignore_links = True
+					doc.cancel()
+				frappe.delete_doc(dt, name, force=True, ignore_permissions=True)
+				_purge_ledgers(dt, name)
+		for dt in ("Address", "Contact"):
+			for name in frappe.get_all("Dynamic Link", filters={"link_doctype": "Customer", "link_name": customer, "parenttype": dt}, pluck="parent"):
+				frappe.delete_doc(dt, name, force=True, ignore_permissions=True)
+		for name in frappe.get_all("Loyalty Point Entry", filters={"customer": customer}, pluck="name"):
+			frappe.delete_doc("Loyalty Point Entry", name, force=True, ignore_permissions=True)
+		frappe.delete_doc("Customer", customer, force=True, ignore_permissions=True)
+	for user in users:
+		frappe.delete_doc("User", user, force=True, ignore_permissions=True)
 	frappe.db.commit()
 	return removed

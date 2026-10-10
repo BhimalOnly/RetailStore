@@ -69,7 +69,9 @@ with sync_playwright() as p:
 	page = g.new_page()
 	page.goto(B + "/")
 	page.wait_for_timeout(3500)
-	check("Home page is the shop, not the login screen", page.title() == "All Products", page.title())
+	# the home page is the store front (banner + products) or, if a client chose it, the product list
+	is_shop = page.locator(".rs-hero").count() == 1 or page.title() == "All Products"
+	check("Home page is the shop, not the login screen", is_shop and not page.evaluate("document.body.classList.contains('sl-split')"), page.title())
 	check("Navbar shows the brand logo", bool(page.evaluate("document.querySelector('nav.navbar .navbar-brand img')?.src")))
 	footer = page.evaluate("document.querySelector('footer')?.innerText||''")
 	check("Footer carries the brand, not 'Powered by ERPNext'", "ERPNext" not in footer and footer.strip() != "", footer)

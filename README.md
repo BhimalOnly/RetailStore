@@ -345,6 +345,48 @@ a site by overriding `--rs-surface`, `--rs-paper`, `--rs-ink`, `--rs-line`, `--r
   files stay in the app, so also delete `public/images/demo/` when cloning this app for a client.
 * The "material card" callout on product pages needs template markup and content, not CSS, and is not done.
 
+#### Shopper identity: sign-up, sign-in, front page, portal
+
+The audit of the Online Store found it could not onboard a real customer. What changed:
+
+* **Sign-up works, and is email-verified.** `Website Settings > Disable Signup` is off. Frappe's sign-up
+  asks for name and email and emails a **set-password link**, so the site needs an outgoing **Email
+  Account** (default outgoing). Without one a new customer is told "ask your administrator to verify
+  your sign-up" and is stuck. **Per client: add their SMTP details before go-live.** On this dev site a
+  local sink stands in (`tests/mail_sink.py`; Email Account "Retail Dev Outgoing" -> 127.0.0.1:1025).
+  Dev sites also have no `host_name`, so the emailed link points at `http://<site>` without the port.
+* **New customers get the `Customer` role** (`Portal Settings > Default Role`, set by
+  `setup_webshop_defaults` while blank). Without it a self-signed-up user had no roles, could not read
+  their own Customer record and got "Not Permitted" on their own order confirmation. The demo shopper
+  only worked because the seeder gave it the role by hand, which is why browser_store never saw it.
+* **Two sign-in URLs.** `/login` is Solvronix Desk's staff page and is untouched. Shoppers have their
+  own page, **`/account/login`** (`www/account/login`: Frappe's login controller, same form and sign-up
+  flow, plus the `rs-shop-login` body class the storefront CSS keys on). Three things point shoppers
+  there, none of which edit webshop or frappe: (1) Webshop Settings > *Redirect on Action*, which the
+  guest Add to Cart / Wishlist use, is set to `/account/login` while blank; (2) retail_store ships its
+  own copies of Frappe's navbar partials (`templates/includes/navbar/`, retail_store loads last so they
+  win) whose Login link uses `rs_login_url`, set by `storefront.shopper_login_url`; (3) a `page_renderer`
+  (`portal_access.GuestToShopperLogin`) sends a signed-out visitor on /orders, /invoices, /shipments,
+  /addresses or /me to `/account/login?redirect-to=...`. With the Online Store off none of this is
+  active: `rs_login_url` is unset, nothing links to the page, and `/account/login` itself redirects to
+  `/login`. The staff page still shows Solvronix's own "Create account" link; that is Solvronix's.
+* **Front page** (`www/store-home`, the site Home Page while the Online Store is on): banner, "Shop by
+  category", "New arrivals". Headline, tagline and banner photo are per-client fields (Retail Store
+  Settings > Branding > Storefront Home Page); with no photo the banner is a brand-coloured band.
+  Category tiles link only to Item Groups that are published with a route (the demo groups are).
+* **Portal pages follow the capabilities** (`portal_access.py`, one table for sidebar AND access). A
+  customer always gets Orders, Invoices, Shipments, Addresses. Quotations need CRM, Issues need Support,
+  Projects/Timesheets need Projects, and the supplier pages need Buying and the Supplier role;
+  Material Request is never shown. Disabling a Portal Menu Item only hid the link: the pages still
+  opened (and a customer could file a support issue nobody watches), so a `before_request` hook now 403s
+  a gated route for Website Users. Staff are unaffected.
+* Test: `tests/browser_shopper.py` (45 checks): the two sign-in URLs, front page, portal gates and the whole
+  new-customer journey (guest Add to Cart -> sign up -> email -> set password -> address -> Place
+  Order -> an order on their own Customer). It leaves one test Customer per run; clear with
+  `bench --site <site> execute retail_store.demo.purge_signup_test_customers`.
+* Not done: out-of-stock product page, search that filters on Enter, the empty Filters panel
+  (Webshop field/attribute filters are off), and mobile cart overflow (13px): the next storefront task.
+
 Gaps this testing found and fixed (each would have hit a real customer):
 
 * **Variants had no warehouse:** the cart reads the warehouse from the Website Item of the exact item bought,
@@ -476,6 +518,8 @@ python apps/retail_store/retail_store/tests/browser_pos_restyle.py
 # Online Store in a real browser (needs the webshop app + toggle on + demo data): a customer buys a
 # variant, stock reserves then deducts on delivery, branding on the public site; cancels what it creates
 python apps/retail_store/retail_store/tests/browser_store.py
+# new-customer journey + login routing + front page + portal gates (needs the dev mail sink, see the file)
+MAIL_OUT=/tmp/retail_mail python apps/retail_store/retail_store/tests/browser_shopper.py
 # CRM capability in a real browser (needs CRM switched on): Lead -> Opportunity -> Customer as
 # Store Owner, and that no other retail role can see or reach CRM; cleans up after itself
 python apps/retail_store/retail_store/tests/browser_crm.py

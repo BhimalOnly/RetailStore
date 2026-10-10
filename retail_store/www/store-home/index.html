@@ -1,0 +1,45 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="rs-home">
+	<section class="rs-hero{% if rs_hero %} has-image{% endif %}"{% if rs_hero %} style="background-image: url('{{ rs_hero }}')"{% endif %}>
+		<div class="rs-hero-inner">
+			<h1>{{ rs_headline }}</h1>
+			{% if rs_tagline %}<p>{{ rs_tagline }}</p>{% endif %}
+			<a class="btn btn-primary rs-hero-cta" href="/all-products">{{ _("Shop all") }}</a>
+		</div>
+	</section>
+
+	{% if rs_categories %}
+	<section class="rs-section">
+		<h2>{{ _("Shop by category") }}</h2>
+		<div class="rs-cats">
+			{% for c in rs_categories %}
+			<a class="rs-cat" href="{{ c.route }}">
+				<span class="rs-cat-img">{% if c.image %}<img src="{{ c.image }}" alt="{{ c.title }}" loading="lazy">{% endif %}</span>
+				<span class="rs-cat-name">{{ c.title }}</span>
+			</a>
+			{% endfor %}
+		</div>
+	</section>
+	{% endif %}
+
+	<section class="rs-section">
+		<h2>{{ _("New arrivals") }}</h2>
+		{% if rs_has_products %}
+		<div class="rs-grid">
+			{% for p in rs_new %}
+			<a class="rs-prod" href="{{ p.route }}">
+				<span class="rs-prod-img">{% if p.image %}<img src="{{ p.image }}" alt="{{ p.title }}" loading="lazy">{% else %}<span class="rs-prod-abbr">{{ p.abbr }}</span>{% endif %}</span>
+				<span class="rs-prod-title">{{ p.title }}</span>
+				{% if p.price %}<span class="rs-prod-price">{{ p.price }}</span>{% endif %}
+			</a>
+			{% endfor %}
+		</div>
+		<p class="rs-more"><a href="/all-products">{{ _("View all products") }} &rarr;</a></p>
+		{% else %}
+		<p class="rs-empty">{{ _("Products are coming soon.") }}</p>
+		{% endif %}
+	</section>
+</div>
+{% endblock %}

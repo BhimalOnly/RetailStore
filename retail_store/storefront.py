@@ -81,3 +81,21 @@ def hide_pay_link_for_offline_gateway(context):
 	account = frappe.get_cached_doc("Webshop Settings").payment_gateway_account
 	if account and frappe.db.get_value("Payment Gateway Account", account, "payment_gateway") == "Pay in Store or on Delivery":
 		context.enabled_checkout = 0
+
+
+SHOPPER_LOGIN = "/account/login"
+
+
+def store_is_on():
+	return "webshop" in frappe.get_installed_apps() and bool(frappe.get_cached_doc("Webshop Settings").enabled)
+
+
+def shopper_login_url(context):
+	"""update_website_context: where the storefront's "Login" link points.
+
+	Staff keep /login (Solvronix's page, untouched). Shoppers get their own page at /account/login.
+	Frappe's navbar partials hard-code "/login", so retail_store ships copies of them (templates/
+	includes/navbar/) that use rs_login_url instead; with the Online Store off this stays unset and
+	the partials fall back to /login, so nothing ever links to the shopper page."""
+	if store_is_on():
+		context.rs_login_url = SHOPPER_LOGIN
