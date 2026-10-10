@@ -413,6 +413,14 @@ The audit of the Online Store found it could not onboard a real customer. What c
   42 means a white size-42 variant), then hands the codes on to Webshop as an item filter.
   Not natively available in Webshop, so not offered: **price range** and **in-stock only** filters (its
   only numeric filter is a discount range driven by Pricing Rules). Adding them means a custom filter.
+* **Polish** (`tests/browser_polish.py`, 16 checks, desktop + phone; shots in `shots/polish/`), all in
+  `storefront.css`, no JS. The nav is now **sticky**, translucent with a backdrop blur (an open phone
+  menu stays solid). A **Sale badge** sits on a product card whenever Webshop's own price line shows a
+  discount (`.striked-price`, i.e. a live Pricing Rule), via `:has()`; it disappears with the discount.
+  The test creates a temporary 20% Pricing Rule and always deletes it. **Not built, on purpose:** a
+  *New* badge (the listing payload carries no creation date and the cards are built in JS, so it needs
+  Python + JS, and on a freshly loaded catalogue every item would be "new") and a *second image on
+  hover* (cards receive only `website_image`; no Website Item has a slideshow).
 * Not done: a stock empty white card under every product page, the material card, bundles.
 
 Gaps this testing found and fixed (each would have hit a real customer):
