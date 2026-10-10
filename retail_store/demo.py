@@ -20,7 +20,7 @@ from retail_store.setup.company import get_default_company
 DEMO_PASSWORD = "RetailDemo#2026"
 EMAIL_DOMAIN = "demo.example"
 
-ITEM_GROUPS = ["DEMO Footwear", "DEMO Apparel"]
+ITEM_GROUPS = ["DEMO Footwear", "DEMO Apparel", "DEMO Indian Wear"]
 
 ATTRIBUTES = {
 	"DEMO Shoe Size": [str(s) for s in range(36, 47)],
@@ -54,7 +54,24 @@ TEMPLATES = [
 # A plain (non-variant) item, so the POS shows a mixed catalogue.
 PLAIN_ITEMS = [
 	{"item_code": "DEMO-TOTE", "item_name": "DEMO Canvas Tote Bag", "item_group": "DEMO Apparel", "rate": 350, "valuation_rate": 120},
+	# Indian wear, one per audience, so the storefront shows a realistic mixed catalogue
+	{"item_code": "DEMO-KURTA-MEN", "item_name": "DEMO Men's Kurta Pajama", "item_group": "DEMO Indian Wear", "rate": 1800, "valuation_rate": 700},
+	{"item_code": "DEMO-SAREE-WOMEN", "item_name": "DEMO Women's Saree", "item_group": "DEMO Indian Wear", "rate": 3200, "valuation_rate": 1300},
+	{"item_code": "DEMO-ETHNIC-KIDS", "item_name": "DEMO Kids' Ethnic Set", "item_group": "DEMO Indian Wear", "rate": 1200, "valuation_rate": 450},
 ]
+
+# Product photos shipped with the app (public/images/demo/). Item code -> file. A file that is not
+# there yet is skipped, so the demo data works with or without photos. Add credit lines for any
+# photo that asks for one to public/images/demo/CREDITS.md.
+DEMO_IMAGE_DIR = "/assets/retail_store/images/demo/"
+DEMO_IMAGES = {
+	"DEMO-SNEAKER": "sneaker.jpg",
+	"DEMO-TEE": "tee.jpg",
+	"DEMO-TOTE": "tote.jpg",
+	"DEMO-KURTA-MEN": "kurta-men.jpg",
+	"DEMO-SAREE-WOMEN": "saree-women.jpg",
+	"DEMO-ETHNIC-KIDS": "ethnic-kids.jpg",
+}
 
 MAIN = "DEMO Main Warehouse"
 STORES = ["DEMO Store Downtown", "DEMO Store Mall", "DEMO Store Airport"]
@@ -95,6 +112,7 @@ def create_demo_data():
 	_pos_profiles(company, warehouses, price_list)
 	_opening_stock(company, warehouses, variants)
 	_users(warehouses)
+	apply_demo_images()
 	publish_demo_website_items()
 	create_demo_shopper()
 	frappe.db.commit()
@@ -544,7 +562,33 @@ WEBSITE_DEMO_ITEMS = {
 	"DEMO-SNEAKER": "Everyday sneaker with cushioned sole. Choose your size and colour.",
 	"DEMO-TEE": "Soft cotton tee. Choose your size and colour.",
 	"DEMO-TOTE": "Canvas tote bag.",
+	"DEMO-KURTA-MEN": "Cotton kurta pajama set for men.",
+	"DEMO-SAREE-WOMEN": "Woven saree with a soft drape.",
+	"DEMO-ETHNIC-KIDS": "Festive ethnic set for children.",
 }
+
+
+def apply_demo_images():
+	"""Point each demo Item (and its variants) at its shipped photo. Idempotent; skips photos not on disk.
+	    bench --site retail.localhost execute retail_store.demo.apply_demo_images
+	"""
+	import os
+
+	folder = frappe.get_app_path("retail_store", "public", "images", "demo")
+	done = []
+	for code, filename in DEMO_IMAGES.items():
+		if not os.path.exists(os.path.join(folder, filename)) or not frappe.db.exists("Item", code):
+			continue
+		url = DEMO_IMAGE_DIR + filename
+		for name in [code] + frappe.get_all("Item", filters={"variant_of": code}, pluck="name"):
+			if frappe.db.get_value("Item", name, "image") != url:
+				frappe.db.set_value("Item", name, "image", url)
+		for site_item in frappe.get_all("Website Item", filters={"item_code": code}, pluck="name") if frappe.db.exists("DocType", "Website Item") else []:
+			if frappe.db.get_value("Website Item", site_item, "website_image") != url:
+				frappe.db.set_value("Website Item", site_item, "website_image", url)
+		done.append(code)
+	frappe.db.commit()
+	return done
 
 
 def publish_demo_website_items():
@@ -576,6 +620,7 @@ def publish_demo_website_items():
 		doc.save()
 		made.append(name)
 	frappe.db.commit()
+	apply_demo_images()  # Website Items exist now, so their website_image can follow the Item photo
 	return made
 
 

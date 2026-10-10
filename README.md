@@ -322,6 +322,29 @@ buttons/links (`public/css/storefront.css`, driven by the per-site colours; the 
 left alone), the brand name in the footer instead of "Powered by ERPNext", and the shop as the home page.
 The logo is the same **square mark** used for Desk (README, Branding).
 
+**Storefront look:** `storefront.css` also gives the public site a calm, image-led look (visual language
+borrowed from Allbirds, no code reused): warm oatmeal page, white navbar with a hairline instead of a
+coloured bar, uppercase tracked product names on borderless image tiles, a serif product title, square
+corners, and paper-on-oatmeal cart panels. The client's brand colour stays on buttons and links only. Re-skin
+a site by overriding `--rs-surface`, `--rs-paper`, `--rs-ink`, `--rs-line`, `--rs-r`, `--rs-display`.
+
+* Public site only (`web_include_css`); the Desk and POS are untouched. Bump the `?v=` in `hooks.py` after
+  editing, then `bench --site <site> clear-cache`. The active Website Theme is stock `Standard` (no custom
+  theme record), and none should be added: it can conflict with hooks-loaded CSS.
+* Webshop markup it targets: `.item-card > .card` (grid), `.list-row` (list), `.product-image`,
+  `.product-details`. Webshop nests Bootstrap `.card` inside `.card` in the cart, so inner ones are flattened.
+* Button text is uppercased by CSS, so tests match it case-insensitively.
+* **Grid is the default view.** Webshop has no setting for it (it hard-codes `localStorage.product_view ||
+  "List View"`), so `public/js/storefront.js` seeds that key only when the shopper has never chosen; their own
+  list/grid choice is kept. Names are uppercase in both views.
+* **Demo photos** (`public/images/demo/`, wired by `retail_store.demo.apply_demo_images`, idempotent, skips
+  missing files) are stock placeholders used to check the look against real photography. Several do not match
+  their item names (e.g. the "Cotton Tee" and "Men's Kurta Pajama" images), the licence/credit for each was not
+  recorded, and the kids' photo shows identifiable children: **replace them all with the client's own product
+  photos, and do not leave these on a client's site.** `delete_demo_data` removes the demo Items but the image
+  files stay in the app, so also delete `public/images/demo/` when cloning this app for a client.
+* The "material card" callout on product pages needs template markup and content, not CSS, and is not done.
+
 Gaps this testing found and fixed (each would have hit a real customer):
 
 * **Variants had no warehouse:** the cart reads the warehouse from the Website Item of the exact item bought,

@@ -52,3 +52,156 @@ body:not(.sl-split) textarea:focus {
 	border-color: var(--rs-a);
 	box-shadow: 0 0 0 2px color-mix(in srgb, var(--rs-a) 25%, transparent);
 }
+
+/* ---- Storefront look: calm, image-led (visual language borrowed from Allbirds) ----------------
+   Warm near-neutral surfaces, graphite text, small corners, generous whitespace, product photography
+   carries the page. The client's own brand colour (--rs-brand / --rs-accent) is kept for buttons
+   and links only, never for large chrome. Override the four --rs-* tokens below to re-skin per site.
+   Public site only (web_include_css); the Desk is untouched. Markup: webshop's item-card / product-page. */
+body:not(.sl-split) {
+	--rs-surface: #f4f1ec;   /* oatmeal page / image tiles */
+	--rs-paper: #ffffff;
+	--rs-ink: #212121;       /* warm graphite, not pure black */
+	--rs-line: #e4dfd6;
+	--rs-r: 6px;
+	--rs-display: Georgia, "Times New Roman", serif;   /* reserved for product titles */
+	color: var(--rs-ink);
+}
+html body:not(.sl-split) { background: var(--rs-surface); }
+body:not(.sl-split) .page-content-wrapper,
+body:not(.sl-split) main.container {
+	background: transparent;
+}
+
+/* Navbar: quiet, white, hairline instead of a coloured bar */
+body:not(.sl-split) nav.navbar {
+	background: var(--rs-paper);
+	border-bottom: 1px solid var(--rs-line);
+}
+body:not(.sl-split) nav.navbar .nav-link {
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--rs-ink);
+}
+body:not(.sl-split) nav.navbar .nav-link:hover { color: var(--rs-b); }
+
+/* Breadcrumbs + headings */
+body:not(.sl-split) .breadcrumb { background: transparent; font-size: 13px; }
+body:not(.sl-split) h1, body:not(.sl-split) h2, body:not(.sl-split) h3 { color: var(--rs-ink); }
+
+/* Product grid: the image carries the design, no borders or shadows */
+body:not(.sl-split) .item-card .card {
+	background: transparent;
+	border: 0;
+	box-shadow: none;
+	border-radius: var(--rs-r);
+}
+body:not(.sl-split) .item-card .card-img-container {
+	background: var(--rs-surface);
+	border-radius: var(--rs-r);
+	overflow: hidden;
+	aspect-ratio: 1 / 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+body:not(.sl-split) .item-card .card-img-container a { display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; }
+body:not(.sl-split) .item-card .card-img-top,
+body:not(.sl-split) .item-card .card-img-container img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	transition: transform 0.25s ease;
+}
+body:not(.sl-split) .item-card:hover .card-img-container img { transform: scale(1.03); }
+body:not(.sl-split) .item-card .card-body { padding: 12px 2px 4px; }
+body:not(.sl-split) .item-card .product-title {
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--rs-ink);
+}
+body:not(.sl-split) .item-card .product-category,
+body:not(.sl-split) .product-code { color: #6b665e; font-size: 12px; }
+body:not(.sl-split) .item-card .product-price,
+body:not(.sl-split) .list-row .product-price { color: var(--rs-ink); font-weight: 700; font-size: 14px; }
+
+/* List view rows: flat, one hairline each */
+body:not(.sl-split) .list-row {
+	background: var(--rs-paper);
+	border: 1px solid var(--rs-line);
+	border-radius: var(--rs-r);
+	padding: 14px;
+}
+body:not(.sl-split) .list-row .list-image { background: var(--rs-surface); border: 0 !important; border-radius: var(--rs-r) !important; }
+
+/* Filters, search, view toggle */
+body:not(.sl-split) .toolbar .form-control {
+	border-radius: 999px;
+	border-color: var(--rs-line);
+	background: var(--rs-paper);
+}
+body:not(.sl-split) .toggle-container .btn { border-radius: var(--rs-r); }
+
+/* Product page: calm image tile + clean details panel */
+body:not(.sl-split) .product-container.item-main,
+body:not(.sl-split) .product-page-content { background: transparent; box-shadow: none; }
+body:not(.sl-split) .product-image {
+	background: var(--rs-surface);
+	border: 0 !important;
+	border-radius: var(--rs-r) !important;
+}
+body:not(.sl-split) .product-details .product-title,
+body:not(.sl-split) .product-details h2 {
+	font-family: var(--rs-display);
+	font-weight: 400;
+	font-size: 2rem;
+	letter-spacing: 0;
+}
+body:not(.sl-split) .product-details .product-price {
+	font-weight: 700;
+	color: var(--rs-ink);
+}
+
+/* Call-to-action buttons: the client's brand colour, squared and uppercase */
+body:not(.sl-split) .btn-primary,
+body:not(.sl-split) .btn-add-to-cart,
+body:not(.sl-split) .btn-add-to-cart-list {
+	border-radius: var(--rs-r);
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	font-weight: 700;
+}
+
+/* Cart / checkout panels: paper on oatmeal, small corners (webshop uses Bootstrap .card here) */
+body:not(.sl-split) .card,
+body:not(.sl-split) .frappe-card {
+	background: var(--rs-paper);
+	border: 1px solid var(--rs-line);
+	border-radius: var(--rs-r);
+	box-shadow: none;
+}
+
+/* Footer */
+body:not(.sl-split) footer.web-footer {
+	background: var(--rs-paper);
+	border-top: 1px solid var(--rs-line);
+}
+/* image placeholders (items without a photo) sit on the same warm tile */
+body:not(.sl-split) .item-card .card-img-top.no-image,
+body:not(.sl-split) .no-image-list,
+body:not(.sl-split) .product-image .no-image,
+body:not(.sl-split) .product-image .no-image-item { background: var(--rs-surface); color: #a39d92; }
+/* webshop nests a .card inside a .card (payment summary, address pickers): only the outer one is drawn */
+body:not(.sl-split) .card .card { border: 0; background: transparent; }
+/* list view: the title is a bare link with inline colour/weight, so it needs !important to match the grid names */
+body:not(.sl-split) .list-row .col-8 > a {
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	font-size: 13px;
+	font-weight: 700 !important;
+	color: var(--rs-ink) !important;
+}

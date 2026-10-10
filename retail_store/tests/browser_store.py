@@ -73,7 +73,8 @@ with sync_playwright() as p:
 	check("Navbar shows the brand logo", bool(page.evaluate("document.querySelector('nav.navbar .navbar-brand img')?.src")))
 	footer = page.evaluate("document.querySelector('footer')?.innerText||''")
 	check("Footer carries the brand, not 'Powered by ERPNext'", "ERPNext" not in footer and footer.strip() != "", footer)
-	check("Products list shows published items", all(n in page.evaluate("document.body.innerText") for n in ("DEMO Everyday Sneaker", "DEMO Cotton Tee")))
+	body_text = page.evaluate("document.body.innerText").lower()  # names are uppercased by CSS
+	check("Products list shows published items", all(n.lower() in body_text for n in ("DEMO Everyday Sneaker", "DEMO Cotton Tee")))
 	page.screenshot(path=f"{OUT}/store-1-home.png")
 	page.goto(B + "/login")
 	page.wait_for_timeout(2500)
@@ -89,7 +90,7 @@ with sync_playwright() as p:
 	login(ctx, "shopper@demo.example")
 	page.goto(B + "/all-products")
 	page.wait_for_timeout(3000)
-	page.locator("a[href*='demo-everyday-sneaker']").first.click()
+	page.locator("a[href*='demo-everyday-sneaker']:visible").first.click()  # grid is the default view; the list-view link is hidden
 	page.wait_for_timeout(3500)
 	page.get_by_role("button", name="Select Variant").click()
 	page.wait_for_timeout(1500)
@@ -106,7 +107,7 @@ with sync_playwright() as p:
 	page.wait_for_timeout(4500)
 	cart = page.evaluate("document.querySelector('.cart-container, .page-content, main')?.innerText||''")
 	check("Cart shows the variant at the Desk price with a total", VARIANT in cart and f"{price:,.2f}" in cart and "Grand Total" in cart, cart[:200])
-	check("Cart offers Place Order (checkout enabled)", "Place Order" in cart)
+	check("Cart offers Place Order (checkout enabled)", "place order" in cart.lower())  # button text is uppercased by CSS
 	page.screenshot(path=f"{OUT}/store-2-cart.png")
 	page.get_by_role("button", name="Place Order").click()
 	page.wait_for_timeout(6000)
