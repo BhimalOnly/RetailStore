@@ -1,0 +1,166 @@
+/* POS restyle: rounded item cards with pastel gradient tiles, stock pill, row-style cart,
+   bold checkout button. VISUAL ONLY: no markup or behaviour is changed, so the variant picker,
+   barcode bypass and permissions are untouched. Everything is scoped under .point-of-sale-app.
+   Colours come from Frappe v16 semantic tokens (--card-bg, --border-color, --control-bg,
+   --text-*, --btn-primary), so Solvronix Desk / Theme Studio and dark mode keep working. The
+   pastel tiles are translucent washes, so they sit correctly on both light and dark surfaces.
+   Dark mode: Frappe sets data-theme="light|dark" (resolved) beside data-theme-mode="automatic" on <html>;
+   the tokens follow it, so no dark-specific selectors are needed here.
+   Selectors use :not(#rs-pos) purely to out-rank ERPNext's deep stock selectors without !important. */
+
+.point-of-sale-app {
+	--rs-pos-radius: 14px;
+	--rs-pos-accent: var(--btn-primary, var(--primary, #0f4c5c));
+	--rs-pos-shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.08);
+	--rs-pos-shadow-hover: 0 6px 16px rgba(16, 24, 40, 0.12);
+}
+
+/* ---- Item cards ------------------------------------------------------------------------- */
+.point-of-sale-app:not(#rs-pos) .items-container.show-item-image > .item-wrapper {
+	background: var(--card-bg, var(--fg-color));
+	border: 1px solid var(--border-color);
+	border-radius: var(--rs-pos-radius);
+	box-shadow: var(--rs-pos-shadow);
+	overflow: hidden;
+	transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.point-of-sale-app:not(#rs-pos) .items-container.show-item-image > .item-wrapper:hover {
+	transform: translateY(-2px);
+	box-shadow: var(--rs-pos-shadow-hover);
+}
+
+/* Image / initials tile */
+.point-of-sale-app:not(#rs-pos) .item-wrapper .item-display {
+	border-radius: calc(var(--rs-pos-radius) - 4px);
+	margin: 8px 8px 0;
+}
+.point-of-sale-app:not(#rs-pos) .item-wrapper .item-display.abbr {
+	font-size: 1.9rem;
+	font-weight: 700;
+	letter-spacing: 0.02em;
+	color: var(--rs-tile-ink, var(--text-color));
+	background: linear-gradient(135deg, var(--rs-tile-a, #dbeafe), var(--rs-tile-b, #e9d5ff));
+}
+/* Soft pastel palette cycled across the grid (translucent so it works on light and dark) */
+.point-of-sale-app:not(#rs-pos) .items-container > .item-wrapper:nth-child(6n + 1) .item-display.abbr { --rs-tile-a: rgba(147, 197, 253, 0.55); --rs-tile-b: rgba(196, 181, 253, 0.55); }
+.point-of-sale-app:not(#rs-pos) .items-container > .item-wrapper:nth-child(6n + 2) .item-display.abbr { --rs-tile-a: rgba(134, 239, 172, 0.55); --rs-tile-b: rgba(153, 246, 228, 0.55); }
+.point-of-sale-app:not(#rs-pos) .items-container > .item-wrapper:nth-child(6n + 3) .item-display.abbr { --rs-tile-a: rgba(253, 186, 116, 0.55); --rs-tile-b: rgba(253, 164, 175, 0.55); }
+.point-of-sale-app:not(#rs-pos) .items-container > .item-wrapper:nth-child(6n + 4) .item-display.abbr { --rs-tile-a: rgba(249, 168, 212, 0.55); --rs-tile-b: rgba(216, 180, 254, 0.55); }
+.point-of-sale-app:not(#rs-pos) .items-container > .item-wrapper:nth-child(6n + 5) .item-display.abbr { --rs-tile-a: rgba(253, 224, 71, 0.5);  --rs-tile-b: rgba(253, 186, 116, 0.5); }
+.point-of-sale-app:not(#rs-pos) .items-container > .item-wrapper:nth-child(6n + 6) .item-display.abbr { --rs-tile-a: rgba(103, 232, 249, 0.5); --rs-tile-b: rgba(147, 197, 253, 0.5); }
+
+/* Stock-count pill, top-right */
+.point-of-sale-app:not(#rs-pos) .item-wrapper .item-qty-pill {
+	top: 4px;
+	right: 4px;
+	z-index: 1;
+}
+.point-of-sale-app:not(#rs-pos) .item-wrapper .item-qty-pill .indicator-pill {
+	border-radius: 999px;
+	padding: 2px 9px;
+	font-size: 11px;
+	font-weight: 600;
+	background: var(--card-bg, var(--fg-color));
+	box-shadow: var(--rs-pos-shadow);
+}
+
+/* Name + price */
+.point-of-sale-app:not(#rs-pos) .items-container.show-item-image > .item-wrapper > .item-detail {
+	padding: 8px 12px 10px;
+	gap: 2px;
+}
+.point-of-sale-app:not(#rs-pos) .items-container.show-item-image > .item-wrapper > .item-detail > .item-name {
+	font-weight: 600;
+	color: var(--text-color);
+}
+.point-of-sale-app:not(#rs-pos) .items-container.show-item-image > .item-wrapper > .item-detail > .item-rate {
+	font-weight: 700;
+	color: color-mix(in srgb, var(--rs-pos-accent) 70%, var(--text-color));
+}
+/* Our own "N options" badge on variant-grouped template cards */
+.point-of-sale-app:not(#rs-pos) .item-wrapper .rs-variant-badge {
+	font-size: 11px;
+	line-height: 1.2;
+}
+.point-of-sale-app:not(#rs-pos) .item-wrapper.rs-template-card {
+	border-color: color-mix(in srgb, var(--rs-pos-accent) 35%, var(--border-color));
+}
+
+/* ---- Cart ------------------------------------------------------------------------------- */
+.point-of-sale-app:not(#rs-pos) .cart-container {
+	border-radius: var(--rs-pos-radius);
+}
+.point-of-sale-app:not(#rs-pos) .cart-items-section > .cart-item-wrapper {
+	border: 1px solid transparent;
+	border-radius: 12px;
+	padding: 8px 10px;
+	gap: 10px;
+	transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+.point-of-sale-app:not(#rs-pos) .cart-items-section > .cart-item-wrapper:hover {
+	background-color: var(--control-bg);
+	border-color: var(--border-color);
+}
+.point-of-sale-app:not(#rs-pos) .cart-items-section > .seperator {
+	display: none; /* rows are separated by spacing and hover, not hairlines */
+}
+.point-of-sale-app:not(#rs-pos) .cart-items-section > .cart-item-wrapper > .item-image {
+	width: 2.75rem;
+	height: 2.75rem;
+	border-radius: 10px;
+	overflow: hidden;
+	flex-shrink: 0;
+}
+.point-of-sale-app:not(#rs-pos) .cart-items-section > .cart-item-wrapper > .item-image.item-abbr {
+	font-weight: 700;
+	color: var(--text-color);
+	background: linear-gradient(135deg, rgba(147, 197, 253, 0.55), rgba(196, 181, 253, 0.55));
+}
+.point-of-sale-app:not(#rs-pos) .cart-item-wrapper .item-name {
+	font-weight: 600;
+}
+/* Quantity shown as a pill (the stock cart edits quantity through the numpad) */
+.point-of-sale-app:not(#rs-pos) .cart-item-wrapper .item-qty-rate > .item-qty > span {
+	display: inline-block;
+	min-width: 2.25rem;
+	text-align: center;
+	padding: 2px 10px;
+	border-radius: 999px;
+	border: 1px solid var(--border-color);
+	background: var(--control-bg);
+	font-weight: 700;
+}
+.point-of-sale-app:not(#rs-pos) .cart-item-wrapper .item-rate-amount .item-rate {
+	font-weight: 700;
+}
+
+/* Discount row + totals */
+.point-of-sale-app:not(#rs-pos) .add-discount-wrapper {
+	border-radius: 10px;
+	border: 1px dashed color-mix(in srgb, var(--rs-pos-accent) 45%, var(--border-color));
+	color: var(--rs-pos-accent);
+	background: color-mix(in srgb, var(--rs-pos-accent) 6%, transparent);
+	font-weight: 600;
+}
+.point-of-sale-app:not(#rs-pos) .cart-totals-section .net-total-container,
+.point-of-sale-app:not(#rs-pos) .cart-totals-section .taxes-container,
+.point-of-sale-app:not(#rs-pos) .cart-totals-section .grand-total-container {
+	border-radius: 10px;
+}
+
+/* Checkout: bold, full-width primary action */
+.point-of-sale-app:not(#rs-pos) .cart-totals-section > .checkout-btn {
+	background-color: var(--rs-pos-accent);
+	color: #fff;
+	border-radius: 12px;
+	font-weight: 700;
+	font-size: var(--text-lg);
+	letter-spacing: 0.01em;
+	padding: 14px 16px;
+	box-shadow: var(--rs-pos-shadow);
+	transition: filter 0.12s ease, transform 0.12s ease;
+}
+.point-of-sale-app:not(#rs-pos) .cart-totals-section > .checkout-btn:hover {
+	filter: brightness(1.08);
+	transform: translateY(-1px);
+}

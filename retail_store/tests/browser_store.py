@@ -180,8 +180,10 @@ with sync_playwright() as p:
 				admin.request.post(f"{B}/api/method/frappe.client.cancel", data={"doctype": dt, "name": name})
 				state = (api(admin, f"/api/resource/{dt}/{q(name)}") or {}).get("docstatus")
 				check(f"cleanup: {dt} {name} cancelled", state == 2, state)
+		# the shopper's cart is a DRAFT Quotation (step 4 leaves a 99999-qty line in it), and a draft
+		# cannot be cancelled, only deleted; left behind it would poison the next run's cart
 		for name in cart_quotes:
-			admin.request.post(f"{B}/api/method/frappe.client.cancel", data={"doctype": "Quotation", "name": name})
+			admin.request.post(f"{B}/api/method/frappe.client.delete", data={"doctype": "Quotation", "name": name})
 		actual3, reserved3 = bin_qty(admin)
 		check("cleanup: stock is back where it started", (actual3, reserved3) == (actual0, reserved0), (actual3, reserved3))
 	admin.close()

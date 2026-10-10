@@ -28,6 +28,8 @@ add_to_apps_screen = [
 # "Apply Brand Colours to Desk" in Retail Store Settings if the theme app owns colours).
 # Public site (storefront/cart/orders) brand skin, driven by the per-site brand colours
 web_include_css = "/assets/retail_store/css/storefront.css"
+# POS item cards + cart restyle (visual only, token-driven; loads after solvronix_desk per apps.txt)
+app_include_css = "/assets/retail_store/css/pos_restyle.css?v=3"
 app_include_js = ["/assets/retail_store/js/retail_store.js", "/assets/retail_store/js/landing.js"]
 
 # POS: one card per product template + Size/Colour picker (see pos_variants.py).

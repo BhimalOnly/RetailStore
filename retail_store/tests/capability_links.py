@@ -35,6 +35,10 @@ def missing(capability, user):
 	for target, sources in sorted(linked_doctypes(grants).items()):
 		if not frappe.db.exists("DocType", target) or frappe.get_meta(target).istable or target in grants:
 			continue
+		# Links to "DocType" itself (e.g. Opportunity.opportunity_from) are resolved by Frappe's own
+		# link/doctype pickers; no non-admin role has `read` on DocType, so flagging it is pure noise.
+		if target == "DocType":
+			continue
 		if not (frappe.has_permission(target, "read", user=user) or frappe.has_permission(target, "select", user=user)):
 			missing[target] = sorted(sources)
 	return missing

@@ -183,6 +183,34 @@ which patches two methods on ERPNext's POS classes (`Controller.on_cart_update`,
 `tests/browser_pos.py`; if the POS has changed underneath, untick the setting and stock behaviour
 returns immediately.
 
+#### POS look (cards + cart)
+
+`public/css/pos_restyle.css` (registered with `app_include_css`) restyles the POS: rounded item
+cards with a soft pastel gradient tile per product, a stock-count pill top-right, rounded
+cart rows with the quantity as a pill, a dashed discount row and a bold Checkout button. It is
+**visual only**: no markup or behaviour changes, so the variant picker, barcode bypass and
+permissions are untouched.
+
+* It layers on Solvronix Desk / Theme Studio rather than replacing them: colours come from
+  Frappe v16's semantic tokens (`--card-bg`, `--border-color`, `--control-bg`, `--text-color`,
+  `--btn-primary`), so Theme Studio brand changes and dark mode flow through. The pastel tiles
+  are translucent washes, so they read on light and dark surfaces. Dark mode is
+  `html[data-theme="dark"]` (checked against this build; `data-theme-mode` holds the user's
+  light/dark/automatic choice).
+* `retail_store` must load **after** `solvronix_desk` in `sites/apps.txt` (it does). Selectors
+  carry `:not(#rs-pos)` to out-rank ERPNext's deeply nested stock rules without `!important`.
+* Frappe v16 does not read a `build.json`; the file is served directly, so **bump the `?v=` in
+  `hooks.py` after editing it**, then `bench --site <site> clear-cache`.
+* No separate Website Theme entry is used (it can conflict with hooks-loaded CSS).
+* The POS markup uses no Bootstrap `.card`, so the `.card` vs `.frappe-card` dark-mode gap does
+  not apply here (re-check if ERPNext's POS changes).
+* Not done, because they need JS rather than CSS: a +/- quantity stepper on cart rows (stock
+  ERPNext edits quantity through the numpad), inline per-row discount badges, and the total
+  inside the Checkout button.
+* Test: `tests/browser_pos_restyle.py` checks the styles (light and dark) and that the restyled
+  screen still works as the Downtown cashier: picker opens, variant adds, Checkout -> Cash ->
+  Complete Order submits a Sales Invoice.
+
 ### 5. Capabilities (Retail Store Settings → Capabilities)
 
 **Who can change what:** the optional-module toggles below are **System Manager only**
@@ -420,6 +448,8 @@ env/bin/python apps/retail_store/retail_store/tests/e2e_section7.py http://<site
 bench --site <site> execute retail_store.tests.check_config.run
 # real browser, as the Downtown cashier: grid -> picker -> cart -> barcode scan (needs Playwright)
 python apps/retail_store/retail_store/tests/browser_pos.py <barcode>
+# POS restyle + that the restyled POS still sells (cashier: picker, cart, checkout); sells 1 sneaker
+python apps/retail_store/retail_store/tests/browser_pos_restyle.py
 # Online Store in a real browser (needs the webshop app + toggle on + demo data): a customer buys a
 # variant, stock reserves then deducts on delivery, branding on the public site; cancels what it creates
 python apps/retail_store/retail_store/tests/browser_store.py
