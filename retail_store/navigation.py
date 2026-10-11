@@ -307,6 +307,12 @@ def boot_session(bootinfo):
 		bootinfo.retail_store_pos_form_view = True
 		return
 	roles = set(frappe.get_roles(user))
+	# One app on the rail (the rule get_workspaces applies): the rail is a dead strip, so the desk hides it and
+	# shows the brand mark beside the company name instead. System Manager and the Accountant keep the rail.
+	bootinfo.retail_store_single_app = _plain_user(roles) and not roles & {"Accounts User", "Accounts Manager"}
+	bootinfo.retail_store_brand_mark = (
+		(bootinfo.get("retail_store_branding") or {}).get("logo") or "/assets/retail_store/images/retail-store-logo.svg"
+	)
 	bootinfo.retail_store_pos_form_view = bool(roles & (BACK_OFFICE | {"Store Manager"}))
 	if not _plain_user(roles):
 		return

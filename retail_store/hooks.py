@@ -37,7 +37,7 @@ web_include_js = [
 ]
 # POS item cards + cart restyle (visual only, token-driven; loads after solvronix_desk per apps.txt)
 app_include_css = "/assets/retail_store/css/pos_restyle.css?v=4"
-app_include_js = ["/assets/retail_store/js/retail_store.js?v=6", "/assets/retail_store/js/landing.js?v=4"]
+app_include_js = ["/assets/retail_store/js/retail_store.js?v=7", "/assets/retail_store/js/landing.js?v=4"]
 
 # POS: one card per product template + Size/Colour picker (see pos_variants.py).
 # Toggle: Retail Store Settings > Capabilities > "Group Variants in POS".
