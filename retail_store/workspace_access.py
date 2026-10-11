@@ -130,7 +130,9 @@ def get_desktop_page(page: str):
 		doc = frappe.get_cached_doc("Workspace", name)
 		if not doc.get("for_user") and not _role_allowed(name):
 			frappe.throw(frappe._("Not permitted to open workspace {0}").format(name), frappe.PermissionError)
-	return core_get_desktop_page(page)
+	from retail_store.navigation import trim_workspace_page
+
+	return trim_workspace_page(core_get_desktop_page(page))
 
 
 LANDING_WORKSPACE = "Retail Store"

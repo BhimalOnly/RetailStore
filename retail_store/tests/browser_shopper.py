@@ -183,7 +183,7 @@ with sync_playwright() as p:
 	page.wait_for_timeout(3500)
 	page.goto(B + "/cart")
 	page.wait_for_timeout(4500)
-	check("cart shows the item", "DEMO-TOTE" in page.inner_text("body"))
+	check("cart shows the item", "DEMO-TOTE" in page.inner_text("body") or "DEMO Canvas Tote" in page.inner_text("body"))
 	page.screenshot(path=f"{OUT}/5-cart-no-address.png")
 	page.click("text=Add a new address")
 	page.wait_for_timeout(2500)

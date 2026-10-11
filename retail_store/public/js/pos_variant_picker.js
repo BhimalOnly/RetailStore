@@ -67,7 +67,7 @@ retail_store.pos.show_picker = function (data, resolve) {
 		const $wrap = dialog.fields_dict.picker.$wrapper;
 		let html = "";
 		data.attributes.forEach((attr) => {
-			html += `<div class="rs-attr mb-3"><div class="text-muted small mb-1">${esc(__(attr))}</div><div>`;
+			html += `<div class="rs-attr"><div class="rs-attr-name">${esc(__(attr))}</div><div class="rs-chips">`;
 			data.options[attr].forEach((val) => {
 				// a value is offered only if some variant has it together with the other picks
 				const others = Object.fromEntries(Object.entries(selected).filter(([a]) => a !== attr));
@@ -75,10 +75,10 @@ retail_store.pos.show_picker = function (data, resolve) {
 				const exists = candidates.length > 0;
 				const in_stock = candidates.some((v) => !v.is_stock_item || v.actual_qty > 0);
 				const active = selected[attr] === val;
-				const cls = active ? "btn-primary" : in_stock ? "btn-default" : "btn-default text-muted";
-				html += `<button class="btn btn-sm ${cls} rs-opt mr-1 mb-1" style="${
-					in_stock || active ? "" : "text-decoration: line-through;"
-				}" data-attr="${esc(attr)}" data-val="${esc(val)}" ${exists ? "" : "disabled"}>${esc(val)}</button>`;
+				const cls = `${active ? "is-active" : ""} ${in_stock || active ? "" : "is-out"}`;
+				html += `<button type="button" class="rs-chip rs-opt ${cls}" data-attr="${esc(attr)}" data-val="${esc(val)}" ${
+					exists ? "" : "disabled"
+				}>${esc(val)}</button>`;
 			});
 			html += `</div></div>`;
 		});
@@ -88,13 +88,13 @@ retail_store.pos.show_picker = function (data, resolve) {
 		if (chosen) {
 			const qty = chosen.is_stock_item ? chosen.actual_qty : __("Non stock item");
 			const indicator = !chosen.is_stock_item || chosen.actual_qty > 10 ? "green" : chosen.actual_qty > 0 ? "orange" : "red";
-			html += `<div class="mt-2 p-2 border rounded">
-				<div><b>${esc(chosen.item_code)}</b></div>
-				<div>${chosen.rate != null ? format_currency(chosen.rate, chosen.currency) : __("No price")}
-					&nbsp;<span class="indicator-pill ${indicator}">${__("In stock here")}: ${qty}</span></div>
+			html += `<div class="rs-pick-summary">
+				<div class="rs-pick-price">${chosen.rate != null ? format_currency(chosen.rate, chosen.currency) : __("No price")}</div>
+				<span class="indicator-pill ${indicator}">${__("In stock here")}: ${qty}</span>
+				<div class="rs-pick-code">${esc(chosen.item_code)}</div>
 			</div>`;
 		} else {
-			html += `<div class="text-muted small mt-2">${__("Choose {0}", [data.attributes.map((a) => __(a)).join(" / ")])}</div>`;
+			html += `<div class="rs-pick-hint">${__("Pick {0} to see the price and stock", [data.attributes.map((a) => __(a)).join(" and ")])}</div>`;
 		}
 		$wrap.html(html);
 
@@ -122,6 +122,18 @@ retail_store.pos.patch = function () {
 	const PS = erpnext.PointOfSale;
 	if (!PS || !PS.Controller || !PS.ItemSelector) return false;
 	if (PS.Controller.prototype.__rs_patched) return true;
+
+	// ERPNext's menu offers "Open Form View" (raw Sales Invoice editing). Only managers and the
+	// back office get it; a cashier reprints / returns from Recent Orders.
+	const original_prepare_menu = PS.Controller.prototype.prepare_menu;
+	PS.Controller.prototype.prepare_menu = function () {
+		original_prepare_menu.call(this);
+		if (!frappe.boot.retail_store_pos_form_view) {
+			this.page.menu.find("a.dropdown-item").filter((i, a) => $(a).text().includes(__("Open Form View"))).parent().remove();
+			// the Ctrl+F shortcut the menu item registered
+			frappe.ui.keys.off("ctrl+f", this.page);
+		}
+	};
 
 	const original_on_cart_update = PS.Controller.prototype.on_cart_update;
 	PS.Controller.prototype.on_cart_update = async function (args) {

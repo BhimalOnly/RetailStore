@@ -31,6 +31,7 @@ def get_context(context):
 		order_by="creation desc",
 	)
 	context.rs_new = [_card(i) for i in items[:NEWEST]]
+	context.rs_hero_art = [p for p in context.rs_new if p.get('image')][:4]  # fills the right half of the banner
 	context.rs_categories = _categories(items)
 	context.rs_has_products = bool(items)
 

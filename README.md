@@ -143,6 +143,18 @@ Only Warehouse Manager, Store Manager and Store Owner can create or submit
 Stock Entries. Approval can be turned off in *Retail Store Settings → Stock
 Transfers*.
 
+**Shop-floor staff (Cashier, Attendants)** can only sell, count stock and *request*
+transfers; they cannot edit prices or book stock movements, and a Material Request
+they raise must be a Material Transfer. They use the plain **Request Stock** page
+(`/desk/stock-request`), not the Desk forms. The Store Owner (or System Manager, not
+Store Admin) can allow named people to *Receive stock* or *Change prices* in *Retail
+Store Settings → Stock Transfers → Extra Staff Permissions*; the list is empty by default.
+(`staff_grants.py` keeps the Stock Receiver / Price Editor roles in step with it.)
+
+> Intentional: a Cashier can open the Sales Invoice list by URL even though the sidebar
+> hides it. POS needs read access to Sales Invoice for returns and reprints; the list is
+> scoped to their own store and they have no write access beyond POS.
+
 > Workflow caveat: if a client enables ERPNext *auto re-order*
 > (system-generated Material Requests), check it against the approval
 > workflow before go-live, or turn approval off.
@@ -631,6 +643,11 @@ either command on a live client site.**
 ### Tests
 
 ```bash
+# staff grants, transfer-only rule, Request Stock API (server side)
+bench --site <site> execute retail_store.tests.check_stock_request.run
+# Request Stock page, settings grants, storefront polish (browser; see each file's header)
+python apps/retail_store/retail_store/tests/browser_stock.py
+python apps/retail_store/retail_store/tests/browser_storefront_batch.py
 # acceptance walk-through over the REST API as each demo user (site must be running)
 env/bin/python apps/retail_store/retail_store/tests/e2e_section7.py http://<site>:<port>
 # toggles, branding, navigation (restores settings afterwards)
@@ -665,6 +682,12 @@ Downtown's test variants hit zero; top up with
 `bench --site <site> execute retail_store.demo.restock_pos_test_items`.
 
 ---
+
+### Backlog (known, not built)
+
+* Staff login page still shows "Powered by Solvronix" (theme setting; the Desk and storefront credits are already hidden).
+* Customer, Employee and Stock Count are still raw Desk forms; Ctrl+K search, the "All Options" menu and the Accountant / Warehouse Manager screens have not had a wording review.
+* `check_config` switches HR off when it finishes; run `tests/seed_hr_demo.run` before `browser_hr.py`.
 
 ### Messaging extension point (planned, not built)
 

@@ -1,6 +1,6 @@
 {
  "creation": "2026-10-08 19:30:00.000000",
- "modified": "2026-10-08 23:00:00.000000",
+ "modified": "2026-10-11 17:00:00.000000",
  "modified_by": "Administrator",
  "owner": "Administrator",
  "module": "Retail Store",
@@ -50,6 +50,8 @@
   "in_transit_warehouse",
   "column_break_stock",
   "require_request_approval",
+  "grants_section",
+  "staff_grants",
   "access_tab",
   "location_scoped_doctypes",
   "pos_scoped_doctypes",
@@ -300,9 +302,21 @@
   {
    "fieldname": "require_request_approval",
    "fieldtype": "Check",
-   "label": "Material Requests Need Approval",
+   "label": "Stock Requests Need Approval",
    "default": "1",
    "description": "Staff submit requests for approval; a Store/Warehouse Manager or Store Owner approves."
+  },
+  {
+   "fieldname": "grants_section",
+   "fieldtype": "Section Break",
+   "label": "Extra Staff Permissions",
+   "description": "By default shop-floor staff sell, count stock and request stock transfers. Nothing else. Add a person here to let them do more. Only the Store Owner can change this list."
+  },
+  {
+   "fieldname": "staff_grants",
+   "fieldtype": "Table",
+   "label": "Extra Permissions",
+   "options": "Retail Staff Grant"
   },
   {
    "fieldname": "access_tab",

@@ -28,6 +28,14 @@ ROLES = {
 }
 
 ALL = list(ROLES)
+
+# Extra rights the Store Owner can hand to individual staff (Retail Store Settings > Stock Transfers >
+# Extra Staff Permissions). Never given by default and not part of ALL: staff_grants.py adds and
+# removes them from the people listed there.
+GRANT_ROLES = {
+	"Stock Receiver": "Can book stock into their own location (deliveries, transfers arriving).",
+	"Price Editor": "Can change selling prices in the price list.",
+}
 MANAGERS = ["Store Manager", "Warehouse Manager", "Store Owner"]
 
 READ = "r rep p"
@@ -49,6 +57,7 @@ _BASE_READ = {
 	"Currency": REF,
 	"Mode of Payment": REF,
 	"Loyalty Program": REF,
+	"Stock Settings": REF,  # every Stock Entry / Material Request form reads it on open
 	"Bin": READ,
 	"Stock Ledger Entry": READ,  # Stock Balance / Stock Ledger reports
 	"Batch": REF,
@@ -96,6 +105,10 @@ _CATALOGUE = {
 }
 
 
+_RECEIVER = {"Stock Entry": "r w c s rep p", "Stock Entry Type": REF}
+_PRICE_EDITOR = {"Item Price": "r w c rep"}
+
+
 def _merge(*maps):
 	out = {}
 	for m in maps:
@@ -105,6 +118,8 @@ def _merge(*maps):
 
 
 PERMISSIONS = {
+	"Stock Receiver": _merge(_BASE_READ, _RECEIVER),
+	"Price Editor": _merge(_BASE_READ, _PRICE_EDITOR),
 	"Store Attendant": _merge(
 		_BASE_READ,
 		_CUSTOMER,
@@ -222,7 +237,7 @@ CODE_TO_FIELD = {
 
 
 def create_roles():
-	for role, description in ROLES.items():
+	for role, description in {**ROLES, **GRANT_ROLES}.items():
 		if frappe.db.exists("Role", role):
 			continue
 		frappe.get_doc(

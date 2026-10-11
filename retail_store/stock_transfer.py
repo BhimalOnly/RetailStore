@@ -20,9 +20,19 @@ from retail_store.location import get_user_warehouses
 from retail_store.permissions import FINAL_DESTINATION
 
 LOCATION_SCOPED_MR_TYPES = ("Material Transfer", "Material Issue")
+TRUSTED = {"System Manager", "Store Owner", "Store Manager", "Warehouse Manager"}
+FRONTLINE = {"Store Cashier", "Store Attendant", "Warehouse Attendant", "Stock Receiver"}
+
+
+def _is_frontline():
+	"""Shop-floor staff with no manager role: limited to the sanctioned transfer flow."""
+	roles = set(frappe.get_roles())
+	return frappe.session.user != "Administrator" and bool(roles & FRONTLINE) and not roles & TRUSTED
 
 
 def validate_material_request(doc, method=None):
+	if _is_frontline() and doc.material_request_type != "Material Transfer":
+		frappe.throw(_("You can only request a stock transfer. Ask a manager for anything else."), frappe.PermissionError)
 	if doc.material_request_type == "Material Transfer" and not doc.get("set_from_warehouse"):
 		main = frappe.db.get_single_value("Retail Store Settings", "main_warehouse")
 		if main:
@@ -51,6 +61,11 @@ def validate_material_request(doc, method=None):
 
 
 def validate_stock_entry(doc, method=None):
+	if _is_frontline():
+		# shop-floor staff the owner has allowed to receive stock: deliveries in, or a transfer arriving
+		arriving = doc.stock_entry_type == "Material Transfer" and doc.get("outgoing_stock_entry")
+		if doc.stock_entry_type != "Material Receipt" and not arriving:
+			frappe.throw(_("You can receive stock here, not {0}.").format(_(doc.stock_entry_type)), frappe.PermissionError)
 	if doc.get("add_to_transit") and doc.get(FINAL_DESTINATION):
 		transit = {d.t_warehouse for d in doc.items if d.t_warehouse}
 		if doc.get(FINAL_DESTINATION) in transit:

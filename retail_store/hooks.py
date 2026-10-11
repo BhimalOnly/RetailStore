@@ -30,14 +30,14 @@ add_to_apps_screen = [
 # so a Desk theme app can be added later without conflict (turn off
 # "Apply Brand Colours to Desk" in Retail Store Settings if the theme app owns colours).
 # Public site (storefront/cart/orders) brand skin, driven by the per-site brand colours
-web_include_css = "/assets/retail_store/css/storefront.css?v=21"
+web_include_css = "/assets/retail_store/css/storefront.css?v=23"
 web_include_js = [
-	"/assets/retail_store/js/storefront.js?v=3",
+	"/assets/retail_store/js/storefront.js?v=8",
 	"/assets/retail_store/js/shop_ui.js?v=3",
 ]
 # POS item cards + cart restyle (visual only, token-driven; loads after solvronix_desk per apps.txt)
-app_include_css = "/assets/retail_store/css/pos_restyle.css?v=3"
-app_include_js = ["/assets/retail_store/js/retail_store.js", "/assets/retail_store/js/landing.js"]
+app_include_css = "/assets/retail_store/css/pos_restyle.css?v=4"
+app_include_js = ["/assets/retail_store/js/retail_store.js?v=2", "/assets/retail_store/js/landing.js"]
 
 # POS: one card per product template + Size/Colour picker (see pos_variants.py).
 # Toggle: Retail Store Settings > Capabilities > "Group Variants in POS".
@@ -50,6 +50,8 @@ override_whitelisted_methods = {
 	"webshop.webshop.shopping_cart.cart.update_cart": "retail_store.storefront.update_cart",
 	# ...and the variant picker's stock for a variant (webshop reads a Website Item the variant lacks)
 	"webshop.webshop.variant_selector.utils.get_next_attribute_and_values": "retail_store.storefront.get_next_attribute_and_values",
+	# the App rail shows the Retail Store app only, except to System Manager (navigation.py)
+	"solvronix_desk.api.get_workspaces": "retail_store.navigation.get_workspaces",
 	"erpnext.selling.page.point_of_sale.point_of_sale.get_items": "retail_store.pos_variants.get_items",
 	# Refuse (403) workspaces the user's roles don't allow, not just hide them.
 	"frappe.client.get_value": "retail_store.permissions.get_value",
@@ -58,7 +60,7 @@ override_whitelisted_methods = {
 	"frappe.desk.doctype.dashboard.dashboard.get_permitted_charts": "retail_store.workspace_access.get_permitted_charts",
 }
 
-boot_session = "retail_store.branding.boot_session"
+boot_session = ["retail_store.branding.boot_session", "retail_store.navigation.boot_session"]
 # A customer may open only the portal pages their store has switched on (portal_access.py)
 page_renderer = ["retail_store.portal_access.GuestToShopperLogin"]
 before_request = ["retail_store.portal_access.block_gated_pages"]
@@ -66,6 +68,7 @@ update_website_context = [
 	"retail_store.branding.update_website_context",
 	"retail_store.storefront.shopper_login_url",
 	"retail_store.storefront.hide_pay_link_for_offline_gateway",
+	"retail_store.storefront.readable_order_items",
 ]
 
 # Installation

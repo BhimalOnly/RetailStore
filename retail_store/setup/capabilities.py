@@ -282,6 +282,7 @@ def setup_webshop_defaults():
 	# screen (only while no home page is chosen; "all-products" stays available as a choice)
 	if not frappe.db.get_single_value("Website Settings", "home_page"):
 		frappe.db.set_single_value("Website Settings", "home_page", "store-home")
+	_set_storefront_nav_defaults()
 
 
 def _ensure_offline_gateway_account(company):
@@ -456,3 +457,28 @@ def apply_module_profile(user):
 	doc.set("block_modules", [{"module": m} for m in blocked])
 	doc.flags.ignore_permissions = True
 	doc.save()
+
+
+def _set_storefront_nav_defaults():
+	"""Top bar and footer for the public site: Frappe's defaults are a lone "Products" link and a bare
+	brand name. Added only while the client has not set their own (top bar still just the one link,
+	footer empty), so their choices are never overwritten."""
+	website = frappe.get_single("Website Settings")
+	changed = False
+	if len(website.top_bar_items or []) <= 1 and not any(i.url in ("/#categories", "/#new-arrivals") for i in website.top_bar_items or []):
+		if not website.top_bar_items:
+			website.append("top_bar_items", {"label": "Products", "url": "/all-products"})
+		website.append("top_bar_items", {"label": "Categories", "url": "/#categories"})
+		website.append("top_bar_items", {"label": "New arrivals", "url": "/#new-arrivals"})
+		changed = True
+	if not website.footer_items:
+		for label, url in (("Shop all", "/all-products"), ("Cart", "/cart"), ("My orders", "/orders"), ("My account", "/me")):
+			website.append("footer_items", {"label": label, "url": url})
+		changed = True
+	if not website.copyright and website.app_name:
+		website.copyright = website.app_name
+		changed = True
+	if changed:
+		website.flags.ignore_permissions = True
+		website.flags.ignore_mandatory = True
+		website.save()

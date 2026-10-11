@@ -13,7 +13,17 @@
 		}
 	}
 
-	$(document).on("startup", () => apply(frappe.boot && frappe.boot.retail_store_branding));
+	// the Desk theme's "Powered by" credit is for the people who run the system, not shop staff
+	function hideCredit() {
+		if (frappe.user && frappe.user.has_role && frappe.user.has_role("System Manager")) return;
+		if (document.getElementById("rs-no-credit")) return;
+		$('<style id="rs-no-credit">#st-powered-by{display:none !important}</style>').appendTo(document.head);
+	}
+
+	$(document).on("startup", () => {
+		apply(frappe.boot && frappe.boot.retail_store_branding);
+		hideCredit();
+	});
 	if (window.frappe && frappe.boot && frappe.boot.retail_store_branding) {
 		apply(frappe.boot.retail_store_branding);
 	}

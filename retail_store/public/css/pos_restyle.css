@@ -164,3 +164,24 @@
 	filter: brightness(1.08);
 	transform: translateY(-1px);
 }
+
+/* ---- Dialogs (variant picker and every Desk popup): softer card, pill buttons ---- */
+.modal-content{border:0;border-radius:16px;box-shadow:0 24px 60px rgba(20,30,28,.28);overflow:hidden}
+.modal-content .modal-header{padding:16px 22px}
+.modal-content .modal-title{font-weight:600;letter-spacing:.1px}
+.modal-content .modal-body{padding:20px 22px}
+.modal-content .modal-footer{padding:14px 22px;border-top:1px solid var(--border-color,#e6e9e8);background:transparent}
+.modal-content .modal-footer .btn,.modal-content .modal-actions .btn{border-radius:999px;padding:8px 22px;font-weight:600}
+/* variant picker */
+.rs-attr{margin-bottom:18px}
+.rs-attr-name{font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px}
+.rs-chips{display:flex;flex-wrap:wrap;gap:8px}
+.rs-chip{min-width:48px;padding:9px 18px;border:1.5px solid var(--border-color,#d7dcda);border-radius:999px;background:var(--card-bg,#fff);color:var(--text-color);font-weight:600;transition:border-color .15s,background .15s}
+.rs-chip:hover:not(:disabled){border-color:var(--primary,#1f5f4a)}
+.rs-chip.is-active{background:var(--primary,#1f5f4a);border-color:var(--primary,#1f5f4a);color:#fff}
+.rs-chip.is-out{color:var(--text-muted);text-decoration:line-through}
+.rs-chip:disabled{opacity:.35;cursor:not-allowed}
+.rs-pick-summary{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 14px;margin-top:6px;padding:14px 16px;border-radius:12px;background:var(--control-bg,#f3f5f4)}
+.rs-pick-price{font-size:1.4rem;font-weight:700}
+.rs-pick-code{flex-basis:100%;font-size:11px;color:var(--text-muted)}
+.rs-pick-hint{margin-top:6px;padding:12px 16px;border-radius:12px;background:var(--control-bg,#f3f5f4);color:var(--text-muted);font-size:13px}

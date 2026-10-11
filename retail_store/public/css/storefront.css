@@ -479,3 +479,35 @@ body:not(.sl-split) .item-card .card-img-container { position: relative; }
   .rs-drawer { width: 100vw; }
 }
 @media (prefers-reduced-motion: reduce) { .rs-drawer { animation: none; } .rs-qv-btn { transition: none; } }
+
+/* ---- Order page: confirmation panel + print button (storefront.js) ---- */
+.rs-order-status{display:flex;gap:16px;align-items:flex-start;margin:20px 0 8px;padding:20px 22px;background:#fff;border:1px solid var(--rs-line,#e6e1d9);border-radius:12px}
+.rs-order-status h2{margin:0 0 4px;font-size:1.25rem;font-weight:600}
+.rs-order-status p{margin:0 0 4px;color:#5c5a55}
+.rs-order-tick{flex:none;width:36px;height:36px;border-radius:50%;background:var(--rs-primary,#1f5f4a);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
+.rs-order-status.rs-cancelled .rs-order-tick{background:#b4472f}
+.rs-order-print{display:inline-block;padding:8px 16px;border:1px solid currentColor;border-radius:999px;font-size:.85rem;text-decoration:none}
+
+/* ---- Storefront polish batch ------------------------------------------------------------------ */
+/* hero: text left, a small product collage right (only when the owner has not set a banner photo) */
+body:not(.sl-split) .rs-hero-inner { display: grid; grid-template-columns: 1fr; gap: 32px; align-items: center; }
+body:not(.sl-split) .rs-hero-art { display: none; }
+@media (min-width: 900px) {
+	body:not(.sl-split) .rs-hero-inner { grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); padding: 72px 20px; }
+	body:not(.sl-split) .rs-hero-art { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+	body:not(.sl-split) .rs-hero-art.rs-art-1 { grid-template-columns: 1fr; max-width: 260px; justify-self: end; }
+	body:not(.sl-split) .rs-hero-art a { display: block; aspect-ratio: 1; border-radius: 14px; overflow: hidden; background: rgba(255, 255, 255, 0.12); }
+	body:not(.sl-split) .rs-hero-art a:nth-child(even) { transform: translateY(18px); }
+	body:not(.sl-split) .rs-hero-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+}
+/* order page: the amount no longer wraps under "Grand Total" */
+body:not(.sl-split) .order-taxes > .col-4 { flex: 0 0 auto; width: auto; max-width: none; margin-left: auto; gap: 24px; }
+body:not(.sl-split) .order-taxes .item-grand-total { flex: none; width: auto; max-width: none; white-space: nowrap; padding-left: 0; }
+/* cart empty state */
+body:not(.sl-split) .cart-empty-message { font-size: 1.15rem; font-weight: 600; margin: 8px 0 4px; }
+.rs-cart-empty-note { color: #6b6a65; margin: 0 0 16px; }
+.rs-cart-empty-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+/* shopper "Settings" page (/me): Frappe's technical entries are removed by storefront.js */
+body.rs-me .rs-me-hidden { display: none !important; }
+/* footer links */
+body:not(.sl-split) footer.web-footer .footer-link a, body:not(.sl-split) footer.web-footer .footer-info a { color: #5c5a55; }

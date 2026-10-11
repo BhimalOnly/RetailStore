@@ -1,6 +1,6 @@
 {
  "creation": "2026-10-08 20:00:00.000000",
- "modified": "2026-10-08 20:00:00.000000",
+ "modified": "2026-10-11 16:00:00.000000",
  "modified_by": "Administrator",
  "owner": "Administrator",
  "docstatus": 0,
@@ -20,7 +20,7 @@
  "sequence_id": 1.0,
  "type": "Workspace",
  "standard": 1,
- "content": "[{\"id\": \"rs_hdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Today</b></span>\", \"col\": 12}}, {\"id\": \"rs_sc0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Point of Sale\", \"col\": 3}}, {\"id\": \"rs_sc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Sales Invoice\", \"col\": 3}}, {\"id\": \"rs_sc2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Customer\", \"col\": 3}}, {\"id\": \"rs_sc3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Item\", \"col\": 3}}, {\"id\": \"rs_sc4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Stock Balance\", \"col\": 3}}, {\"id\": \"rs_sc5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Material Request\", \"col\": 3}}, {\"id\": \"rs_sc6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Stock Entry\", \"col\": 3}}, {\"id\": \"rs_sc7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Loyalty Program\", \"col\": 3}}, {\"id\": \"rs_hdr2\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Everything else</b></span>\", \"col\": 12}}, {\"id\": \"rs_cd0\", \"type\": \"card\", \"data\": {\"card_name\": \"Selling\", \"col\": 4}}, {\"id\": \"rs_cd1\", \"type\": \"card\", \"data\": {\"card_name\": \"Stock\", \"col\": 4}}, {\"id\": \"rs_cd2\", \"type\": \"card\", \"data\": {\"card_name\": \"Catalogue\", \"col\": 4}}, {\"id\": \"rs_cd3\", \"type\": \"card\", \"data\": {\"card_name\": \"Loyalty\", \"col\": 4}}, {\"id\": \"rs_cd4\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"rs_cd5\", \"type\": \"card\", \"data\": {\"card_name\": \"Setup\", \"col\": 4}}]",
+ "content": "[{\"id\": \"rs_hdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Today</b></span>\", \"col\": 12}}, {\"id\": \"rs_sc0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Point of Sale\", \"col\": 3}}, {\"id\": \"rs_sc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Sales\", \"col\": 3}}, {\"id\": \"rs_sc2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Customer\", \"col\": 3}}, {\"id\": \"rs_sc3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Products\", \"col\": 3}}, {\"id\": \"rs_sc4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Stock Levels\", \"col\": 3}}, {\"id\": \"rs_sc5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Request Transfer\", \"col\": 3}}, {\"id\": \"rs_sc6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Move Stock\", \"col\": 3}}, {\"id\": \"rs_sc7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Loyalty\", \"col\": 3}}, {\"id\": \"rs_hdr2\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Everything else</b></span>\", \"col\": 12}}, {\"id\": \"rs_cd0\", \"type\": \"card\", \"data\": {\"card_name\": \"Selling\", \"col\": 4}}, {\"id\": \"rs_cd1\", \"type\": \"card\", \"data\": {\"card_name\": \"Stock\", \"col\": 4}}, {\"id\": \"rs_cd2\", \"type\": \"card\", \"data\": {\"card_name\": \"Catalogue\", \"col\": 4}}, {\"id\": \"rs_cd3\", \"type\": \"card\", \"data\": {\"card_name\": \"Loyalty\", \"col\": 4}}, {\"id\": \"rs_cd4\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"rs_cd5\", \"type\": \"card\", \"data\": {\"card_name\": \"Setup\", \"col\": 4}}]",
  "shortcuts": [
   {
    "label": "Point of Sale",
@@ -29,7 +29,7 @@
    "color": "Blue"
   },
   {
-   "label": "Sales Invoice",
+   "label": "Sales",
    "type": "DocType",
    "link_to": "Sales Invoice",
    "color": "Blue",
@@ -43,35 +43,35 @@
    "doc_view": "List"
   },
   {
-   "label": "Item",
+   "label": "Products",
    "type": "DocType",
    "link_to": "Item",
    "color": "Orange",
    "doc_view": "List"
   },
   {
-   "label": "Stock Balance",
+   "label": "Stock Levels",
    "type": "Report",
    "link_to": "Stock Balance",
    "color": "Grey",
    "report_ref_doctype": "Stock Ledger Entry"
   },
   {
-   "label": "Material Request",
+   "label": "Request Transfer",
    "type": "DocType",
    "link_to": "Material Request",
    "color": "Yellow",
    "doc_view": "List"
   },
   {
-   "label": "Stock Entry",
+   "label": "Move Stock",
    "type": "DocType",
    "link_to": "Stock Entry",
    "color": "Purple",
    "doc_view": "List"
   },
   {
-   "label": "Loyalty Program",
+   "label": "Loyalty",
    "type": "DocType",
    "link_to": "Loyalty Program",
    "color": "Pink",
@@ -99,7 +99,7 @@
   },
   {
    "type": "Link",
-   "label": "Sales Invoice",
+   "label": "Sales",
    "link_type": "DocType",
    "link_to": "Sales Invoice",
    "link_count": 0,
@@ -109,7 +109,7 @@
   },
   {
    "type": "Link",
-   "label": "POS Opening Entry",
+   "label": "Till Openings",
    "link_type": "DocType",
    "link_to": "POS Opening Entry",
    "link_count": 0,
@@ -119,7 +119,7 @@
   },
   {
    "type": "Link",
-   "label": "POS Closing Entry",
+   "label": "Till Closings",
    "link_type": "DocType",
    "link_to": "POS Closing Entry",
    "link_count": 0,
@@ -147,7 +147,7 @@
   },
   {
    "type": "Link",
-   "label": "Material Request",
+   "label": "Request Transfer",
    "link_type": "DocType",
    "link_to": "Material Request",
    "link_count": 0,
@@ -157,7 +157,7 @@
   },
   {
    "type": "Link",
-   "label": "Stock Entry",
+   "label": "Move Stock",
    "link_type": "DocType",
    "link_to": "Stock Entry",
    "link_count": 0,
@@ -167,7 +167,7 @@
   },
   {
    "type": "Link",
-   "label": "Stock Reconciliation",
+   "label": "Stock Count",
    "link_type": "DocType",
    "link_to": "Stock Reconciliation",
    "link_count": 0,
@@ -177,7 +177,7 @@
   },
   {
    "type": "Link",
-   "label": "Warehouse",
+   "label": "Locations",
    "link_type": "DocType",
    "link_to": "Warehouse",
    "link_count": 0,
@@ -195,7 +195,7 @@
   },
   {
    "type": "Link",
-   "label": "Item",
+   "label": "Products",
    "link_type": "DocType",
    "link_to": "Item",
    "link_count": 0,
@@ -205,7 +205,7 @@
   },
   {
    "type": "Link",
-   "label": "Item Group",
+   "label": "Product Categories",
    "link_type": "DocType",
    "link_to": "Item Group",
    "link_count": 0,
@@ -215,7 +215,7 @@
   },
   {
    "type": "Link",
-   "label": "Item Attribute",
+   "label": "Product Options",
    "link_type": "DocType",
    "link_to": "Item Attribute",
    "link_count": 0,
@@ -225,7 +225,7 @@
   },
   {
    "type": "Link",
-   "label": "Item Price",
+   "label": "Prices",
    "link_type": "DocType",
    "link_to": "Item Price",
    "link_count": 0,
@@ -243,7 +243,7 @@
   },
   {
    "type": "Link",
-   "label": "Loyalty Program",
+   "label": "Loyalty",
    "link_type": "DocType",
    "link_to": "Loyalty Program",
    "link_count": 0,
@@ -253,7 +253,7 @@
   },
   {
    "type": "Link",
-   "label": "Loyalty Point Entry",
+   "label": "Points History",
    "link_type": "DocType",
    "link_to": "Loyalty Point Entry",
    "link_count": 0,
@@ -271,7 +271,7 @@
   },
   {
    "type": "Link",
-   "label": "Stock Balance",
+   "label": "Stock Levels",
    "link_type": "Report",
    "link_to": "Stock Balance",
    "link_count": 0,
@@ -282,7 +282,7 @@
   },
   {
    "type": "Link",
-   "label": "Stock Projected Qty",
+   "label": "Projected Stock",
    "link_type": "Report",
    "link_to": "Stock Projected Qty",
    "link_count": 0,
@@ -293,7 +293,7 @@
   },
   {
    "type": "Link",
-   "label": "Stock Ledger",
+   "label": "Stock Movements",
    "link_type": "Report",
    "link_to": "Stock Ledger",
    "link_count": 0,
@@ -343,7 +343,7 @@
   },
   {
    "type": "Link",
-   "label": "POS Profile",
+   "label": "Till Setup",
    "link_type": "DocType",
    "link_to": "POS Profile",
    "link_count": 0,

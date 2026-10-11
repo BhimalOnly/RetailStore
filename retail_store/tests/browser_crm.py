@@ -110,8 +110,10 @@ with sync_playwright() as p:
 	status = ctx.request.get(f"{B}/api/resource/Lead/{lead}").json().get("data", {}).get("status")
 	check("Lead is marked Converted", status == "Converted", status)
 	check("No console/server errors during the owner flow", not bad, bad)
-	rail = page.evaluate("[...document.querySelectorAll('.st-rail-module')].map(e=>e.innerText.trim())")
-	check("CRM shows in the owner's rail", "CRM" in rail, rail)
+	page.goto(B + "/desk")
+	page.wait_for_timeout(5000)
+	rail = page.evaluate("[...document.querySelectorAll('.body-sidebar a')].map(e=>e.innerText.trim())")
+	check("CRM shows in the owner's sidebar (Add-ons)", "CRM" in rail, rail)
 	ctx.close()
 
 	# 4. every other retail role: no CRM in navigation, every CRM route blocked, no data shown

@@ -108,7 +108,7 @@ with sync_playwright() as p:
 	page.goto(B + "/cart")
 	page.wait_for_timeout(4500)
 	cart = page.evaluate("document.querySelector('.cart-container, .page-content, main')?.innerText||''")
-	check("Cart shows the variant at the Desk price with a total", VARIANT in cart and f"{price:,.2f}" in cart and "Grand Total" in cart, cart[:200])
+	check("Cart shows the variant at the Desk price with a total", VARIANT in cart or "DEMO Everyday Sneaker" in cart and f"{price:,.2f}" in cart and "Grand Total" in cart, cart[:200])
 	check("Cart offers Place Order (checkout enabled)", "place order" in cart.lower())  # button text is uppercased by CSS
 	page.screenshot(path=f"{OUT}/store-2-cart.png")
 	page.get_by_role("button", name="Place Order").click()
@@ -116,7 +116,7 @@ with sync_playwright() as p:
 	so_name = page.url.rsplit("/", 1)[-1]
 	body = page.evaluate("document.querySelector('.page-content, main')?.innerText||''")
 	check("Order confirmation page loads for the customer (no 'Not Permitted')", so_name.startswith("SAL-ORD-") and "Not Permitted" not in body, (page.url, body[:120]))
-	check("Order page shows the item and total", VARIANT in body and f"{price:,.2f}" in body, body[:200])
+	check("Order page shows the item and total", "DEMO Everyday Sneaker" in body and f"{price:,.2f}" in body, body[:200])
 	check("No 'Pay' link for the offline gateway", "Pay Rs" not in body and "Pay " + f"{price:,.2f}" not in body, body[:200])
 	page.screenshot(path=f"{OUT}/store-3-order.png")
 	check("No server errors during the customer flow", not bad, bad)

@@ -4,14 +4,21 @@
 <div class="rs-home">
 	<section class="rs-hero{% if rs_hero %} has-image{% endif %}"{% if rs_hero %} style="background-image: url('{{ rs_hero }}')"{% endif %}>
 		<div class="rs-hero-inner">
-			<h1>{{ rs_headline }}</h1>
-			{% if rs_tagline %}<p>{{ rs_tagline }}</p>{% endif %}
-			<a class="btn btn-primary rs-hero-cta" href="/all-products">{{ _("Shop all") }}</a>
+			<div class="rs-hero-text">
+				<h1>{{ rs_headline }}</h1>
+				{% if rs_tagline %}<p>{{ rs_tagline }}</p>{% endif %}
+				<a class="btn btn-primary rs-hero-cta" href="/all-products">{{ _("Shop all") }}</a>
+			</div>
+			{% if rs_hero_art and not rs_hero %}
+			<div class="rs-hero-art rs-art-{{ rs_hero_art|length }}" aria-hidden="true">
+				{% for p in rs_hero_art %}<a href="{{ p.route }}" tabindex="-1"><img src="{{ p.image }}" alt="" loading="lazy"></a>{% endfor %}
+			</div>
+			{% endif %}
 		</div>
 	</section>
 
 	{% if rs_categories %}
-	<section class="rs-section">
+	<section class="rs-section" id="categories">
 		<h2>{{ _("Shop by category") }}</h2>
 		<div class="rs-cats">
 			{% for c in rs_categories %}
@@ -24,7 +31,7 @@
 	</section>
 	{% endif %}
 
-	<section class="rs-section">
+	<section class="rs-section" id="new-arrivals">
 		<h2>{{ _("New arrivals") }}</h2>
 		{% if rs_has_products %}
 		<div class="rs-grid">

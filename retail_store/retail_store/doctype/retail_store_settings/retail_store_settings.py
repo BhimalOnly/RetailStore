@@ -14,6 +14,9 @@ REQUIRES_APP = {
 
 class RetailStoreSettings(Document):
 	def validate(self):
+		from retail_store.staff_grants import validate_settings
+
+		validate_settings(self)
 		installed = frappe.get_installed_apps()
 		for field, (app, get_cmd) in REQUIRES_APP.items():
 			if self.get(field) and app not in installed:
@@ -34,6 +37,9 @@ class RetailStoreSettings(Document):
 		apply_branding(self)
 		apply_loyalty_toggle(self)
 		apply_workflow_toggle(self)
+		from retail_store.staff_grants import sync_grant_roles
+
+		sync_grant_roles(self)
 		frappe.clear_cache()
 
 

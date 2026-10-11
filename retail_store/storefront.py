@@ -81,6 +81,34 @@ def hide_pay_link_for_offline_gateway(context):
 	account = frappe.get_cached_doc("Webshop Settings").payment_gateway_account
 	if account and frappe.db.get_value("Payment Gateway Account", account, "payment_gateway") == "Pay in Store or on Delivery":
 		context.enabled_checkout = 0
+		# storefront.js reads this to say "pay in store" on the order page (it cannot see the context)
+		context.body_class = f"{context.get('body_class') or ''} rs-pay-offline".strip()
+
+
+def readable_order_items(context):
+	"""update_website_context: the order page prints each line's item CODE ("DEMO-SNEAKER-40-WHIT").
+	Show the product name and its options ("DEMO Everyday Sneaker (40, White)") instead. Display only:
+	the document in the context is never saved."""
+	doc = context.get("doc")
+	# never the cart (Quotation): its quantity / remove buttons key on item_code
+	if not doc or doc.get("doctype") not in ("Sales Order", "Sales Invoice", "Delivery Note"):
+		return
+	names = {}
+	for d in doc.get("items") or []:
+		code = d.get("item_code")
+		if code not in names:
+			names[code] = _shopper_item_name(code, d.get("item_name"))
+		d.item_code = names[code]
+
+
+def _shopper_item_name(item_code, item_name):
+	variant_of = frappe.db.get_value("Item", item_code, "variant_of")
+	if not variant_of:
+		return item_name or item_code
+	base = frappe.db.get_value("Item", variant_of, "item_name") or item_name or item_code
+	options = frappe.get_all("Item Variant Attribute", filters={"parent": item_code}, fields=["attribute_value"], order_by="idx")
+	values = [o.attribute_value for o in options if o.attribute_value]
+	return f"{base} ({', '.join(values)})" if values else base
 
 
 SHOPPER_LOGIN = "/account/login"
