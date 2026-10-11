@@ -576,7 +576,7 @@ branding-token pass).
 ### 7. Navigation
 
 The **Retail Store** app (apps screen, and the default landing page for
-retail staff) has a Dock with Retail Store / Stock / Selling / Accounts. The
+retail staff) has a Dock with one entry, Retail Store (the raw Stock / Selling / Accounts module shells were removed from it: they opened unbranded ERPNext sidebars, and what they held is reachable from the Retail Store sidebar, including a **Back Office** section for owners). The
 Retail Store sidebar has: Point of Sale, Sales Invoice, Customer, Loyalty
 Program, Stock Balance, Material Request, Stock Entry, Stock Reconciliation,
 Warehouse, the catalogue, the till documents, and Setup. Frappe trims each
@@ -691,6 +691,7 @@ Display-side only; the server 403s stay the real boundary. Test: `tests/browser_
 
 ### Backlog (known, not built)
 
+* Report roles: `apply_report_and_page_roles` is meant to start each Custom Role from the report's standard roles, but after migrate Sales Register, Sales Analytics and Item-wise Sales Register hold only the retail roles (Profit and Loss / Balance Sheet showed the same until their accounting roles were named explicitly). Check what the Accountant can still open and fix the copy step.
 * Staff login page still shows "Powered by Solvronix" (theme setting; the Desk and storefront credits are already hidden).
 * Customer, Employee and Stock Count are still raw Desk forms; Ctrl+K search, the "All Options" menu and the Accountant / Warehouse Manager screens have not had a wording review.
 * `check_config` switches HR off when it finishes; run `tests/seed_hr_demo.run` before `browser_hr.py`.

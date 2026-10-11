@@ -61,6 +61,29 @@ PEOPLE = [
 ]
 
 
+# Back office (Store Owner / Store Admin): what the raw Stock / Selling / Accounts module shells used to hold
+# that the Retail Store sidebar did not, now that those Dock icons are gone. Shown only where the role
+# holds read permission, in shop language.
+BACK_OFFICE_LINKS = [
+	("Sales Order", "Online Orders"),
+	("Delivery Note", "Deliveries"),
+	("Payment Entry", "Payments"),
+	("Pricing Rule", "Discount Rules"),
+	("Price List", "Price Lists"),
+	("Mode of Payment", "Payment Methods"),
+	("Sales Taxes and Charges Template", "Taxes"),
+	("Account", "Chart of Accounts"),
+	("UOM", "Units"),
+	("Brand", "Brands"),
+	("Customer Group", "Customer Groups"),
+]
+
+
+# Reports in the same section (the report opens directly: no Accounting module shell), only for a role the report is
+# granted to (roles.REPORT_ROLES): the Store Owner, not Store Admin / Manager / Cashier.
+BACK_OFFICE_REPORTS = [("Profit and Loss Statement", "Profit & Loss"), ("Balance Sheet", "Balance Sheet")]
+
+
 # Optional capabilities (Retail Store Settings > Capabilities) live in ERPNext's own workspaces. With the
 # ERPNext app icon gone they are offered here instead, to the owner only (workspace_access.OWNER_LEVEL).
 CAPABILITY_WORKSPACES = [
@@ -227,6 +250,27 @@ def _people(roles):
 	]
 
 
+def _back_office(roles):
+	if not roles & BACK_OFFICE:
+		return []
+	rows = [
+		_link(label, "DocType", doctype)
+		for doctype, label in BACK_OFFICE_LINKS
+		if frappe.db.exists("DocType", doctype) and frappe.has_permission(doctype, "read")
+	]
+	for report, label in BACK_OFFICE_REPORTS:
+		if frappe.db.exists("Report", report) and frappe.get_doc("Report", report).is_permitted():
+			row = _link(label, "Report", report)
+			row["report"] = {"report_type": "Script Report", "ref_doctype": "GL Entry"}
+			rows.append(row)
+	if not rows:
+		return []
+	return [
+		{**_link("Back Office", "Section Break", ""), "type": "Section Break", "key": "Section Break|Back Office", "child": 0, "collapsible": 1, "indent": 1, "icon": "briefcase", "link_to": None, "link_type": None},
+		*rows,
+	]
+
+
 def _addons(roles):
 	if "Store Owner" not in roles:
 		return []
@@ -242,6 +286,17 @@ def _addons(roles):
 		{**_link("Add-ons", "Section Break", ""), "type": "Section Break", "key": "Section Break|Add-ons", "child": 0, "collapsible": 1, "indent": 1, "icon": "layout-grid", "link_to": None, "link_type": None},
 		*rows,
 	]
+
+
+@frappe.whitelist()
+def get_versions():
+	"""Wraps frappe.utils.change_log.get_versions (the About dialog and the "Installed Apps" list in the
+	avatar menu): app names and version numbers are for System Manager, not for shop staff."""
+	from frappe.utils.change_log import get_versions as original
+
+	if "System Manager" in frappe.get_roles():
+		return original()
+	return {}
 
 
 def boot_session(bootinfo):
@@ -268,7 +323,7 @@ def boot_session(bootinfo):
 			items.insert(at, _link("Request Stock", "Page", "stock-request"))
 	# People goes after the stock / catalogue / till sections, before Setup
 	setup_at = next((i for i, it in enumerate(items) if it.get("label") == "Setup"), len(items))
-	sidebar["items"] = items[:setup_at] + _people(roles) + _addons(roles) + items[setup_at:]
+	sidebar["items"] = items[:setup_at] + _people(roles) + _back_office(roles) + _addons(roles) + items[setup_at:]
 
 	_pin_to_retail_shell(bootinfo, sidebar["items"])
 

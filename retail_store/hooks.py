@@ -37,12 +37,13 @@ web_include_js = [
 ]
 # POS item cards + cart restyle (visual only, token-driven; loads after solvronix_desk per apps.txt)
 app_include_css = "/assets/retail_store/css/pos_restyle.css?v=4"
-app_include_js = ["/assets/retail_store/js/retail_store.js?v=2", "/assets/retail_store/js/landing.js?v=4"]
+app_include_js = ["/assets/retail_store/js/retail_store.js?v=6", "/assets/retail_store/js/landing.js?v=4"]
 
 # POS: one card per product template + Size/Colour picker (see pos_variants.py).
 # Toggle: Retail Store Settings > Capabilities > "Group Variants in POS".
 page_js = {"point-of-sale": "public/js/pos_variant_picker.js"}
 override_whitelisted_methods = {
+	"frappe.utils.change_log.get_versions": "retail_store.navigation.get_versions",
 	# Attribute filters (colour, size) on a variant shop: see storefront._items_with_attributes
 	"webshop.webshop.api.get_product_filter_data": "retail_store.storefront.get_product_filter_data",
 	"webshop.webshop.shopping_cart.cart.get_cart_quotation": "retail_store.storefront.get_cart_quotation",

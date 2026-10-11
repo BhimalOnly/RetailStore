@@ -169,6 +169,8 @@ PERMISSIONS = {
 		_CATALOGUE,
 		{
 			"Account": REF,  # owners may see the chart of accounts; till staff may not
+			"GL Entry": "r rep",  # Profit and Loss / Balance Sheet read the ledger
+			"Fiscal Year": REF,
 			"Customer": "r w c d rep p e exp",
 			"Sales Invoice": "r w c s x a rep p e exp",
 			"POS Invoice": "r w c s x a rep p e exp",
@@ -214,6 +216,9 @@ REPORT_ROLES = {
 	"Sales Register": ["Store Manager", "Store Owner"],
 	"Sales Analytics": ["Store Manager", "Store Owner"],
 	"Item-wise Sales Register": ["Store Manager", "Store Owner"],
+	# the accounting roles are named so a Custom Role never narrows these two reports to the owner alone
+	"Profit and Loss Statement": ["Store Owner", "Accounts User", "Accounts Manager", "Auditor"],
+	"Balance Sheet": ["Store Owner", "Accounts User", "Accounts Manager", "Auditor"],
 }
 PAGE_ROLES = {
 	"point-of-sale": ["Store Cashier", "Store Manager", "Store Owner"],

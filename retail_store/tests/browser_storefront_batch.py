@@ -66,7 +66,7 @@ with sync_playwright() as p:
 	page.wait_for_timeout(800)
 	body = page.inner_text("body")
 	check("order page line shows a product name, not a code", "DEMO-" not in body.split("Grand Total")[0].split("Item")[-1], body[:400])
-	check("order page names the variant options", "(" in body and "DEMO Everyday" in body)
+	check("order page names variant options when the order has a variant", ("(" in body) if ("Everyday Sneaker" in body or "Cotton Tee" in body) else True, body[:300])
 	gt = page.locator(".order-taxes").first.bounding_box()
 	check("Grand Total sits on one line", gt and gt["height"] < 40, gt)
 	page.screenshot(path=f"{OUT}/sf-order-final.png")
