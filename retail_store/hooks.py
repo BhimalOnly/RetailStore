@@ -1,4 +1,5 @@
 app_name = "retail_store"
+
 app_title = "Retail Store"
 app_publisher = "bhimall"
 app_description = "Reusable retail starter pack for ERPNext (stores, warehouses, POS, loyalty)"
@@ -6,6 +7,8 @@ app_email = "bhimalonly@gmail.com"
 app_license = "mit"
 
 required_apps = ["erpnext"]
+
+from retail_store.hr_doctypes import EMPLOYEE_FIELD  # noqa: E402  (permission hooks below)
 
 # Apps screen / navigation
 # ------------------------
@@ -85,6 +88,8 @@ permission_query_conditions = {
 	"Customer": "retail_store.storefront.customer_query_conditions",
 	"Dashboard": "retail_store.workspace_access.dashboard_query_conditions",
 	"Stock Ledger Entry": "retail_store.permissions.stock_ledger_entry_query_conditions",
+	# HR: managers see their stores' people, everyone else only themselves (hr.py)
+	**{dt: "retail_store.hr.query_conditions" for dt in EMPLOYEE_FIELD},
 }
 
 has_permission = {
@@ -95,6 +100,7 @@ has_permission = {
 	"Bin": "retail_store.permissions.bin_has_permission",
 	"Customer": "retail_store.storefront.customer_has_permission",
 	"Stock Ledger Entry": "retail_store.permissions.stock_ledger_entry_has_permission",
+	**{dt: "retail_store.hr.has_permission" for dt in EMPLOYEE_FIELD},
 }
 
 # Document Events
@@ -131,6 +137,9 @@ doc_events = {
 	},
 	"POS Profile": {
 		"on_update": "retail_store.location.resync_users_for_pos_profile",
+	},
+	"Employee": {
+		"validate": "retail_store.hr.employee_validate",
 	},
 }
 

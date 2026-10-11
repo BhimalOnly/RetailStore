@@ -179,12 +179,27 @@ retail_store.pos.ensure_patched = function (tries = 0) {
 	if (tries < 600) setTimeout(() => retail_store.pos.ensure_patched(tries + 1), 50);
 };
 
+// Clock In / Out (HR). ERPNext's POS controller sets its own header buttons once the bundle
+// has loaded (and would overwrite ours), so wait for it, then add ours next to Recent Orders.
+retail_store.pos.add_clock_button = function (wrapper, tries = 0) {
+	const ready = wrapper.pos && wrapper.page && wrapper.page.btn_secondary && wrapper.page.btn_secondary.is(":visible");
+	if (ready) {
+		const open_clock = () => frappe.set_route("store-clock");
+		if (!wrapper.page.wrapper.find(".rs-clock-btn").length) {
+			wrapper.page.add_button(__("Clock In / Out"), open_clock).addClass("rs-clock-btn");
+		}
+		return;
+	}
+	if (tries < 200) setTimeout(() => retail_store.pos.add_clock_button(wrapper, tries + 1), 100);
+};
+
 (function () {
 	const page = frappe.pages["point-of-sale"];
 	if (!page) return;
 	const original_on_page_load = page.on_page_load;
 	page.on_page_load = function (wrapper) {
 		const result = original_on_page_load.call(this, wrapper);
+		if (frappe.boot.retail_store_clock) retail_store.pos.add_clock_button(wrapper);
 		retail_store.pos.ensure_patched();
 		return result;
 	};

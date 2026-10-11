@@ -1,0 +1,24 @@
+{
+ "doctype": "Page",
+ "name": "store-clock",
+ "page_name": "store-clock",
+ "title": "Clock In / Out",
+ "module": "Retail Store",
+ "standard": "Yes",
+ "system_page": 0,
+ "roles": [
+  {"role": "Store Attendant"},
+  {"role": "Store Cashier"},
+  {"role": "Store Manager"},
+  {"role": "Warehouse Attendant"},
+  {"role": "Warehouse Manager"},
+  {"role": "Store Owner"},
+  {"role": "Store Admin"},
+  {"role": "System Manager"}
+ ],
+ "idx": 0,
+ "modified": "2026-10-11 10:00:00.000000",
+ "creation": "2026-10-11 10:00:00.000000",
+ "owner": "Administrator",
+ "modified_by": "Administrator"
+}

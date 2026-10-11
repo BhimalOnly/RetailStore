@@ -345,6 +345,72 @@ a site by overriding `--rs-surface`, `--rs-paper`, `--rs-ink`, `--rs-line`, `--r
   files stay in the app, so also delete `public/images/demo/` when cloning this app for a client.
 * The "material card" callout on product pages needs template markup and content, not CSS, and is not done.
 
+#### HR & Payroll (needs the `hrms` app)
+
+```bash
+bench get-app hrms --branch version-16
+bench --site <site> install-app hrms
+```
+
+Then tick **HR** (System Manager, Retail Store Settings > Capabilities). It unhides the HR and
+Payroll modules, grants the roles below, and seeds defaults from the new **HR & Payroll** tab.
+Untick it and the grants are withdrawn again.
+
+> ## ⚠ Payroll must be verified before any real pay run
+> Every payroll figure here (PAYE bands, CSG, HRDC, PRGF, leave days, overtime multipliers) is a
+> **starting point from a research note** (`mauritius_payroll_reference.md` in the bench root),
+> compiled from payroll vendors and law firms, **not** from the MRA or the Workers' Rights Act
+> text, and several figures are disputed between sources. The PAYE bands were not yet gazetted
+> when the note was written. **The client's own accountant or payroll professional must check
+> every rate, threshold and the resulting payslips against current MRA guidance and the Act
+> before the first real pay run.** The system makes this configurable; it cannot make it correct.
+> (Same category of flag as per-client SMTP in the shopper section below.)
+
+**Who can do what**
+
+| Role | Employee | Checkin / Attendance / Shift Assignment / Leave | Payroll |
+|---|---|---|---|
+| Store Owner | everyone, create + delete | everyone, full | full |
+| System Manager | everyone | everyone | full, **and** the only role that edits the rates |
+| Store Admin | everyone, create + edit | none | none |
+| Store Manager | own stores' staff, edit **not create** | own stores' staff | none |
+| Cashier / Attendant / Warehouse | themselves | clock in/out themselves | none |
+
+**One location per employee.** Employee has a single `Store / Location` field. For an employee
+with a login it follows that user's default location in *Retail Staff Access* (so there is one
+source of truth: change it there and the Employee follows); loginless staff are set directly on
+the Employee. A Store Manager sees and edits employees of the stores in their own Retail Staff
+Access, and cannot move one to a store they do not run.
+
+**Scoping is enforced by `hr.py`, not by HRMS' own "Employee → self" User Permission.** That
+permission would stop a Store Manager seeing their store's staff, so it is switched off, and
+every doctype that carries a person (`hr_doctypes.py`; Salary Slip, Expense Claim, Timesheet,
+Checkin, Attendance, ...) is limited the same way by permission hooks: managers see their stores,
+everyone else sees only themselves, owner-level roles see all. `tests/check_hr.py` walks every
+doctype on the site and fails if an HRMS upgrade adds a person-linked doctype that is not covered.
+HRMS gives every user linked to an Employee the `Employee` role, which can read payroll doctypes,
+so **do not remove these hooks without putting something equivalent in their place.**
+
+**Clock in / out** is a page (`/desk/store-clock`), reached from a **Clock In / Out** button in the
+POS header (shown only when HR is on and the user has an Employee record). It writes a standard
+*Employee Checkin* through HRMS' `add_log_based_on_employee_field`, so shifts and auto-attendance
+work as HRMS designed. Staff never open a Desk form. Link each login to an Employee
+(`User ID` on the Employee); a user with no Employee sees a plain message instead.
+
+**What gets seeded** (idempotent, re-applied on every settings save / migrate): Leave Types
+(*Annual Leave*, and *Sick Leave* only if you give it a non-zero figure), an Overtime Type, Salary
+Components (*CSG (Employee)*, employer-side *CSG*, *HRDC Levy*, *PRGF* as statistical components so
+they never reduce net pay, *PAYE*, *Basic Salary*, *Overtime*, *End of Year Bonus*) and a submitted
+*Income Tax Slab*. Formulas are rebuilt from the settings, so no rate lives in Python or JS. Changing a
+PAYE band adds a **new** Income Tax Slab (HRMS versions tax by effective date); older slabs stay for
+past payslips. Not modelled: the PRGF wage ceiling (sources disagree), the cumulative-PAYE
+remittance deadline, the 3x rate beyond 8 public-holiday hours, and the 13th-month
+"whichever is higher" rule (*End of Year Bonus* is paid via Additional Salary).
+
+**Time zone.** Clock times, shifts and auto-attendance all use System Settings > Time Zone.
+This is a Mauritius system, so it must be `Indian/Mauritius` (UTC+4); the dev site is set to
+that. Install and the setup wizard set it automatically on new sites (`install.py`); change it here if a site needs another zone.
+
 #### Shopper identity: sign-up, sign-in, front page, portal
 
 The audit of the Online Store found it could not onboard a real customer. What changed:
@@ -581,6 +647,11 @@ MAIL_OUT=/tmp/retail_mail python apps/retail_store/retail_store/tests/browser_sh
 # CRM capability in a real browser (needs CRM switched on): Lead -> Opportunity -> Customer as
 # Store Owner, and that no other retail role can see or reach CRM; cleans up after itself
 python apps/retail_store/retail_store/tests/browser_crm.py
+# HR (needs hrms + HR switched on + demo data): scoping, grants, payroll seed, clock API. Removes what it creates
+bench --site <site> execute retail_store.tests.check_hr.run
+# HR in a real browser as cashier / manager / owner / admin / system manager (seed the employees first)
+bench --site <site> execute retail_store.tests.seed_hr_demo.run
+python apps/retail_store/retail_store/tests/browser_hr.py
 # who may open which workspace, as each demo user, over HTTP. Enumerates EVERY workspace on the
 # site (expects 403 for all but Retail Store for retail-only roles)
 python3 apps/retail_store/retail_store/tests/workspace_access.py

@@ -32,6 +32,13 @@ def get_branding():
 def boot_session(bootinfo):
 	branding = get_branding()
 	bootinfo.retail_store_branding = branding
+	# POS shows its Clock In / Out button only when HR is on and the user has an Employee record
+	bootinfo.retail_store_clock = bool(
+		"hrms" in frappe.get_installed_apps()
+		and frappe.db.get_single_value("Retail Store Settings", "enable_hr")
+		and frappe.session.user != "Guest"
+		and frappe.db.exists("Employee", {"user_id": frappe.session.user, "status": "Active"})
+	)
 	# v16 desk shows the app tile's logo (top-left, apps screen), not Navbar Settings'
 	# app_logo; the tile logo comes from a static hook, so swap in this site's logo.
 	if branding.get("logo"):

@@ -27,6 +27,9 @@ class RetailStaffAccess(Document):
 
 		sync_location_permissions(self)
 		apply_module_profile(self.user)
+		from retail_store.hr import sync_employees_for_user
+
+		sync_employees_for_user(self.user)
 
 	def on_trash(self):
 		clear_location_permissions(self.user)

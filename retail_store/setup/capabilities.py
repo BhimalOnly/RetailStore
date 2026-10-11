@@ -24,6 +24,77 @@ SUBMIT = {**FULL, "submit": 1, "cancel": 1, "amend": 1}
 # main document fails with a 403 on a harmless dropdown. tests/capability_links.py lists them.
 LOOKUP = {"read": 1}
 
+# --- HR (enable_hr). Which rights each role gets while HR is switched on. -------------------
+_HR_DELETE = {**FULL, "delete": 1}
+HR_OWNER = {
+	"Employee": _HR_DELETE,
+	"Employee Checkin": _HR_DELETE,
+	"Attendance": {**SUBMIT, "delete": 1},
+	"Attendance Request": SUBMIT,
+	"Shift Type": FULL,
+	"Shift Assignment": SUBMIT,
+	"Leave Type": FULL,
+	"Leave Policy": SUBMIT,
+	"Leave Period": FULL,
+	"Leave Allocation": SUBMIT,
+	"Leave Application": SUBMIT,
+	"Holiday List": FULL,
+	"Department": FULL,
+	"Designation": FULL,
+	"Branch": FULL,
+	"Employment Type": FULL,
+	"Employee Grade": FULL,
+	# Payroll: Store Owner and System Manager only (Store Manager / Store Admin get none).
+	"Salary Component": FULL,
+	"Salary Structure": SUBMIT,
+	"Salary Structure Assignment": SUBMIT,
+	"Salary Slip": SUBMIT,
+	"Payroll Entry": SUBMIT,
+	"Additional Salary": SUBMIT,
+	"Income Tax Slab": SUBMIT,
+	"Payroll Period": FULL,
+	"Overtime Type": FULL,
+	"Shift Location": FULL,
+	"Shift Request": SUBMIT,
+	"Leave Block List": FULL,
+	"Leave Policy Assignment": SUBMIT,
+	"Compensatory Leave Request": SUBMIT,
+}
+_HR_LOOKUPS = {
+	k: LOOKUP
+	for k in (
+		"Shift Type",
+		"Leave Type",
+		"Leave Period",
+		"Leave Allocation",
+		"Holiday List",
+		"Department",
+		"Designation",
+		"Branch",
+		"Employment Type",
+		"Employee Grade",
+		"Overtime Type",
+	)
+}
+HR_MANAGER = {
+	**_HR_LOOKUPS,
+	# manage, not create: new people are added by the owner (hr.employee_validate also keeps
+	# a manager inside their own stores)
+	"Employee": {"read": 1, "write": 1, "report": 1, "print": 1, "export": 1},
+	"Employee Checkin": {"read": 1, "write": 1, "create": 1, "report": 1, "export": 1},
+	"Attendance": SUBMIT,
+	"Attendance Request": SUBMIT,
+	"Shift Assignment": SUBMIT,
+	"Shift Location": LOOKUP,
+	"Leave Application": SUBMIT,
+}
+HR_ADMIN = {
+	**_HR_LOOKUPS,
+	"Employee": {"read": 1, "write": 1, "create": 1, "report": 1, "print": 1},
+}
+HR_STAFF = {"Employee Checkin": {"read": 1, "create": 1}, "Shift Type": LOOKUP, "Overtime Type": LOOKUP}
+HR_STAFF_ROLES = ["Store Attendant", "Store Cashier", "Warehouse Attendant", "Warehouse Manager"]
+
 OPTIONAL = {
 	"enable_crm": {
 		"modules": ["CRM"],
@@ -58,7 +129,20 @@ OPTIONAL = {
 			"Request for Quotation": SUBMIT,
 		},
 	},
-	"enable_hr": {"modules": ["HR", "Payroll"], "icons": ["HR", "Payroll", "Frappe HR"], "grants": {}},
+	"enable_hr": {
+		"modules": ["HR", "Payroll"],
+		"icons": ["HR", "Payroll", "Frappe HR"],
+		# Store Owner: HR Manager-equivalent plus payroll. Rows are scoped per store by hr.py.
+		"grants": HR_OWNER,
+		"role_grants": {
+			# Store Manager: runs their store's people day to day. No create on Employee, no payroll.
+			"Store Manager": HR_MANAGER,
+			# Store Admin: sets up Employee records (and nothing else HR).
+			"Store Admin": HR_ADMIN,
+			# Shop floor: clock in/out. They only ever reach their own log (hr.py).
+			**{role: HR_STAFF for role in HR_STAFF_ROLES},
+		},
+	},
 	"enable_manufacturing": {"modules": ["Manufacturing"], "icons": ["Manufacturing"], "grants": {}},
 	"enable_quality": {"modules": ["Quality Management"], "icons": ["Quality"], "grants": {}},
 	"enable_support": {"modules": ["Support"], "icons": ["Support"], "grants": {}},
@@ -84,7 +168,9 @@ def apply_capabilities(settings=None):
 		if not enabled:
 			blocked += _existing_modules(cfg["modules"])
 		_set_icons_hidden(cfg["icons"], hidden=not enabled)
-		_set_owner_grants(cfg["grants"], enabled)
+		_set_role_grants(OWNER, cfg["grants"], enabled)
+		for role, grants in cfg.get("role_grants", {}).items():
+			_set_role_grants(role, grants, enabled)
 		for label in cfg["icons"]:
 			dock_visibility[label] = not enabled
 
@@ -94,6 +180,10 @@ def apply_capabilities(settings=None):
 		frappe.db.set_single_value("Webshop Settings", "enabled", 1)
 		setup_webshop_defaults()
 		backfill_thumbnails()
+
+	from retail_store.hr import setup_hr_defaults
+
+	setup_hr_defaults(settings)
 
 	from retail_store.portal_access import apply_portal_menu
 
@@ -253,18 +343,18 @@ def _set_dock_hidden(hidden_by_sidebar):
 			_save_layer(app, entries, user=None, require_visible=False)
 
 
-def _set_owner_grants(grants, enabled):
+def _set_role_grants(role, grants, enabled):
 	from frappe.permissions import setup_custom_perms
 
 	for doctype, rights in grants.items():
 		if not frappe.db.exists("DocType", doctype):
 			continue
-		name = frappe.db.get_value("Custom DocPerm", {"parent": doctype, "role": OWNER, "permlevel": 0, "if_owner": 0})
+		name = frappe.db.get_value("Custom DocPerm", {"parent": doctype, "role": role, "permlevel": 0, "if_owner": 0})
 		if enabled and not name:
 			setup_custom_perms(doctype)
 			submittable = frappe.get_meta(doctype).is_submittable
 			perm = {k: v for k, v in rights.items() if submittable or k not in ("submit", "cancel", "amend")}
-			frappe.get_doc({"doctype": "Custom DocPerm", "parent": doctype, "role": OWNER, "permlevel": 0, **perm}).insert(
+			frappe.get_doc({"doctype": "Custom DocPerm", "parent": doctype, "role": role, "permlevel": 0, **perm}).insert(
 				ignore_permissions=True
 			)
 			frappe.clear_cache(doctype=doctype)

@@ -52,7 +52,31 @@
   "require_request_approval",
   "access_tab",
   "location_scoped_doctypes",
-  "pos_scoped_doctypes"
+  "pos_scoped_doctypes",
+  "hr_tab",
+  "hr_leave_section",
+  "hr_annual_leave_days",
+  "hr_sick_leave_days",
+  "column_break_hr1",
+  "hr_overtime_multiplier",
+  "hr_rest_day_multiplier",
+  "payroll_section",
+  "paye_effective_from",
+  "paye_band1_limit",
+  "paye_band2_limit",
+  "column_break_pay1",
+  "paye_rate1",
+  "paye_rate2",
+  "paye_rate3",
+  "contrib_section",
+  "csg_salary_threshold",
+  "csg_employee_rate_low",
+  "csg_employee_rate_high",
+  "column_break_pay2",
+  "csg_employer_rate_low",
+  "csg_employer_rate_high",
+  "hrdc_rate",
+  "prgf_rate"
  ],
  "fields": [
   {
@@ -298,6 +322,189 @@
    "label": "Doctypes Restricted by POS Profile",
    "default": "POS Opening Entry\nPOS Closing Entry",
    "description": "One per line. Restricted to the POS Profiles of the staff member's warehouses."
+  },
+  {
+   "fieldname": "hr_tab",
+   "fieldtype": "Tab Break",
+   "label": "HR & Payroll",
+   "depends_on": "eval:doc.enable_hr"
+  },
+  {
+   "fieldname": "hr_leave_section",
+   "fieldtype": "Section Break",
+   "label": "Leave & Overtime Defaults",
+   "description": "Starting points written to Leave Types and the Overtime Type when HR is on. Verify against the Workers' Rights Act 2019 before relying on them: sources disagree on annual leave (20 vs 22 days).",
+   "depends_on": "eval:doc.enable_hr"
+  },
+  {
+   "fieldname": "hr_annual_leave_days",
+   "fieldtype": "Float",
+   "label": "Annual Leave (days / year)",
+   "default": "20",
+   "depends_on": "eval:doc.enable_hr"
+  },
+  {
+   "fieldname": "hr_sick_leave_days",
+   "fieldtype": "Float",
+   "label": "Sick Leave (days / year)",
+   "default": "0",
+   "depends_on": "eval:doc.enable_hr",
+   "description": "Leave 0 until confirmed from the Act; no Sick Leave type is created while this is 0."
+  },
+  {
+   "fieldname": "column_break_hr1",
+   "fieldtype": "Column Break",
+   "label": "",
+   "depends_on": "eval:doc.enable_hr"
+  },
+  {
+   "fieldname": "hr_overtime_multiplier",
+   "fieldtype": "Float",
+   "label": "Overtime Pay Multiplier",
+   "default": "1.5",
+   "depends_on": "eval:doc.enable_hr"
+  },
+  {
+   "fieldname": "hr_rest_day_multiplier",
+   "fieldtype": "Float",
+   "label": "Rest Day / Public Holiday Multiplier",
+   "default": "2",
+   "depends_on": "eval:doc.enable_hr",
+   "description": "Applies to the first 8 hours (the Act pays 3x beyond that; HRMS cannot split a day, so adjust per case)."
+  },
+  {
+   "fieldname": "payroll_section",
+   "fieldtype": "Section Break",
+   "label": "Payroll Statutory Rates (System Manager only)",
+   "description": "NOT verified. Every figure is a starting point from a research note; the client's own accountant or payroll professional must check each one against current MRA guidance and the Workers' Rights Act before ANY real pay run. Saving rewrites the Salary Components and, if the PAYE bands changed, adds a new Income Tax Slab.",
+   "permlevel": 1,
+   "depends_on": "eval:doc.enable_hr"
+  },
+  {
+   "fieldname": "paye_effective_from",
+   "fieldtype": "Date",
+   "label": "PAYE Effective From",
+   "default": "2025-07-01",
+   "permlevel": 1,
+   "depends_on": "eval:doc.enable_hr"
+  },
+  {
+   "fieldname": "paye_band1_limit",
+   "fieldtype": "Currency",
+   "label": "PAYE Band 1 Up To (annual)",
+   "default": "500000",
+   "permlevel": 1,
+   "depends_on": "eval:doc.enable_hr"
+  },
+  {
+   "fieldname": "paye_band2_limit",
+   "fieldtype": "Currency",
+   "label": "PAYE Band 2 Up To (annual)",
+   "default": "1000000",
+   "permlevel": 1,
+   "depends_on": "eval:doc.enable_hr"
+  },
+  {
+   "fieldname": "column_break_pay1",
+   "fieldtype": "Column Break",
+   "label": "",
+   "permlevel": 1,
+   "depends_on": "eval:doc.enable_hr"
+  },
+  {
+   "fieldname": "paye_rate1",
+   "fieldtype": "Percent",
+   "label": "PAYE Rate, Band 1",
+   "default": "0",
+   "permlevel": 1,
+   "depends_on": "eval:doc.enable_hr"
+  },
+  {
+   "fieldname": "paye_rate2",
+   "fieldtype": "Percent",
+   "label": "PAYE Rate, Band 2",
+   "default": "10",
+   "permlevel": 1,
+   "depends_on": "eval:doc.enable_hr"
+  },
+  {
+   "fieldname": "paye_rate3",
+   "fieldtype": "Percent",
+   "label": "PAYE Rate, Above Band 2",
+   "default": "20",
+   "permlevel": 1,
+   "depends_on": "eval:doc.enable_hr"
+  },
+  {
+   "fieldname": "contrib_section",
+   "fieldtype": "Section Break",
+   "label": "CSG, HRDC and PRGF",
+   "permlevel": 1,
+   "depends_on": "eval:doc.enable_hr"
+  },
+  {
+   "fieldname": "csg_salary_threshold",
+   "fieldtype": "Currency",
+   "label": "CSG Monthly Salary Threshold",
+   "default": "50000",
+   "permlevel": 1,
+   "depends_on": "eval:doc.enable_hr"
+  },
+  {
+   "fieldname": "csg_employee_rate_low",
+   "fieldtype": "Percent",
+   "label": "CSG Employee Rate, up to threshold",
+   "default": "1.5",
+   "permlevel": 1,
+   "depends_on": "eval:doc.enable_hr"
+  },
+  {
+   "fieldname": "csg_employee_rate_high",
+   "fieldtype": "Percent",
+   "label": "CSG Employee Rate, above threshold",
+   "default": "3",
+   "permlevel": 1,
+   "depends_on": "eval:doc.enable_hr"
+  },
+  {
+   "fieldname": "column_break_pay2",
+   "fieldtype": "Column Break",
+   "label": "",
+   "permlevel": 1,
+   "depends_on": "eval:doc.enable_hr"
+  },
+  {
+   "fieldname": "csg_employer_rate_low",
+   "fieldtype": "Percent",
+   "label": "CSG Employer Rate, up to threshold",
+   "default": "3",
+   "permlevel": 1,
+   "depends_on": "eval:doc.enable_hr"
+  },
+  {
+   "fieldname": "csg_employer_rate_high",
+   "fieldtype": "Percent",
+   "label": "CSG Employer Rate, above threshold",
+   "default": "6",
+   "permlevel": 1,
+   "depends_on": "eval:doc.enable_hr"
+  },
+  {
+   "fieldname": "hrdc_rate",
+   "fieldtype": "Percent",
+   "label": "HRDC Levy (employer)",
+   "default": "1.5",
+   "permlevel": 1,
+   "depends_on": "eval:doc.enable_hr"
+  },
+  {
+   "fieldname": "prgf_rate",
+   "fieldtype": "Percent",
+   "label": "PRGF (employer)",
+   "default": "4.5",
+   "description": "The PRGF wage ceiling is disputed between sources and is not applied.",
+   "permlevel": 1,
+   "depends_on": "eval:doc.enable_hr"
   }
  ],
  "permissions": [

@@ -20,11 +20,34 @@ CUSTOM_FIELDS = {
 			"module": "Retail Store",
 		}
 	],
+	"Employee": [
+		{
+			"fieldname": "custom_store_warehouse",
+			"fieldtype": "Link",
+			"label": "Store / Location",
+			"options": "Warehouse",
+			"insert_after": "company",
+			"in_list_view": 0,
+			"in_standard_filter": 1,
+			"description": "Where this person works. Follows Retail Staff Access when the employee has a login.",
+			"module": "Retail Store",
+		}
+	],
 }
+
+
+SITE_TIME_ZONE = "Indian/Mauritius"
+
+
+def set_site_time_zone():
+	"""Every client is Mauritius-based; don't leave it to the setup wizard's picker. Not run on
+	migrate, so a deliberate override in System Settings sticks."""
+	frappe.db.set_single_value("System Settings", "time_zone", SITE_TIME_ZONE)
 
 
 def after_install():
 	run_setup()
+	set_site_time_zone()
 	click.secho("Retail Store installed. Configure it at /desk/retail-store-settings", fg="green")
 
 
@@ -36,6 +59,7 @@ def after_setup_wizard(args=None):
 	from retail_store.setup.company import setup_company_defaults
 
 	setup_company_defaults()
+	set_site_time_zone()  # the wizard writes its own choice after install
 
 
 def run_setup():
@@ -51,6 +75,9 @@ def run_setup():
 	setup_material_request_workflow()
 	apply_capabilities()
 	setup_company_defaults()
+	from retail_store.hr import backfill_employee_stores
+
+	backfill_employee_stores()
 	frappe.clear_cache()
 
 

@@ -31,7 +31,7 @@ RETAIL_ONLY = [
 ALWAYS_OPEN = {"Retail Store"}
 SYSTEM_MANAGER_ONLY = {"Build", "Users"}  # everyone back-office except these is allowed the rest
 # Optional-capability workspaces: Store Owner holds their grants, Store Admin does not.
-OWNER_ONLY = {"CRM", "Buying", "Assets", "Projects", "Manufacturing", "Quality", "Support"}
+OWNER_ONLY = {"Payroll", "CRM", "Buying", "Assets", "Projects", "Manufacturing", "Quality", "Support"}
 ACCOUNTANT = {"Accounting", "Financial Reports", "Invoicing", "Payments", "Assets"}
 
 
