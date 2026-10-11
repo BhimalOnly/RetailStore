@@ -66,6 +66,8 @@ _BASE_READ = {
 	"Sales Taxes and Charges Template": REF,
 	"Item Tax Template": REF,
 	"Cost Center": REF,
+	"Custom HTML Block": REF,  # the Retail Store home greeting (home.py); a role without it gets no block
+	"Number Card": REF,  # Sales today / Requests waiting on the home page
 }
 
 _CUSTOMER = {"Customer": "r w c rep p e", "Contact": "r w c", "Address": "r w c"}

@@ -86,7 +86,7 @@ with sync_playwright() as p:
 	page.wait_for_timeout(2500)
 	check("cashier does not see 'Powered by Solvronix'", not page.locator("#st-powered-by:visible").count())
 	blocks = page.evaluate("()=>document.querySelectorAll('.ce-block').length")
-	check("cashier home: only the blocks they can use are laid out (no holes)", blocks <= 7, blocks)
+	check("cashier home: only the blocks they can use are laid out (no holes)", blocks <= 8, blocks)
 	body = page.inner_text("body")
 	check("cashier home does not offer Retail Store Settings / Staff Access", "Retail Store Settings" not in body and "Retail Staff Access" not in body)
 	ctx, page = login(br, "wh.attendant@demo.example")

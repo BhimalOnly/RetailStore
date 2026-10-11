@@ -185,3 +185,31 @@
 .rs-pick-price{font-size:1.4rem;font-weight:700}
 .rs-pick-code{flex-basis:100%;font-size:11px;color:var(--text-muted)}
 .rs-pick-hint{margin-top:6px;padding:12px 16px;border-radius:12px;background:var(--control-bg,#f3f5f4);color:var(--text-muted);font-size:13px}
+
+/* ---- Retail Store home page (workspace): cards, number cards and heading hierarchy ----------------------
+   Same radius / shadow tokens as the POS cards and Desk dialogs above. Scoped to the workspace editor so
+   forms and lists are untouched. */
+.editor-js-container .widget {
+	border-radius: var(--rs-pos-radius);
+	box-shadow: var(--rs-pos-shadow);
+	transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.editor-js-container .shortcut-widget-box:hover,
+.editor-js-container .number-widget-box:hover,
+.editor-js-container .links-widget-box:hover {
+	transform: translateY(-1px);
+	box-shadow: var(--rs-pos-shadow-hover);
+}
+/* section headings ("Today", "Everything else") step back so the greeting and the figures lead */
+.editor-js-container .ce-header .h4 {
+	font-size: 12px;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--text-muted);
+}
+.editor-js-container .ce-header .h4 b { font-weight: 600; }
+.editor-js-container .ce-block:has(.ce-header) { margin-top: 10px; }
+/* number cards: the figure is the point */
+.editor-js-container .number-widget-box .widget-title,
+.editor-js-container .number-widget-box .widget-label { color: var(--text-muted); }
+.editor-js-container .number-widget-box .number { font-size: 2rem; font-weight: 600; line-height: 1.2; }

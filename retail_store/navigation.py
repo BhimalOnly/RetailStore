@@ -61,6 +61,20 @@ PEOPLE = [
 ]
 
 
+# Home-page number cards (home.py): who sees each, and the plain shortcut tile it replaces for them.
+NUMBER_CARDS = {
+	"Sales today": ({"Store Manager"}, "Sales"),
+	"Requests waiting": (_STOCK_HANDS, "Request Transfer"),
+}
+
+
+def _number_cards_for(roles):
+	"""{card: replaced shortcut} for the cards this role sees: managers and above for sales, stock roles
+	for requests; a cashier sees neither and keeps the plain tiles."""
+	everyone = BACK_OFFICE
+	return {card: tile for card, (allowed, tile) in NUMBER_CARDS.items() if roles & (allowed | everyone)}
+
+
 # Back office (Store Owner / Store Admin): what the raw Stock / Selling / Accounts module shells used to hold
 # that the Retail Store sidebar did not, now that those Dock icons are gone. Shown only where the role
 # holds read permission, in shop language.
@@ -136,6 +150,7 @@ def _trim_home_layout(data):
 				continue
 			shortcuts = {s.get("label") for s in (built.get("shortcuts") or {}).get("items") or []}
 			cards = {c.get("label") for c in (built.get("cards") or {}).get("items") or []}
+			numbers = {n.get("label") or n.get("name") for n in (built.get("number_cards") or {}).get("items") or []}
 			kept, pending_header = [], None
 			for b in blocks:
 				d = b.get("data") or {}
@@ -145,6 +160,8 @@ def _trim_home_layout(data):
 				if b.get("type") == "shortcut" and d.get("shortcut_name") not in shortcuts:
 					continue
 				if b.get("type") == "card" and d.get("card_name") not in cards:
+					continue
+				if b.get("type") == "number_card" and d.get("number_card_name") not in numbers:
 					continue
 				if pending_header:
 					kept.append(pending_header)
@@ -157,18 +174,26 @@ def trim_workspace_page(result, user=None):
 	"""get_desktop_page for the Retail Store home: the same role rules as the sidebar, so a cashier's
 	home page does not offer Sales Invoice, Stock Entry or the item catalogue the sidebar hides."""
 	roles = set(frappe.get_roles(user))
-	# everyone but back office gets the same role rules as the sidebar (an accountant too: Retail Store
-	# Settings and Staff Access are not theirs to open)
-	if roles & BACK_OFFICE or not isinstance(result, dict):
+	if not isinstance(result, dict) or "System Manager" in roles:  # System Manager sees the page untrimmed
 		return result
+	cards_for = _number_cards_for(roles)
+	numbers = (result.get("number_cards") or {}).get("items")
+	if numbers is not None:
+		result["number_cards"]["items"] = [n for n in numbers if n.get("label") in cards_for or n.get("name") in cards_for]
+	replaced = set(cards_for.values())
+	back_office = bool(roles & BACK_OFFICE)
 
-	def visible(link_to):
+	def visible(link_to, label=None):
+		if label in replaced:
+			return False
 		rule = LINKS.get(link_to)
-		return not rule or bool(roles & rule[1])
+		return back_office or not rule or bool(roles & rule[1])
 
 	shortcuts = (result.get("shortcuts") or {}).get("items")
 	if shortcuts is not None:
-		result["shortcuts"]["items"] = [s for s in shortcuts if visible(s.get("link_to"))]
+		result["shortcuts"]["items"] = [s for s in shortcuts if visible(s.get("link_to"), s.get("label"))]
+	if back_office:
+		return result
 	cards = (result.get("cards") or {}).get("items")
 	if cards is not None:
 		kept = []
@@ -316,7 +341,7 @@ def boot_session(bootinfo):
 	bootinfo.retail_store_pos_form_view = bool(roles & (BACK_OFFICE | {"Store Manager"}))
 	if not _plain_user(roles):
 		return
-	if not roles & BACK_OFFICE and isinstance(bootinfo.get("workspaces"), dict):
+	if isinstance(bootinfo.get("workspaces"), dict):
 		_trim_home_layout(bootinfo.workspaces)  # the desk draws the home page from boot, not from get_workspaces
 	sidebar = (bootinfo.get("module_sidebars") or {}).get("Retail Store")
 	if not sidebar:

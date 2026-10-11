@@ -68,6 +68,9 @@ def run_setup():
 	from retail_store.setup.roles import setup_roles_and_permissions
 	from retail_store.setup.workflow import setup_material_request_workflow
 
+	from retail_store.home import ensure_home_records
+
+	ensure_home_records()
 	create_custom_fields(CUSTOM_FIELDS, ignore_validate=True)
 	ensure_single_defaults()
 	activate_retail_domain()

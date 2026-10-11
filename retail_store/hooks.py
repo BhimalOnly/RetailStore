@@ -36,8 +36,8 @@ web_include_js = [
 	"/assets/retail_store/js/shop_ui.js?v=3",
 ]
 # POS item cards + cart restyle (visual only, token-driven; loads after solvronix_desk per apps.txt)
-app_include_css = "/assets/retail_store/css/pos_restyle.css?v=4"
-app_include_js = ["/assets/retail_store/js/retail_store.js?v=7", "/assets/retail_store/js/landing.js?v=4"]
+app_include_css = "/assets/retail_store/css/pos_restyle.css?v=5"
+app_include_js = ["/assets/retail_store/js/retail_store.js?v=8", "/assets/retail_store/js/landing.js?v=4"]
 
 # POS: one card per product template + Size/Colour picker (see pos_variants.py).
 # Toggle: Retail Store Settings > Capabilities > "Group Variants in POS".
@@ -74,6 +74,7 @@ update_website_context = [
 
 # Installation
 # ------------
+before_install = "retail_store.home.before_install"
 after_install = "retail_store.install.after_install"
 after_migrate = "retail_store.install.after_migrate"
 setup_wizard_complete = "retail_store.install.after_setup_wizard"
