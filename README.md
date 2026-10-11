@@ -683,6 +683,12 @@ Downtown's test variants hit zero; top up with
 
 ---
 
+**Home icon.** The rail's top tile links to Frappe's own home (`/desk/home`), which is the Setup
+shell for an owner and the Apps launcher (naming ERPNext / Frappe HR, or "Not permitted") for
+everyone else. `public/js/landing.js` sends every retail user (anyone but System Manager) from
+that tile, from `/desk/home`, `/desk/setup/home` and any `desktop` route back to Retail Store.
+Display-side only; the server 403s stay the real boundary. Test: `tests/browser_home.py`.
+
 ### Backlog (known, not built)
 
 * Staff login page still shows "Powered by Solvronix" (theme setting; the Desk and storefront credits are already hidden).
