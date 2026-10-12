@@ -25,10 +25,11 @@
 	function hideCredit() {
 		if (frappe.user && frappe.user.has_role && frappe.user.has_role("System Manager")) return;
 		if (document.getElementById("rs-no-credit")) return;
+		// #st-sh-link is the toolbar's "Today's View" (the theme's own home page: widget builder, workspace switcher...)
 		// the rail's top tile repeats the Retail Store app icon right under it (and used to open Frappe's home);
 		// Reset Desktop Layout, the workspace search/list (one entry) and the theme-profile picker (names Frappe/Solvronix)
 		// in All Options mean nothing to shop staff: Appearance (theme, density, font size) stays
-		$('<style id="rs-no-credit">#st-powered-by,#st-icon-rail .st-rail-brand,#st-user-dropdown [data-action=reset-layout],#st-options-search-wrap,#st-options-body,.st-theme-profile-row{display:none !important}</style>').appendTo(document.head);
+		$('<style id="rs-no-credit">#st-powered-by,#st-sh-link,#st-icon-rail .st-rail-brand,#st-user-dropdown [data-action=reset-layout],#st-options-search-wrap,#st-options-body,.st-theme-profile-row{display:none !important}</style>').appendTo(document.head);
 	}
 
 	// ---- One app on the rail: hide the rail, put the brand mark beside the company name ----------------

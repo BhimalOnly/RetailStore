@@ -197,3 +197,24 @@ def get_permitted_charts(dashboard_name):
 
 	_require_dashboard_access(dashboard_name)
 	return core(dashboard_name)
+
+
+# Theme / generic Desk pages that retail users must not open: the theme's own home ("Today's View": widget builder,
+# workspace switcher, raw doctype counts), the apps launcher that names ERPNext / Frappe HR, a generic dashboard
+# viewer and two HR pages. A Custom Role can only ADD roles to a Page, so these are refused where Frappe loads a
+# page instead. ("desktop" is deliberately not here: Frappe routes through it; landing.js redirects it.)
+SYSTEM_MANAGER_PAGES = {"smart-home", "all-apps", "dashboard-view", "organizational-chart", "team-updates"}
+# the Accountant keeps the ERPNext app, whose "Dashboard" links open the generic dashboard viewer
+ALSO_ALLOWED = {"dashboard-view": {"Accounts User", "Accounts Manager"}}
+
+
+@frappe.whitelist(allow_guest=True)
+@frappe.read_only()
+def getpage(name: str):
+	"""Frappe's getpage, but the generic theme pages above open for System Manager only."""
+	from frappe.desk.desk_page import getpage as core_getpage
+
+	roles = set(frappe.get_roles())
+	if name in SYSTEM_MANAGER_PAGES and frappe.session.user != "Administrator" and not roles & ({"System Manager"} | ALSO_ALLOWED.get(name, set())):
+		frappe.throw(frappe._("Not permitted to open page {0}").format(name), frappe.PermissionError)
+	return core_getpage(name)

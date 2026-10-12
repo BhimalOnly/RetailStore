@@ -32,8 +32,9 @@ def open_home(br, user, width=1300):
 def greeting(page):
 	return page.evaluate("""()=>{const e=[...document.querySelectorAll('*')].find(x=>x.tagName.toLowerCase().startsWith('custom-block-'));
 		if(!e||!e.shadowRoot) return null;
-		const m=e.shadowRoot.querySelector('.rs-greet-main'), s=e.shadowRoot.querySelector('.rs-greet-sub');
-		return [m&&m.textContent, s&&s.textContent]}""")
+		const q=(c)=>e.shadowRoot.querySelector(c);
+		return [q('.rs-greet-main')&&q('.rs-greet-main').textContent, q('.rs-greet-eyebrow')&&q('.rs-greet-eyebrow').textContent, q('.rs-greet-date')&&q('.rs-greet-date').textContent,
+			q('.rs-greet-main')&&getComputedStyle(q('.rs-greet-main')).fontFamily, q('.rs-greet-main')&&parseFloat(getComputedStyle(q('.rs-greet-main')).fontSize)]}""")
 
 
 def number_cards(page):
@@ -58,7 +59,8 @@ with sync_playwright() as p:
 		ctx, page = open_home(br, user)
 		g = greeting(page)
 		check(f"{user}: greeting says Good morning/afternoon/evening, first name", g and re.match(r"Good (morning|afternoon|evening), \S+", g[0] or ""), g)
-		check(f"{user}: greeting subtext has store/brand and today's date", g and g[1] and " · " in g[1] and re.search(r"\d", g[1]), g)
+		check(f"{user}: eyebrow names the store/brand, date line has today's date", g and g[1] and g[2] and re.search(r"\d{4}", g[2]), g)
+		check(f"{user}: heading is the large serif style", g and "Georgia" in (g[3] or "") and g[4] >= 25, g)
 		nc = number_cards(page)
 		titles = {t for t in cards if any(t in n for n in nc)}
 		check(f"{user}: number cards = {sorted(cards) or 'none'}", titles == cards and len(nc) == len(cards), nc)

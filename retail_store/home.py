@@ -15,21 +15,36 @@ GREETING_BLOCK = "Retail Store Greeting"
 SALES_TODAY = "Sales today"
 REQUESTS_WAITING = "Requests waiting"
 
-GREETING_HTML = '<div class="rs-greeting"><div class="rs-greet-main">&nbsp;</div><div class="rs-greet-sub">&nbsp;</div></div>'
+GREETING_HTML = (
+	'<div class="rs-greeting"><div class="rs-greet-eyebrow">&nbsp;</div><h2 class="rs-greet-main">&nbsp;</h2>'
+	'<div class="rs-greet-date">&nbsp;</div></div>'
+)
+# Same type and spacing as the theme's own "Today's View" welcome (solvronix_desk smart_home.css): a small
+# spaced uppercase accent eyebrow, a large serif heading with the name in the accent colour, a muted date line.
 GREETING_STYLE = """
-.rs-greeting{padding:6px 2px 14px}
-.rs-greet-main{font-size:1.6rem;font-weight:600;line-height:1.25;color:var(--text-color)}
-.rs-greet-sub{margin-top:2px;color:var(--text-muted);font-size:var(--text-md,14px)}
+.rs-greeting{padding:10px 4px 12px}
+.rs-greet-eyebrow{margin-bottom:7px;color:var(--st-accent,var(--rs-brand,var(--primary)));font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+.rs-greet-main{margin:0;color:var(--heading-color,var(--text-color));font-family:Georgia,"Times New Roman",serif;font-size:clamp(25px,2.4vw,36px);font-weight:500;line-height:1.12;letter-spacing:-.025em}
+.rs-greet-name{color:var(--st-accent,var(--rs-brand,var(--primary)))}
+.rs-greet-date{margin-top:7px;color:var(--text-muted);font-size:12px}
 """
 GREETING_SCRIPT = """
 frappe.call({ method: "retail_store.home.greeting" }).then((r) => {
 	const g = r.message || {};
 	const hour = new Date().getHours();
 	const part = hour < 12 ? __("Good morning") : hour < 18 ? __("Good afternoon") : __("Good evening");
-	const date = new Date().toLocaleDateString(frappe.boot.lang || undefined, { weekday: "long", day: "numeric", month: "long" });
+	const date = new Date().toLocaleDateString(frappe.boot.lang || undefined, { weekday: "long", year: "numeric", month: "long", day: "numeric" });
 	const root = root_element.querySelector ? root_element : root_element[0];
-	root.querySelector(".rs-greet-main").textContent = g.first_name ? part + ", " + g.first_name : part;
-	root.querySelector(".rs-greet-sub").textContent = [g.store, date].filter(Boolean).join(" \\u00b7 ");
+	root.querySelector(".rs-greet-eyebrow").textContent = g.store || "";
+	const main = root.querySelector(".rs-greet-main");
+	main.textContent = g.first_name ? part + ", " : part;
+	if (g.first_name) {
+		const name = document.createElement("span");
+		name.className = "rs-greet-name";
+		name.textContent = g.first_name;
+		main.appendChild(name);
+	}
+	root.querySelector(".rs-greet-date").textContent = date;
 });
 """
 
