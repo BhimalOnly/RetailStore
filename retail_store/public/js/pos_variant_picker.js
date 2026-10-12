@@ -173,6 +173,57 @@ retail_store.pos.patch = function () {
 		return $card.prop("outerHTML");
 	};
 
+	// ---- Closing a shift ------------------------------------------------------------------------------
+	// Why the shift is being closed decides where the cashier lands afterwards (public/js/pos_closing_entry.js):
+	// "end" = they chose Close the POS (end of day) -> Retail Store home; "stale" = an earlier day's shift was in
+	// the way of selling -> straight back into POS to open today's. The closing form reads this flag.
+	const original_close_pos = PS.Controller.prototype.close_pos;
+	PS.Controller.prototype.close_pos = function () {
+		retail_store.pos.set_close_reason("end");
+		return original_close_pos.apply(this, arguments);
+	};
+
+	// ERPNext shows a dismissable yellow note when the open shift is from an earlier day, and the cashier can
+	// carry on selling into it (two days' cash in one count). Replace it with a dialog that cannot be closed,
+	// whose one action is to close that shift.
+	PS.Controller.prototype.check_outdated_pos_opening_entry = function () {
+		if (!frappe.datetime.get_day_diff(frappe.datetime.get_today(), (this.pos_opening_time || "").slice(0, 10))) return;
+		const me = this;
+		const opened = frappe.datetime.str_to_user((this.pos_opening_time || "").slice(0, 10));
+		const dialog = new frappe.ui.Dialog({
+			title: __("An earlier shift is still open"),
+			static: true,
+			fields: [
+				{
+					fieldtype: "HTML",
+					options: `<div class="rs-stale-shift"><p>${__("This till was opened on {0} and was never closed.", [`<b>${frappe.utils.escape_html(opened)}</b>`])}</p>
+						<p>${__("Close that shift first, so each day's cash is counted on its own. You will come straight back here to open today's shift.")}</p></div>`,
+				},
+			],
+			primary_action_label: __("Close shift"),
+			primary_action() {
+				retail_store.pos.set_close_reason("stale");
+				const voucher = frappe.model.get_new_doc("POS Closing Entry");
+				voucher.pos_profile = me.pos_profile;
+				voucher.user = frappe.session.user;
+				voucher.company = me.company;
+				voucher.pos_opening_entry = me.pos_opening;
+				voucher.period_end_date = frappe.datetime.now_datetime();
+				voucher.posting_date = frappe.datetime.now_date();
+				voucher.posting_time = frappe.datetime.now_time();
+				dialog.hide();
+				frappe.set_route("Form", "POS Closing Entry", voucher.name);
+			},
+			secondary_action_label: __("Back to Retail Store"),
+			secondary_action() {
+				dialog.hide();
+				frappe.set_route("retail-store");
+			},
+		});
+		dialog.$wrapper.addClass("rs-stale-dialog");
+		dialog.show();
+	};
+
 	PS.Controller.prototype.__rs_patched = true;
 	return true;
 };
@@ -189,6 +240,35 @@ retail_store.pos.ensure_patched = function (tries = 0) {
 		return;
 	}
 	if (tries < 600) setTimeout(() => retail_store.pos.ensure_patched(tries + 1), 50);
+};
+
+retail_store.pos.set_close_reason = function (reason) {
+	try {
+		sessionStorage.setItem("rs_close_reason", reason);
+	} catch (e) {
+		/* storage blocked: the closing form then simply stays where it is */
+	}
+};
+
+// "‹ Retail Store": the way out of POS. The only other exit is the toolbar's small home icon, which nobody on a
+// till should have to know about. An unpaid cart asks first, so a sale in progress is not lost by a stray tap.
+retail_store.pos.add_back_button = function (wrapper, tries = 0) {
+	const $head = wrapper.page && wrapper.page.wrapper && wrapper.page.wrapper.find(".page-head .title-area, .page-head .page-title").first();
+	if ($head && $head.length) {
+		if (wrapper.page.wrapper.find(".rs-pos-back").length) return;
+		const $back = $(`<button type="button" class="rs-pos-back" title="${__("Back to Retail Store")}">&lsaquo; ${__("Retail Store")}</button>`);
+		$back.on("click", () => {
+			const items = (window.cur_pos && cur_pos.frm && cur_pos.frm.doc && cur_pos.frm.doc.items) || [];
+			if (items.length) {
+				frappe.confirm(__("Leave this sale? The items in the cart have not been paid for."), () => frappe.set_route("retail-store"));
+			} else {
+				frappe.set_route("retail-store");
+			}
+		});
+		$head.prepend($back);
+		return;
+	}
+	if (tries < 100) setTimeout(() => retail_store.pos.add_back_button(wrapper, tries + 1), 100);
 };
 
 // Clock In / Out (HR). ERPNext's POS controller sets its own header buttons once the bundle
@@ -211,6 +291,7 @@ retail_store.pos.add_clock_button = function (wrapper, tries = 0) {
 	const original_on_page_load = page.on_page_load;
 	page.on_page_load = function (wrapper) {
 		const result = original_on_page_load.call(this, wrapper);
+		retail_store.pos.add_back_button(wrapper);
 		if (frappe.boot.retail_store_clock) retail_store.pos.add_clock_button(wrapper);
 		retail_store.pos.ensure_patched();
 		return result;
