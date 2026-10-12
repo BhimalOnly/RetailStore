@@ -19,6 +19,19 @@ def check(name, ok, detail=""):
 		fails.append(name)
 
 
+def page_menu(page):
+	"""Entries of the page-level '...' menu (top right): Edit / New / Manage, whichever are showing."""
+	found = []
+	for label in ("Edit", "New", "Manage"):
+		loc = page.get_by_text(label, exact=True).locator("visible=true")
+		for i in range(loc.count()):
+			box = loc.nth(i).bounding_box()
+			if box and box["y"] < 200 and box["x"] > 1000:
+				found.append(label)
+				break
+	return found
+
+
 def open_home(br, user, width=1300):
 	ctx = br.new_context(viewport={"width": width, "height": 850})
 	page = ctx.new_page()
@@ -151,6 +164,58 @@ with sync_playwright() as p:
 	page.goto(B + "/desk/home")
 	page.wait_for_timeout(4000)
 	check("leaving Retail Store: badges are not carried to other screens", page.locator(".rs-badge").count() == 0 or "retail-store" in page.url, page.url)
+
+	# ---- #25 number cards in the grid, no raw-form routes, no "+ New", one brand colour for every role
+	brand = {}
+	for user in ("owner", "admin", "manager.downtown", "cashier.downtown", "wh.attendant", "accountant"):
+		ctx, page = open_home(br, user)
+		g = page.evaluate("""()=>{const r=(w)=>{const b=w.getBoundingClientRect();return Math.round(b.width)+'x'+Math.round(b.height)};
+			const nc=[...document.querySelectorAll('.number-widget-box')], sc=[...document.querySelectorAll('.shortcut-widget-box')];
+			return {nc:nc.map(r), sc:sc.map(r), ctl:nc.map(w=>w.querySelector('.widget-control')&&getComputedStyle(w.querySelector('.widget-control')).display),
+				figs:nc.map(w=>/\\d/.test(w.innerText)), brand:getComputedStyle(document.documentElement).getPropertyValue('--st-primary').trim(),
+				bar:getComputedStyle(document.querySelector('.navbar, header')||document.body).backgroundColor,
+				active:(document.querySelector('.active-sidebar')||{}).className&&getComputedStyle(document.querySelector('.active-sidebar')).backgroundColor}}""")
+		check(f"{user}: number cards are the same size as the shortcut cards", all(x == g["sc"][0] for x in g["nc"]) if g["sc"] and g["nc"] else True, g)
+		check(f"{user}: number cards still show their figures", all(g["figs"]), g["figs"])
+		check(f"{user}: number card '...' menu is hidden", all(c == "none" for c in g["ctl"]), g["ctl"])
+		page.mouse.click(1235, 59)
+		page.wait_for_timeout(700)
+		entries = page_menu(page)
+		check(f"{user}: page '...' menu has no 'New' entry (nor Edit / Manage)", entries == [], entries)
+		page.keyboard.press("Escape")
+		brand[user] = (g["brand"], g["bar"], g["active"])
+		if user == "wh.attendant":
+			page.goto(B + "/desk/build/number-card/Requests%20waiting")
+			page.wait_for_timeout(5000)
+			check("wh.attendant: a number card's raw form lands back on Retail Store", page.url.rstrip("/").endswith("/desk/retail-store") and page.locator(".form-sidebar").count() == 0, page.url)
+			page.goto(B + "/desk/number-card/Requests%20waiting")
+			page.wait_for_timeout(4000)
+			check("wh.attendant: the form's other address lands back on Retail Store too", page.url.rstrip("/").endswith("/desk/retail-store"), page.url)
+		ctx.close()
+	check("same brand colour for every role (no per-user theme profile)", len({v[0] for v in brand.values()}) == 1, brand)
+	check("same header and active-nav colour for every role (single-app roles)", len({v[1:] for k, v in brand.items() if k != "accountant"}) <= 2, brand)
+
+	# System Manager keeps the number card's menu, and the open menu is not hidden under the next card
+	ctx = br.new_context(viewport={"width": 1300, "height": 850})
+	page = ctx.new_page()
+	ctx.request.post(f"{B}/api/method/login", data={"usr": "Administrator", "pwd": "admin"})
+	page.goto(B + "/desk/retail-store")
+	page.wait_for_selector(".number-widget-box", timeout=60000)
+	page.wait_for_timeout(3500)
+	page.mouse.click(1235, 59)
+	page.wait_for_timeout(800)
+	check("System Manager keeps '+ New' in the page menu", sorted(page_menu(page)) == ["Edit", "Manage", "New"], page_menu(page))
+	page.mouse.click(700, 200)
+	page.wait_for_timeout(400)
+	nc = page.locator(".number-widget-box").first
+	nc.hover()
+	nc.locator(".card-actions a[data-toggle=dropdown]").click(force=True)
+	page.wait_for_timeout(600)
+	top = page.evaluate("""()=>{const m=document.querySelector('.number-widget-box .dropdown-menu');const r=m.getBoundingClientRect();
+		const e=document.elementFromPoint(r.left+r.width/2, r.top+r.height/2);return !!(e&&m.contains(e))}""")
+	check("System Manager: number card menu opens on top of its neighbour", top)
+	page.screenshot(path=f"{OUT}/homepage-numbercard-menu-sm.png")
+	ctx.close()
 
 	# ---- narrow window
 	ctx, page = open_home(br, "owner", width=700)

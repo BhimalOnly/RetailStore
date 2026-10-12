@@ -170,6 +170,14 @@ def run():
 	# --- navigation for a cashier
 	frappe.set_user("cashier.downtown@demo.example")
 	user = frappe.get_doc("User", "cashier.downtown@demo.example")
+	check("Per-user theme profile picker is off (one brand identity per site)", not frappe.db.get_single_value("Theme Settings", "allow_user_theme"))
+	check("Today's View switched on in the theme (System Manager keeps it)", frappe.db.get_single_value("Theme Settings", "enable_smart_home") and "\"enable_smart_home\": true" in (frappe.db.get_single_value("Theme Settings", "theme_studio_config") or ""))
+	check("No stored per-user theme profiles", not frappe.db.count("Theme Preference"))
+	previous_user = frappe.session.user
+	for who, want in (("cashier.downtown@demo.example", False), ("owner@demo.example", False), ("Administrator", True)):
+		frappe.set_user(who)
+		check(f"Workspace create right: {who} = {want}", bool(frappe.has_permission("Workspace", "create")) == want)
+	frappe.set_user(previous_user)
 	check("Retail staff land in Retail Store app", user.get("default_app") == "retail_store", user.get("default_app"))
 	from retail_store.branding import has_app_permission
 

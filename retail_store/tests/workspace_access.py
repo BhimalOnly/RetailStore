@@ -95,6 +95,29 @@ def run():
 		for b in bad:
 			print(f"    {b[0]:22} page={b[1]} doc={b[2]}  {b[3]}")
 		failures += [(user,) + b for b in bad]
+
+	# ---- changing workspaces (create / edit / delete) is System Manager only, over the API as well as the menu.
+	# A throwaway page made by Administrator is the target, so a hole costs nothing; it is always removed.
+	admin = session("Administrator", "admin")
+	probe = "zz access probe"
+	status(admin, f"{BASE}/api/resource/Workspace/{urllib.parse.quote(probe)}")  # warm the session
+	code, _ = status(admin, f"{BASE}/api/resource/Workspace", {"data": json.dumps({"doctype": "Workspace", "label": probe, "title": probe, "name": probe, "module": "Retail Store", "public": 1, "content": "[]"})})
+	write_failures = []
+	if code != 200:
+		write_failures.append(("Administrator", "create probe", code))
+	for user in users[1:]:
+		op = session(user, PWD)
+		made, _ = status(op, f"{BASE}/api/resource/Workspace", {"data": json.dumps({"doctype": "Workspace", "label": f"zz {user}", "title": f"zz {user}", "name": f"zz {user}", "public": 0, "for_user": user, "content": "[]"})})
+		if made == 200:  # a hole: clean up
+			status(admin, f"{BASE}/api/method/frappe.client.delete", {"doctype": "Workspace", "name": f"zz {user}"})
+		url = f"{BASE}/api/method/frappe.client.set_value"
+		edited, _ = status(op, url, {"doctype": "Workspace", "name": probe, "fieldname": "sequence_id", "value": 99})
+		deleted, _ = status(op, f"{BASE}/api/method/frappe.client.delete", {"doctype": "Workspace", "name": probe})
+		bad = [(what, c) for what, c in (("create", made), ("edit", edited), ("delete", deleted)) if c != 403]
+		print(f"{user:34} workspace create/edit/delete refused  {'ok' if not bad else 'FAIL'}")
+		write_failures += [(user,) + b for b in bad]
+	status(admin, f"{BASE}/api/method/frappe.client.delete", {"doctype": "Workspace", "name": probe})
+	failures += write_failures
 	print(f"\n{len(failures)} failure(s)")
 	return 1 if failures else 0
 

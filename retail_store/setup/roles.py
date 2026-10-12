@@ -356,36 +356,57 @@ def apply_settings_permissions():
 	Custom DocPerm rows replace the doctype's standard ones entirely, and they exist on this
 	doctype, so the JSON alone is not enough. Extra rows (e.g. a permlevel-1 grant to anyone
 	else, made in Role Permission Manager) are removed."""
+	_apply_exact_permissions(SETTINGS_DOCTYPE, SETTINGS_PERMISSIONS)
+
+
+# Workspaces are shared product scaffolding, identical on every client site: only System Manager
+# changes them. Frappe's own rows let every Desk User create, change and delete workspaces (their
+# private pages), which reaches the "+ New" menu entry and the API alike. Everyone keeps read.
+WORKSPACE_DOCTYPE = "Workspace"
+WORKSPACE_PERMISSIONS = {
+	("System Manager", 0): {"read": 1, "write": 1, "create": 1, "delete": 1, "select": 1, "print": 1, "email": 1, "share": 1, "export": 1},
+	("Workspace Manager", 0): {"read": 1, "write": 1, "create": 1, "delete": 1, "select": 1},
+	("Desk User", 0): {"read": 1, "select": 1},
+}
+PERM_FIELDS = ("read", "write", "create", "delete", "select", "print", "email", "share", "export", "import", "report")
+
+
+def apply_workspace_permissions():
+	_apply_exact_permissions(WORKSPACE_DOCTYPE, WORKSPACE_PERMISSIONS, exact=True)
+
+
+def _apply_exact_permissions(doctype, wanted, exact=False):
 	from frappe.permissions import setup_custom_perms
 
-	if not frappe.db.exists("DocType", SETTINGS_DOCTYPE):
+	if not frappe.db.exists("DocType", doctype):
 		return
-	setup_custom_perms(SETTINGS_DOCTYPE)
+	setup_custom_perms(doctype)
 	have = {}
 	for row in frappe.get_all(
-		"Custom DocPerm", filters={"parent": SETTINGS_DOCTYPE}, fields=["name", "role", "permlevel", "if_owner"]
+		"Custom DocPerm", filters={"parent": doctype}, fields=["name", "role", "permlevel", "if_owner"]
 	):
 		if row.if_owner:
 			frappe.delete_doc("Custom DocPerm", row.name, ignore_permissions=True, force=True)
 			continue
 		key = (row.role, row.permlevel)
-		if key not in SETTINGS_PERMISSIONS or key in have:
+		if key not in wanted or key in have:
 			frappe.delete_doc("Custom DocPerm", row.name, ignore_permissions=True, force=True)
 		else:
 			have[key] = row.name
-	for (role, level), flags in SETTINGS_PERMISSIONS.items():
+	for (role, level), flags in wanted.items():
 		if (role, level) in have:
 			doc = frappe.get_doc("Custom DocPerm", have[(role, level)])
 		else:
-			doc = frappe.get_doc({"doctype": "Custom DocPerm", "parent": SETTINGS_DOCTYPE, "role": role, "permlevel": level})
+			doc = frappe.get_doc({"doctype": "Custom DocPerm", "parent": doctype, "role": role, "permlevel": level})
 		changed = doc.is_new()
-		for field, value in flags.items():
+		for field in PERM_FIELDS if exact else flags:
+			value = flags.get(field, 0)
 			if doc.get(field) != value:
 				doc.set(field, value)
 				changed = True
 		if changed:
 			doc.save(ignore_permissions=True)
-	frappe.clear_cache(doctype=SETTINGS_DOCTYPE)
+	frappe.clear_cache(doctype=doctype)
 
 
 def apply_portal_permissions():
@@ -409,6 +430,7 @@ def setup_roles_and_permissions():
 	create_roles()
 	apply_role_permissions()
 	apply_settings_permissions()
+	apply_workspace_permissions()
 	apply_portal_permissions()
 	revoke_permissions()
 	apply_report_and_page_roles()

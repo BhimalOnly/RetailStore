@@ -77,11 +77,41 @@ def run_setup():
 	setup_roles_and_permissions()
 	setup_material_request_workflow()
 	apply_capabilities()
+	lock_user_themes()
 	setup_company_defaults()
 	from retail_store.hr import backfill_employee_stores
 
 	backfill_employee_stores()
 	frappe.clear_cache()
+
+
+def lock_user_themes():
+	"""One brand identity per site: the theme's per-user "Theme profile" picker is off (branding is
+	a System Manager decision, Task #7), and any profile a user picked while it was on is dropped.
+	Light/dark, density and font size stay personal. Runs on every migrate, like the settings it guards."""
+	if not frappe.db.exists("DocType", "Theme Settings"):
+		return
+	frappe.db.set_single_value("Theme Settings", "allow_user_theme", 0)
+	if frappe.db.exists("DocType", "Theme Preference"):
+		frappe.db.delete("Theme Preference")
+	enable_today_view()
+
+
+def enable_today_view():
+	"""System Manager keeps the theme's own "Today's View" (its toolbar link); retail_store.js hides the
+	link and landing.js / getpage close the page for everyone else. The theme reads the switch from its
+	stored studio config as well as the field, so both are set (a per-user profile used to mask this)."""
+	import json
+
+	frappe.db.set_single_value("Theme Settings", "enable_smart_home", 1)
+	raw = frappe.db.get_single_value("Theme Settings", "theme_studio_config")
+	try:
+		config = json.loads(raw) if raw else None
+	except ValueError:
+		config = None
+	if isinstance(config, dict) and config.get("enable_smart_home") is not True:
+		config["enable_smart_home"] = True
+		frappe.db.set_single_value("Theme Settings", "theme_studio_config", json.dumps(config, indent=1, sort_keys=True))
 
 
 def ensure_single_defaults():

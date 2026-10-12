@@ -239,6 +239,9 @@ body[data-route="Workspaces/Retail Store"] .editor-js-container .shortcut-widget
 body[data-route="Workspaces/Retail Store"] .editor-js-container .shortcut-widget-box .widget-control svg.icon { display: none; }
 body[data-route="Workspaces/Retail Store"] .editor-js-container .shortcut-widget-box .widget-title,
 body[data-route="Workspaces/Retail Store"] .editor-js-container .shortcut-widget-box:hover .widget-head .widget-title { font-size: 15px; font-weight: 600; color: var(--text-color) !important; }
+body[data-route="Workspaces/Retail Store"] .editor-js-container .number-widget-box { min-height: 76px; }
+/* System Manager keeps the card's menu: lift the open card above its neighbours (hover gives each its own layer) */
+body[data-route="Workspaces/Retail Store"] .editor-js-container .ce-block:has(.number-widget-box .dropdown-menu.show) { position: relative; z-index: 6; }
 /* the theme's coloured top bar on hover is replaced by the module-colour border below */
 body[data-route="Workspaces/Retail Store"] .editor-js-container .shortcut-widget-box::before,
 body[data-route="Workspaces/Retail Store"] .editor-js-container .shortcut-widget-box::after,
@@ -304,7 +307,7 @@ body[data-route="Workspaces/Retail Store"] .editor-js-container .number-widget-b
 body[data-route="Workspaces/Retail Store"] .editor-js-container .number-widget-box .widget-label { color: var(--text-muted); }
 body[data-route="Workspaces/Retail Store"] .editor-js-container .number-widget-box .number { font-size: 2rem; font-weight: 600; line-height: 1.2; }
 /* soft fade-in on load; nothing else moves */
-body[data-route="Workspaces/Retail Store"] .editor-js-container .ce-block { animation: rs-fade-in 0.25s ease both; }
+body[data-route="Workspaces/Retail Store"] .editor-js-container .ce-block { animation: rs-fade-in 0.25s ease backwards; }
 @keyframes rs-fade-in { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) {
 	body[data-route="Workspaces/Retail Store"] .editor-js-container .ce-block { animation: none; }

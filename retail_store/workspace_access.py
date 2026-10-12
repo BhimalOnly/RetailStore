@@ -106,13 +106,22 @@ def _role_allowed(workspace_name, for_user=None, user=None):
 	return bool(has_common(user_roles, roles))
 
 
-def has_permission(doc, ptype=None, user=None, debug=False):
-	"""Workspace doc API (e.g. /api/resource/Workspace/Accounting): read needs an allowed role.
+READ_PTYPES = (None, "read", "select", "print", "email", "export", "report")
 
-	Denies only; never grants. Private pages belong to their owner and are untouched."""
-	if ptype not in (None, "read", "select"):
-		return True
+
+def _is_system_manager(user):
+	return user == "Administrator" or "System Manager" in frappe.get_roles(user)
+
+
+def has_permission(doc, ptype=None, user=None, debug=False):
+	"""Workspace doc API (e.g. /api/resource/Workspace/Accounting): read needs an allowed role,
+	and anything that changes a workspace needs System Manager (the doctype's own rows are cut
+	back to match in setup/roles.py; this covers a single document, private pages included).
+
+	Denies only; never grants."""
 	user = user or frappe.session.user
+	if ptype not in READ_PTYPES:
+		return _is_system_manager(user)
 	if doc.get("for_user"):
 		return True
 	return _role_allowed(doc.name, user=user)

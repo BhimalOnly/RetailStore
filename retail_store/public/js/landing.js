@@ -56,7 +56,9 @@
 			return el && el.offsetParent !== null;
 		});
 		const accounts = frappe.user.has_role("Accounts User") || frappe.user.has_role("Accounts Manager"); // keeps ERPNext's Dashboard links
-		if ((THEME_PAGES.indexOf(route[0]) !== -1 && !(accounts && route[0] === "dashboard-view")) || visible_theme_page) {
+		// a number card's raw Desk form (the home-page cards' "Edit"): System Manager authors those, nobody else opens them
+		const number_card_form = (route[0] === "build" && route[1] === "number-card") || (route[0] === "Form" && route[1] === "Number Card");
+		if ((THEME_PAGES.indexOf(route[0]) !== -1 && !(accounts && route[0] === "dashboard-view")) || visible_theme_page || number_card_form) {
 			window.location.replace("/desk/retail-store");
 			return;
 		}
