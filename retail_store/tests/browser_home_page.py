@@ -99,6 +99,59 @@ with sync_playwright() as p:
 		page.wait_for_timeout(1200)
 		check(f"{user}: expands again", page.locator(".body-sidebar").first.bounding_box()["width"] > 200)
 
+	# ---- #24 card grid: even sizes, module badges, no arrow, hover, both themes, six roles
+	GRID_JS = """()=>{
+		const box = (w)=>{const r=w.getBoundingClientRect(); return Math.round(r.width)+'x'+Math.round(r.height)};
+		const sc=[...document.querySelectorAll('.shortcut-widget-box')], lk=[...document.querySelectorAll('.links-widget-box')];
+		return {sc:sc.map(box), lk:lk.map(box),
+			badged: [...sc,...lk].every(w=>w.querySelector('.rs-badge svg')),
+			arrows: sc.filter(w=>[...w.querySelectorAll('svg')].some(v=>!v.closest('.rs-badge')&&getComputedStyle(v).display!=='none')).length,
+			headIcons: document.querySelectorAll('.ce-header .h4 svg').length,
+			overflow: document.documentElement.scrollWidth > window.innerWidth + 2}}"""
+	for theme in ("light", "dark"):
+		for user in ("owner", "admin", "manager.downtown", "cashier.downtown", "wh.attendant", "accountant"):
+			ctx, page = open_home(br, user)
+			errs = []
+			page.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)
+			page.evaluate(f"document.documentElement.setAttribute('data-theme','{theme}')")
+			page.wait_for_timeout(500)
+			g = page.evaluate(GRID_JS)
+			tag = f"{user}/{theme}"
+			check(f"{tag}: shortcut cards all the same size", len(set(g["sc"])) <= 1, g["sc"])
+			check(f"{tag}: group cards all the same size", len(set(g["lk"])) <= 1, g["lk"])
+			check(f"{tag}: shortcut and group cards share a column width", not g["sc"] or not g["lk"] or g["sc"][0].split("x")[0] == g["lk"][0].split("x")[0], (g["sc"][:1], g["lk"][:1]))
+			check(f"{tag}: every card has a module badge with an icon", g["badged"] and (g["sc"] or g["lk"]), g)
+			check(f"{tag}: no arrow glyph on shortcut cards", g["arrows"] == 0, g["arrows"])
+			check(f"{tag}: section headings carry an icon", g["headIcons"] == 2, g["headIcons"])
+			check(f"{tag}: no sideways scroll", not g["overflow"])
+			if g["sc"]:
+				first = page.locator(".shortcut-widget-box").first
+				before = first.evaluate("w=>getComputedStyle(w).borderTopColor")
+				first.hover()
+				page.wait_for_timeout(400)
+				h = first.evaluate("w=>({t:getComputedStyle(w).transform,b:getComputedStyle(w).borderTopColor,bar:getComputedStyle(w,'::before').display,title:getComputedStyle(w.querySelector('.widget-title')).color,txt:getComputedStyle(document.body).color})")
+				check(f"{tag}: hover lifts the card and recolours its border", h["t"] != "none" and h["b"] != before, (before, h))
+				check(f"{tag}: hover shows no theme top bar, title keeps its colour", h["bar"] == "none" and h["title"] == h["txt"], h)
+			check(f"{tag}: no console errors", not errs, errs[:2])
+			if user in ("owner", "cashier.downtown"):
+				page.screenshot(path=f"{OUT}/homepage-grid-{user}-{theme}.png", full_page=True)
+			ctx.close()
+
+	# other workspaces are untouched (System Manager on a non-Retail workspace)
+	ctx = br.new_context(viewport={"width": 1300, "height": 850})
+	page = ctx.new_page()
+	ctx.request.post(f"{B}/api/method/login", data={"usr": "Administrator", "pwd": "admin"})
+	page.goto(B + "/desk/solvronix-desk/smart-home")
+	page.wait_for_timeout(6000)
+	page.goto(B + "/desk/users")
+	page.wait_for_timeout(5000)
+	check("other workspace/page: no module badges or heading icons injected", page.locator(".rs-badge, .ce-header .h4 svg").count() == 0)
+	page.goto(B + "/desk/retail-store")
+	page.wait_for_selector(".rs-badge", timeout=60000)
+	page.goto(B + "/desk/home")
+	page.wait_for_timeout(4000)
+	check("leaving Retail Store: badges are not carried to other screens", page.locator(".rs-badge").count() == 0 or "retail-store" in page.url, page.url)
+
 	# ---- narrow window
 	ctx, page = open_home(br, "owner", width=700)
 	check("narrow window: home page loads, greeting visible, no sideways scroll", greeting(page) and page.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 2"))

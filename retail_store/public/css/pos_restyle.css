@@ -186,33 +186,130 @@
 .rs-pick-code{flex-basis:100%;font-size:11px;color:var(--text-muted)}
 .rs-pick-hint{margin-top:6px;padding:12px 16px;border-radius:12px;background:var(--control-bg,#f3f5f4);color:var(--text-muted);font-size:13px}
 
-/* ---- Retail Store home page (workspace): cards, number cards and heading hierarchy ----------------------
-   Same radius / shadow tokens as the POS cards and Desk dialogs above. Scoped to the workspace editor so
-   forms and lists are untouched. */
-.editor-js-container .widget {
-	border-radius: var(--rs-pos-radius);
+/* ---- Retail Store home page (workspace): even card grid, module colour + icon badges ----------------------
+   Scoped to the Retail Store workspace only (body[data-route]) so other workspaces are untouched. Same
+   radius / shadow family as the POS cards and Desk dialogs above. Badges are added by home_cards.js. */
+body[data-route="Workspaces/Retail Store"] .editor-js-container {
+	--rs-h-teal: 15 118 110; --rs-h-amber: 180 83 9; --rs-h-violet: 109 40 217;
+	--rs-h-rose: 190 24 93; --rs-h-blue: 29 78 216; --rs-h-slate: 71 85 105;
+}
+[data-theme="dark"] body[data-route="Workspaces/Retail Store"] .editor-js-container {
+	--rs-h-teal: 45 212 191; --rs-h-amber: 251 191 36; --rs-h-violet: 167 139 250;
+	--rs-h-rose: 244 114 182; --rs-h-blue: 96 165 250; --rs-h-slate: 148 163 184;
+}
+body[data-route="Workspaces/Retail Store"] .rs-m-teal { --rs-hue: var(--rs-h-teal); }
+body[data-route="Workspaces/Retail Store"] .rs-m-amber { --rs-hue: var(--rs-h-amber); }
+body[data-route="Workspaces/Retail Store"] .rs-m-violet { --rs-hue: var(--rs-h-violet); }
+body[data-route="Workspaces/Retail Store"] .rs-m-rose { --rs-hue: var(--rs-h-rose); }
+body[data-route="Workspaces/Retail Store"] .rs-m-blue { --rs-hue: var(--rs-h-blue); }
+body[data-route="Workspaces/Retail Store"] .rs-m-slate { --rs-hue: var(--rs-h-slate); }
+body[data-route="Workspaces/Retail Store"] .editor-js-container .shortcut-widget-box,
+body[data-route="Workspaces/Retail Store"] .editor-js-container .links-widget-box,
+body[data-route="Workspaces/Retail Store"] .editor-js-container .number-widget-box {
+	background: var(--card-bg) !important;
+	background-image: none !important;
+	border: 1px solid var(--border-color);
+	border-top: 1px solid var(--border-color) !important;
+	border-radius: 14px;
 	box-shadow: var(--rs-pos-shadow);
-	transition: transform 0.15s ease, box-shadow 0.15s ease;
+	transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
 }
-.editor-js-container .shortcut-widget-box:hover,
-.editor-js-container .number-widget-box:hover,
-.editor-js-container .links-widget-box:hover {
-	transform: translateY(-1px);
-	box-shadow: var(--rs-pos-shadow-hover);
+/* shortcut cards: one size, badge - title - count */
+body[data-route="Workspaces/Retail Store"] .editor-js-container .shortcut-widget-box {
+	height: 76px;
+	display: flex;
+	align-items: center;
+	padding: 0 16px;
+	cursor: pointer;
 }
+body[data-route="Workspaces/Retail Store"] .editor-js-container .shortcut-widget-box .widget-head {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start !important;
+	gap: 12px;
+	width: 100%;
+	flex: 1;
+	margin: 0 !important;
+	padding: 0 !important;
+}
+body[data-route="Workspaces/Retail Store"] .editor-js-container .shortcut-widget-box .widget-body,
+body[data-route="Workspaces/Retail Store"] .editor-js-container .shortcut-widget-box .widget-footer { display: none !important; }
+body[data-route="Workspaces/Retail Store"] .editor-js-container .shortcut-widget-box .widget-label { flex: 1; min-width: 0; order: 1; text-align: left; }
+body[data-route="Workspaces/Retail Store"] .editor-js-container .shortcut-widget-box .widget-control { order: 2; display: flex; }
+body[data-route="Workspaces/Retail Store"] .editor-js-container .shortcut-widget-box .widget-control svg.icon { display: none; }
+body[data-route="Workspaces/Retail Store"] .editor-js-container .shortcut-widget-box .widget-title,
+body[data-route="Workspaces/Retail Store"] .editor-js-container .shortcut-widget-box:hover .widget-head .widget-title { font-size: 15px; font-weight: 600; color: var(--text-color) !important; }
+/* the theme's coloured top bar on hover is replaced by the module-colour border below */
+body[data-route="Workspaces/Retail Store"] .editor-js-container .shortcut-widget-box::before,
+body[data-route="Workspaces/Retail Store"] .editor-js-container .shortcut-widget-box::after,
+body[data-route="Workspaces/Retail Store"] .editor-js-container .links-widget-box::before { display: none !important; }
+/* module badge */
+body[data-route="Workspaces/Retail Store"] .editor-js-container .rs-badge {
+	order: 0;
+	flex: none;
+	width: 40px;
+	height: 40px;
+	border-radius: 12px;
+	display: grid;
+	place-items: center;
+	background: rgb(var(--rs-hue) / 0.12);
+	color: rgb(var(--rs-hue));
+}
+body[data-route="Workspaces/Retail Store"] .editor-js-container .rs-badge svg { width: 20px; height: 20px; stroke: currentColor; fill: none; }
+/* group cards ("Everything else"): equal height, links in normal text colour */
+body[data-route="Workspaces/Retail Store"] .editor-js-container .links-widget-box { min-height: 212px; padding: 16px 18px; }
+body[data-route="Workspaces/Retail Store"] .editor-js-container .links-widget-box .widget-head { display: flex; align-items: center; justify-content: flex-start; gap: 10px; margin-bottom: 8px; }
+body[data-route="Workspaces/Retail Store"] .editor-js-container .links-widget-box .widget-label { flex: 1; text-align: left; }
+body[data-route="Workspaces/Retail Store"] .editor-js-container .links-widget-box .widget-title { font-size: 14px; font-weight: 600; }
+body[data-route="Workspaces/Retail Store"] .editor-js-container .links-widget-box .rs-badge { width: 30px; height: 30px; border-radius: 9px; }
+body[data-route="Workspaces/Retail Store"] .editor-js-container .links-widget-box .rs-badge svg { width: 16px; height: 16px; }
+body[data-route="Workspaces/Retail Store"] .editor-js-container .links-widget-box a.link-item {
+	color: var(--text-color) !important;
+	border-radius: 6px;
+	padding: 3px 6px;
+	margin: 0 -6px;
+	text-decoration: none;
+}
+body[data-route="Workspaces/Retail Store"] .editor-js-container .links-widget-box a.link-item:hover { background: rgb(var(--rs-hue) / 0.1); color: rgb(var(--rs-hue)) !important; }
+/* hover: lift, soft shadow, border in the module colour (no arrow glyph) */
+body[data-route="Workspaces/Retail Store"] .editor-js-container .shortcut-widget-box:hover,
+body[data-route="Workspaces/Retail Store"] .editor-js-container .links-widget-box:hover {
+	transform: translateY(-2px);
+	border-color: rgb(var(--rs-hue) / 0.55);
+	border-top-color: rgb(var(--rs-hue) / 0.55) !important;
+	box-shadow: var(--rs-pos-shadow-hover), 0 0 0 1px rgb(var(--rs-hue) / 0.25);
+}
+[data-theme="dark"] body[data-route="Workspaces/Retail Store"] .editor-js-container .shortcut-widget-box:hover,
+[data-theme="dark"] body[data-route="Workspaces/Retail Store"] .editor-js-container .links-widget-box:hover {
+	box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45), 0 0 0 1px rgb(var(--rs-hue) / 0.3);
+}
+/* the theme switches the lift off inside the workspace editor (!important, id selector): turn it back on */
+body[data-route="Workspaces/Retail Store"] #editorjs .shortcut-widget-box:hover,
+body[data-route="Workspaces/Retail Store"] #editorjs .links-widget-box:hover { transform: translateY(-2px) !important; }
 /* section headings ("Today", "Everything else") step back so the greeting and the figures lead */
-.editor-js-container .ce-header .h4 {
+body[data-route="Workspaces/Retail Store"] .editor-js-container .ce-header .h4 {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
 	font-size: 12px;
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
 	color: var(--text-muted);
 }
-.editor-js-container .ce-header .h4 b { font-weight: 600; }
-.editor-js-container .ce-block:has(.ce-header) { margin-top: 10px; }
+body[data-route="Workspaces/Retail Store"] .editor-js-container .ce-header .h4 b { font-weight: 600; }
+body[data-route="Workspaces/Retail Store"] .editor-js-container .ce-header .h4 svg { width: 16px; height: 16px; stroke: currentColor; fill: none; }
+body[data-route="Workspaces/Retail Store"] .editor-js-container .ce-block:has(.ce-header) { margin-top: 10px; }
 /* number cards: the figure is the point */
-.editor-js-container .number-widget-box .widget-title,
-.editor-js-container .number-widget-box .widget-label { color: var(--text-muted); }
-.editor-js-container .number-widget-box .number { font-size: 2rem; font-weight: 600; line-height: 1.2; }
+body[data-route="Workspaces/Retail Store"] .editor-js-container .number-widget-box .widget-title,
+body[data-route="Workspaces/Retail Store"] .editor-js-container .number-widget-box .widget-label { color: var(--text-muted); }
+body[data-route="Workspaces/Retail Store"] .editor-js-container .number-widget-box .number { font-size: 2rem; font-weight: 600; line-height: 1.2; }
+/* soft fade-in on load; nothing else moves */
+body[data-route="Workspaces/Retail Store"] .editor-js-container .ce-block { animation: rs-fade-in 0.25s ease both; }
+@keyframes rs-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+	body[data-route="Workspaces/Retail Store"] .editor-js-container .ce-block { animation: none; }
+	body[data-route="Workspaces/Retail Store"] .editor-js-container .widget { transition: none !important; }
+}
 
 /* ---- POS: back to Retail Store, and the "earlier shift is still open" dialog ----------------------------- */
 .rs-pos-back {

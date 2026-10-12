@@ -694,6 +694,7 @@ Display-side only; the server 403s stay the real boundary. Test: `tests/browser_
 * Report roles: `apply_report_and_page_roles` is meant to start each Custom Role from the report's standard roles, but after migrate Sales Register, Sales Analytics and Item-wise Sales Register hold only the retail roles (Profit and Loss / Balance Sheet showed the same until their accounting roles were named explicitly). Check what the Accountant can still open and fix the copy step.
 * Staff login page still shows "Powered by Solvronix" (theme setting; the Desk and storefront credits are already hidden).
 * Customer, Employee and Stock Count are still raw Desk forms; Ctrl+K search, the "All Options" menu and the Accountant / Warehouse Manager screens have not had a wording review.
+* The Retail Store home page colour/icon badges (`public/js/home_cards.js`) are keyed on the English card titles; update its lookup table if a shortcut or card is ever relabelled or translated (unknown titles just get no badge).
 * `check_config` switches HR off when it finishes; run `tests/seed_hr_demo.run` before `browser_hr.py`.
 
 ### Messaging extension point (planned, not built)
