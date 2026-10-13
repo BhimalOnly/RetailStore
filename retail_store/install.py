@@ -33,6 +33,28 @@ CUSTOM_FIELDS = {
 			"module": "Retail Store",
 		}
 	],
+	"Customer": [
+		# a Messages tab of its own (after Portal Users); each field anchored to the one before so the group stays together
+		{"fieldname": "custom_messaging_tab", "fieldtype": "Tab Break", "label": "Messages", "insert_after": "portal_users", "module": "Retail Store"},
+		{
+			"fieldname": "custom_messaging_section",
+			"fieldtype": "Section Break",
+			"label": "Offers by WhatsApp / SMS",
+			"insert_after": "custom_messaging_tab",
+			"collapsible": 0,
+			"description": "Order messages go to the number on the order. Offers and loyalty messages need the customer's own yes: leave unticked unless they said so.",
+			"module": "Retail Store",
+		},
+		{"fieldname": "custom_whatsapp_optin", "fieldtype": "Check", "label": "Offers by WhatsApp", "insert_after": "custom_messaging_section", "allow_in_quick_entry": 1, "module": "Retail Store"},
+		{"fieldname": "custom_whatsapp_optin_on", "fieldtype": "Datetime", "label": "WhatsApp opt-in recorded", "insert_after": "custom_whatsapp_optin", "read_only": 1, "depends_on": "custom_whatsapp_optin_on", "module": "Retail Store"},
+		{"fieldname": "custom_whatsapp_optout_on", "fieldtype": "Datetime", "label": "WhatsApp opt-out recorded", "insert_after": "custom_whatsapp_optin_on", "read_only": 1, "depends_on": "custom_whatsapp_optout_on", "module": "Retail Store"},
+		{"fieldname": "custom_messaging_column", "fieldtype": "Column Break", "insert_after": "custom_whatsapp_optout_on", "module": "Retail Store"},
+		{"fieldname": "custom_sms_optin", "fieldtype": "Check", "label": "Offers by SMS", "insert_after": "custom_messaging_column", "allow_in_quick_entry": 1, "module": "Retail Store"},
+		{"fieldname": "custom_sms_optin_on", "fieldtype": "Datetime", "label": "SMS opt-in recorded", "insert_after": "custom_sms_optin", "read_only": 1, "depends_on": "custom_sms_optin_on", "module": "Retail Store"},
+		{"fieldname": "custom_sms_optout_on", "fieldtype": "Datetime", "label": "SMS opt-out recorded", "insert_after": "custom_sms_optin_on", "read_only": 1, "depends_on": "custom_sms_optout_on", "module": "Retail Store"},
+		{"fieldname": "custom_consent_source", "fieldtype": "Select", "label": "Last changed", "options": "\nStorefront checkout\nRecorded by staff", "insert_after": "custom_sms_optout_on", "read_only": 1, "depends_on": "custom_consent_source", "module": "Retail Store"},
+		{"fieldname": "custom_consent_by", "fieldtype": "Link", "label": "Last changed by", "options": "User", "insert_after": "custom_consent_source", "read_only": 1, "depends_on": "custom_consent_by", "module": "Retail Store"},
+	],
 }
 
 
@@ -78,11 +100,46 @@ def run_setup():
 	setup_material_request_workflow()
 	apply_capabilities()
 	lock_user_themes()
+	ensure_message_rules()
 	setup_company_defaults()
 	from retail_store.hr import backfill_employee_stores
 
 	backfill_employee_stores()
 	frappe.clear_cache()
+
+
+DEFAULT_MESSAGE_RULES = [
+	("Order confirmation", "WhatsApp", 1, "Hi {customer}, thanks for your order {order} at {store}. Total: {total}. We'll message you when it's ready.", "order_confirmation"),
+	("Order confirmation", "SMS", 0, "{store}: thanks {customer}, order {order} received. Total {total}.", ""),
+	("Order ready", "WhatsApp", 1, "Hi {customer}, your order {order} from {store} is ready.", "order_ready"),
+	("Order ready", "SMS", 0, "{store}: {customer}, your order {order} is ready.", ""),
+]
+
+
+def ensure_message_rules():
+	"""Starter wording for the two customer messages, only while the list is empty (an owner's edits and
+	deletions stick). WhatsApp rows are on, SMS rows off, so a site that turns messaging on and picks one
+	channel does not send twice. Nothing is sent until Capabilities > Customer Messages is switched on."""
+	if not frappe.db.exists("DocType", "Retail Message Rule"):
+		return
+	if frappe.db.count("Retail Message Rule", {"parent": "Retail Store Settings"}):
+		return
+	for idx, (event, channel, enabled, body, template) in enumerate(DEFAULT_MESSAGE_RULES, 1):
+		frappe.get_doc(
+			{
+				"doctype": "Retail Message Rule",
+				"parent": "Retail Store Settings",
+				"parenttype": "Retail Store Settings",
+				"parentfield": "message_rules",
+				"idx": idx,
+				"event": event,
+				"channel": channel,
+				"enabled": enabled,
+				"body": body,
+				"whatsapp_template": template,
+				"template_language": "en",
+			}
+		).db_insert()
 
 
 def lock_user_themes():

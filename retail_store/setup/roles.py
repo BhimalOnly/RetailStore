@@ -345,6 +345,8 @@ SETTINGS_DOCTYPE = "Retail Store Settings"
 SETTINGS_PERMISSIONS = {
 	("System Manager", 0): {"read": 1, "write": 1, "create": 1, "print": 1, "email": 1, "share": 1},
 	("System Manager", 1): {"read": 1, "write": 1},
+	("System Manager", 2): {"read": 1, "write": 1},
+	("Store Owner", 2): {"read": 1, "write": 1},
 	("Store Admin", 0): {"read": 1, "write": 1, "create": 1},
 	("Store Owner", 0): {"read": 1, "write": 1, "create": 1},
 }

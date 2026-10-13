@@ -81,6 +81,7 @@ def _number_cards_for(roles):
 BACK_OFFICE_LINKS = [
 	("Sales Order", "Online Orders"),
 	("Delivery Note", "Deliveries"),
+	("Retail Message Log", "Messages"),
 	("Payment Entry", "Payments"),
 	("Pricing Rule", "Discount Rules"),
 	("Price List", "Price Lists"),

@@ -233,3 +233,58 @@ try {
 	new MutationObserver(reword).observe(document.documentElement, { childList: true, subtree: true });
 	document.addEventListener("DOMContentLoaded", reword);
 })();
+
+// ---- Cart: opt-in to offers by WhatsApp / SMS (only when the shop has messages switched on) ----------
+// Two boxes above Place Order. Never ticked for the shopper: a box is ticked only if they ticked it on an
+// earlier order, and unticking withdraws. Their choice is saved as they press Place Order (before the order is
+// placed), as the consent record on their Customer (see retail_store/messaging/consent.py).
+(function () {
+	if (window.location.pathname !== "/cart") return;
+	var CONSENT = "retail_store.messaging.consent.";
+	function build(state) {
+		if (document.getElementById("rs-consent")) return;
+		var host = document.querySelector(".place-order");
+		if (!host) return;
+		var box = document.createElement("div");
+		box.id = "rs-consent";
+		box.className = "rs-consent mb-3";
+		box.innerHTML =
+			'<label class="rs-consent-row" for="rs-consent-wa"><input type="checkbox" id="rs-consent-wa"' + (state.whatsapp ? " checked" : "") + '>' +
+			'<span>Send me offers and loyalty updates by WhatsApp</span></label>' +
+			'<label class="rs-consent-row" for="rs-consent-sms"><input type="checkbox" id="rs-consent-sms"' + (state.sms ? " checked" : "") + '>' +
+			'<span>Send me offers and loyalty updates by SMS</span></label>' +
+			'<div class="text-muted small">Updates about this order go to the phone number on your order either way.</div>';
+		host.parentNode.insertBefore(box, host);
+	}
+	function setup() {
+		var signed_in = frappe.is_user_logged_in ? frappe.is_user_logged_in() : (frappe.session && frappe.session.user && frappe.session.user !== "Guest");
+		if (!window.frappe || !frappe.call || !signed_in) return;  // guests have no customer record to attach a choice to
+		frappe.call({
+			method: CONSENT + "get_cart_consent",
+			silent: true,  // never put an error dialog in front of a shopper: no boxes is the safe fallback
+			error: function () {},
+			callback: function (r) {
+				if (r && r.message && r.message.enabled) build(r.message);
+			},
+		});
+	}
+	// capture phase: runs before webshop's own Place Order handler, and waits for the save to finish
+	document.addEventListener(
+		"click",
+		function (e) {
+			if (!e.target.closest || !e.target.closest(".btn-place-order") || !document.getElementById("rs-consent")) return;
+			frappe.call({
+				method: CONSENT + "save_cart_consent",
+				args: {
+					whatsapp: document.getElementById("rs-consent-wa").checked ? 1 : 0,
+					sms: document.getElementById("rs-consent-sms").checked ? 1 : 0,
+				},
+				async: false,
+				silent: true,
+				error: function () {},
+			});
+		},
+		true
+	);
+	document.addEventListener("DOMContentLoaded", setup);
+})();

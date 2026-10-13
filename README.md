@@ -59,6 +59,8 @@ Manager**, unchanged.
 | Operational (permlevel 0): Stock Transfers tab (main / in-transit warehouse, request approval), Location Access, Loyalty program and Group Variants in POS | RW | RW | RW | – |
 | **Branding** tab (permlevel 1): name, logo, favicon, brand and accent colours, apply to Desk | RW | hidden | hidden | – |
 | **Capabilities** optional-module toggles (permlevel 1): CRM, Online Store, Buying, HR, Manufacturing, Quality, Support, Assets, Projects, messaging | RW | hidden | hidden | – |
+| **Messages** tab, wording and country code (permlevel 0): which order messages go out, by which channel | RW | RW | RW | – |
+| **Messages** tab, WhatsApp / SMS connection and credentials (permlevel 2) | RW | RW | hidden | – |
 
 Hidden means the tab/section is not shown, the values are not returned by the API, the
 change history of those fields is not shown, and a save that tries to change them is
@@ -669,6 +671,10 @@ bench --site <site> execute retail_store.tests.check_hr.run
 # HR in a real browser as cashier / manager / owner / admin / system manager (seed the employees first)
 bench --site <site> execute retail_store.tests.seed_hr_demo.run
 python apps/retail_store/retail_store/tests/browser_hr.py
+# customer messages: phone numbers, consent, the three providers against a fake gateway, failure / retry, who sees credentials
+bench --site <site> execute retail_store.tests.check_messaging.run
+# the same in a real browser: cart opt-in boxes, order + delivery in the Message Log, Settings tab per role (switches messaging on, then off)
+python apps/retail_store/retail_store/tests/browser_messages.py
 # who may open which workspace, as each demo user, over HTTP. Enumerates EVERY workspace on the
 # site (expects 403 for all but Retail Store for retail-only roles)
 python3 apps/retail_store/retail_store/tests/workspace_access.py
@@ -697,17 +703,48 @@ Display-side only; the server 403s stay the real boundary. Test: `tests/browser_
 * The Retail Store home page colour/icon badges (`public/js/home_cards.js`) are keyed on the English card titles; update its lookup table if a shortcut or card is ever relabelled or translated (unknown titles just get no badge).
 * `check_config` switches HR off when it finishes; run `tests/seed_hr_demo.run` before `browser_hr.py`.
 
-### Messaging extension point (planned, not built)
+### Customer messages (WhatsApp / SMS)
 
-WhatsApp/SMS will use Meta's **Tech Provider** model: each client keeps their
-own WhatsApp Business Account, and the tech provider sends on their behalf.
-Planned shape: a separate app (or a `messaging` module here) that
+Order messages to the customer: **order confirmation** (when a storefront order is placed) and **order ready**
+(when its Delivery Note is posted). Built in this app (`retail_store/messaging/`); Capabilities > **Customer Messages**
+(System Manager) switches it on, **off by default**. Low-stock and staff-invite messages are not part of it: they stay on
+Frappe's own email / Desk notifications.
 
-* adds per-site credentials to a settings doctype (WABA ID, phone number ID, token reference), never shared across clients;
-* listens through `doc_events` (Sales Invoice `on_submit` for receipts, Loyalty Point Entry `after_insert` for points balance, Material Request workflow changes for staff alerts);
-* sends via a background job (`frappe.enqueue`) so the till never waits on Meta.
+> ## ⚠ A local adviser must confirm the rules before real marketing messages go out
+> The consent scaffolding below is **configurable and ready, not legally verified.** The research behind it (vendor guides,
+> not the statute) could not confirm how the **Data Protection Act 2017**, the **ICTA's SMS rules** and **WhatsApp's own
+> business rules** treat *transactional* versus *marketing* messages in Mauritius, nor whether each retailer must register with
+> the Data Protection Office. **Before any client sends offers or loyalty messages, their adviser must check those points.**
+> Order messages go to the phone number on the order, **pending that same confirmation**. WhatsApp pricing per message for
+> Mauritius is also unconfirmed (it comes from Meta's rate card). Nothing here blocks development; it should make it easy to comply once confirmed.
 
-Nothing in this app sends messages today. `hooks.py` marks the spot.
+**How it works**
+
+| Piece | What it does |
+|---|---|
+| Rules (Settings > **Messages**) | One row per message and channel: when (Order confirmation / Order ready), WhatsApp or SMS, on/off, the wording (`{customer}` first name, `{order}`, `{store}`, `{total}`) and, for WhatsApp, the approved template's name. Starter rows: WhatsApp on, SMS off (no double sends). Store Owner and Store Admin edit these. |
+| Providers | **Dry run** (default: logs, sends nothing), **Meta WhatsApp Cloud API** (the client's own WhatsApp Business account: phone number ID + access token), **generic HTTP SMS gateway** (address, method, `name=value` parameters with `{to}`, `{to_digits}`, `{message}`, `{sender}`, `{username}`, `{password}`, optional success text). Twilio can be added as a fourth adapter in `messaging/providers.py`. |
+| Credentials | Retail Store Settings > Messages, `Password` fields (encrypted like the SMTP password), access level 2: **System Manager and Store Owner only**, not Store Admin. Never in code, never in the log (masked in errors). A gateway address must be `https://` (plain `http://` only for this machine). |
+| Message Log | The outbox (like Email Queue): event, channel, recipient, text, status **Queued / Retry / Sent / Failed / Skipped**, attempts, the provider's reference, the problem in words, and why it was allowed (order message, or the opt-in's date). Store Owner / Store Admin read it (sidebar: Back Office > Messages); nobody edits or deletes it by hand. |
+| Sending | `frappe.enqueue` after the sale commits, so the till and the checkout never wait. Timeouts, 5xx and 429 are **retried** (after about 5 then 30 minutes, 3 attempts, by a scheduler job every 5 minutes); anything a retry cannot fix (bad token, rejected number, unknown template, `http://` gateway) is **Failed at once**, with the reason shown. A failed message **never** fails the order: it is a log row. |
+| Which orders | Only storefront orders (Sales Order type *Shopping Cart*); POS and Desk sales send nothing. The number comes from the order's contact, then the customer, then the delivery / billing address, and is normalised to +230 (Settings: country code). |
+
+**Consent.** Each Customer has, per channel, *Offers by WhatsApp* / *Offers by SMS* with the time ticked, the time unticked
+(the first stays), how (*Storefront checkout* / *Recorded by staff*) and by whom. The storefront cart shows the two boxes
+only while messaging is on: never ticked for the shopper (only if they ticked them before), saved as they press Place Order,
+and unticking withdraws. POS's new-customer dialog carries the same two boxes; staff record or withdraw a customer's choice on the Customer form's **Messages** tab (the theme keeps optional fields behind "Show N optional fields" on every form). The engine already refuses a
+**marketing**-kind message without that opt-in (Skipped, "has not opted in"); no marketing message is built yet.
+Gap to close before launch: the storefront has no separate "manage my messages" page, only the cart boxes.
+
+**Set up for a client:** a System Manager switches **Customer Messages** on (Capabilities); the Store Owner picks the provider
+and pastes the credentials (Messages tab), edits the wording, and turns SMS rows on if they use SMS. For WhatsApp, the client
+creates and gets their templates approved in their own WhatsApp Business account first (messages the business starts need an
+approved template). Leave providers on Dry run to rehearse: the Message Log fills, nothing is sent.
+
+**Tests:** `bench --site <site> execute retail_store.tests.check_messaging.run` (phone numbers, consent, all three providers
+against a fake gateway on this machine, failure / retry, who sees credentials, a real storefront Sales Order; rolls itself back)
+and `python tests/browser_messages.py` (the cart boxes, order + delivery in the Message Log, the Customer form, the Settings tab
+and sidebar per role; cancels what it creates, switches messaging back off).
 
 ---
 

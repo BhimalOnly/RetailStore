@@ -511,3 +511,7 @@ body:not(.sl-split) .cart-empty-message { font-size: 1.15rem; font-weight: 600; 
 body.rs-me .rs-me-hidden { display: none !important; }
 /* footer links */
 body:not(.sl-split) footer.web-footer .footer-link a, body:not(.sl-split) footer.web-footer .footer-info a { color: #5c5a55; }
+
+/* Cart: opt-in boxes for offers by WhatsApp / SMS (retail_store/messaging; storefront.js) */
+.rs-consent .rs-consent-row { display: flex; align-items: flex-start; gap: 10px; margin: 0 0 8px; cursor: pointer; font-size: 14px; line-height: 1.35; }
+.rs-consent .rs-consent-row input { flex: none; width: 16px; height: 16px; margin: 2px 0 0; position: static; }

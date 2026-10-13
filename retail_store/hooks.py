@@ -30,9 +30,9 @@ add_to_apps_screen = [
 # so a Desk theme app can be added later without conflict (turn off
 # "Apply Brand Colours to Desk" in Retail Store Settings if the theme app owns colours).
 # Public site (storefront/cart/orders) brand skin, driven by the per-site brand colours
-web_include_css = "/assets/retail_store/css/storefront.css?v=23"
+web_include_css = "/assets/retail_store/css/storefront.css?v=24"
 web_include_js = [
-	"/assets/retail_store/js/storefront.js?v=8",
+	"/assets/retail_store/js/storefront.js?v=11",
 	"/assets/retail_store/js/shop_ui.js?v=3",
 ]
 # POS item cards + cart restyle (visual only, token-driven; loads after solvronix_desk per apps.txt)
@@ -119,12 +119,17 @@ doc_events = {
 	# webshop's place_order re-reads each line's warehouse from Website Item(variant), blank for variants
 	"Sales Order": {
 		"before_validate": "retail_store.storefront.set_online_order_warehouse",
+		"on_submit": "retail_store.messaging.events.order_submitted",
+	},
+	"Delivery Note": {
+		"on_submit": "retail_store.messaging.events.delivery_submitted",
 	},
 	"Website Item": {
 		"validate": "retail_store.storefront.default_thumbnail",
 	},
 	"Customer": {
 		"before_validate": "retail_store.setup.company.fill_customer_defaults",
+		"validate": "retail_store.messaging.consent.stamp_consent",
 	},
 	"User": {
 		"validate": "retail_store.workspace_access.set_default_landing",
@@ -148,6 +153,11 @@ doc_events = {
 	"Employee": {
 		"validate": "retail_store.hr.employee_validate",
 	},
+}
+
+# Customer messages: retry what failed for a reason worth retrying (retail_store/messaging/engine.py)
+scheduler_events = {
+	"cron": {"*/5 * * * *": ["retail_store.messaging.engine.retry_due"]},
 }
 
 # Testing

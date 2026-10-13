@@ -1,0 +1,209 @@
+{
+ "creation": "2026-10-13 13:00:00.000000",
+ "modified": "2026-10-13 13:00:00.000000",
+ "modified_by": "Administrator",
+ "owner": "Administrator",
+ "module": "Retail Store",
+ "engine": "InnoDB",
+ "docstatus": 0,
+ "idx": 0,
+ "doctype": "DocType",
+ "states": [],
+ "links": [],
+ "name": "Retail Message Log",
+ "autoname": "MSG-.#####",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "title_field": "recipient",
+ "track_changes": 0,
+ "field_order": [
+  "event",
+  "channel",
+  "kind",
+  "status",
+  "column_break_a",
+  "recipient",
+  "customer",
+  "attempts",
+  "next_attempt_at",
+  "details_section",
+  "body",
+  "reference_doctype",
+  "reference_name",
+  "column_break_b",
+  "provider",
+  "provider_message_id",
+  "consent_basis",
+  "sent_on",
+  "error",
+  "template_name",
+  "template_language",
+  "template_variables"
+ ],
+ "fields": [
+  {
+   "fieldname": "event",
+   "fieldtype": "Data",
+   "label": "Event",
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "channel",
+   "fieldtype": "Select",
+   "label": "Channel",
+   "options": "WhatsApp\nSMS",
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "kind",
+   "fieldtype": "Select",
+   "label": "Kind",
+   "options": "Transactional\nMarketing",
+   "read_only": 1,
+   "default": "Transactional"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Queued\nRetry\nSent\nFailed\nSkipped",
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "default": "Queued"
+  },
+  {
+   "fieldname": "column_break_a",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "recipient",
+   "fieldtype": "Data",
+   "label": "To",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "attempts",
+   "fieldtype": "Int",
+   "label": "Attempts",
+   "read_only": 1,
+   "default": "0"
+  },
+  {
+   "fieldname": "next_attempt_at",
+   "fieldtype": "Datetime",
+   "label": "Next try",
+   "read_only": 1
+  },
+  {
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "body",
+   "fieldtype": "Small Text",
+   "label": "Message",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "label": "About",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Document",
+   "options": "reference_doctype",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_b",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "provider",
+   "fieldtype": "Data",
+   "label": "Provider",
+   "read_only": 1
+  },
+  {
+   "fieldname": "provider_message_id",
+   "fieldtype": "Data",
+   "label": "Provider reference",
+   "read_only": 1
+  },
+  {
+   "fieldname": "consent_basis",
+   "fieldtype": "Data",
+   "label": "Why it was allowed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sent_on",
+   "fieldtype": "Datetime",
+   "label": "Sent on",
+   "read_only": 1
+  },
+  {
+   "fieldname": "error",
+   "fieldtype": "Small Text",
+   "label": "Problem",
+   "read_only": 1
+  },
+  {
+   "fieldname": "template_name",
+   "fieldtype": "Data",
+   "label": "Template",
+   "hidden": 1
+  },
+  {
+   "fieldname": "template_language",
+   "fieldtype": "Data",
+   "label": "Template language",
+   "hidden": 1
+  },
+  {
+   "fieldname": "template_variables",
+   "fieldtype": "Small Text",
+   "label": "Template variables",
+   "hidden": 1
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1
+  },
+  {
+   "role": "Store Owner",
+   "read": 1,
+   "report": 1
+  },
+  {
+   "role": "Store Admin",
+   "read": 1,
+   "report": 1
+  }
+ ]
+}

@@ -1,0 +1,78 @@
+{
+ "creation": "2026-10-13 13:00:00.000000",
+ "modified": "2026-10-13 13:00:00.000000",
+ "modified_by": "Administrator",
+ "owner": "Administrator",
+ "module": "Retail Store",
+ "engine": "InnoDB",
+ "docstatus": 0,
+ "idx": 0,
+ "doctype": "DocType",
+ "states": [],
+ "links": [],
+ "name": "Retail Message Rule",
+ "istable": 1,
+ "editable_grid": 1,
+ "field_order": [
+  "event",
+  "channel",
+  "enabled",
+  "body",
+  "whatsapp_template",
+  "template_language"
+ ],
+ "fields": [
+  {
+   "fieldname": "event",
+   "fieldtype": "Select",
+   "label": "When",
+   "options": "Order confirmation\nOrder ready",
+   "reqd": 1,
+   "in_list_view": 1,
+   "columns": 2,
+   "description": ""
+  },
+  {
+   "fieldname": "channel",
+   "fieldtype": "Select",
+   "label": "Send by",
+   "options": "WhatsApp\nSMS",
+   "reqd": 1,
+   "in_list_view": 1,
+   "columns": 1
+  },
+  {
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "On",
+   "default": "0",
+   "in_list_view": 1,
+   "columns": 1
+  },
+  {
+   "fieldname": "body",
+   "fieldtype": "Small Text",
+   "label": "Message",
+   "reqd": 1,
+   "in_list_view": 1,
+   "columns": 4,
+   "description": "You can use {customer}, {order}, {store} and {total}. WhatsApp sends these in this order as the template's variables."
+  },
+  {
+   "fieldname": "whatsapp_template",
+   "fieldtype": "Data",
+   "label": "WhatsApp template name",
+   "depends_on": "eval:doc.channel=='WhatsApp'",
+   "columns": 2,
+   "description": "The template approved by WhatsApp for this message. Empty = plain text (only delivered inside WhatsApp's 24-hour window)."
+  },
+  {
+   "fieldname": "template_language",
+   "fieldtype": "Data",
+   "label": "Template language",
+   "default": "en",
+   "depends_on": "eval:doc.channel=='WhatsApp'"
+  }
+ ],
+ "permissions": []
+}

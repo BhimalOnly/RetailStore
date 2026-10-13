@@ -1,6 +1,6 @@
 {
  "creation": "2026-10-08 19:30:00.000000",
- "modified": "2026-10-11 17:00:00.000000",
+ "modified": "2026-10-13 13:10:00.000000",
  "modified_by": "Administrator",
  "owner": "Administrator",
  "module": "Retail Store",
@@ -44,7 +44,7 @@
   "enable_support",
   "enable_assets",
   "enable_projects",
-  "messaging_section",
+  "enable_messaging",
   "stock_tab",
   "main_warehouse",
   "in_transit_warehouse",
@@ -52,6 +52,27 @@
   "require_request_approval",
   "grants_section",
   "staff_grants",
+  "messaging_tab",
+  "messaging_rules_section",
+  "message_rules",
+  "messaging_country_code",
+  "messaging_whatsapp_section",
+  "whatsapp_provider",
+  "whatsapp_phone_number_id",
+  "whatsapp_access_token",
+  "column_break_wa",
+  "whatsapp_api_version",
+  "whatsapp_api_base",
+  "messaging_sms_section",
+  "sms_provider",
+  "sms_gateway_url",
+  "sms_http_method",
+  "sms_params",
+  "column_break_sms",
+  "sms_username",
+  "sms_password",
+  "sms_sender_id",
+  "sms_success_text",
   "access_tab",
   "location_scoped_doctypes",
   "pos_scoped_doctypes",
@@ -269,12 +290,12 @@
    "permlevel": 1
   },
   {
-   "fieldname": "messaging_section",
-   "fieldtype": "Section Break",
-   "label": "Messaging (planned)",
-   "collapsible": 1,
-   "description": "WhatsApp/SMS is not built yet. See the app README, section 'Messaging extension point'.",
-   "permlevel": 1
+   "fieldname": "enable_messaging",
+   "fieldtype": "Check",
+   "label": "Customer Messages (WhatsApp / SMS)",
+   "default": "0",
+   "permlevel": 1,
+   "description": "Order confirmation and order-ready messages to customers. Set up on the Messages tab (Store Owner)."
   },
   {
    "fieldname": "stock_tab",
@@ -519,6 +540,145 @@
    "description": "The PRGF wage ceiling is disputed between sources and is not applied.",
    "permlevel": 1,
    "depends_on": "eval:doc.enable_hr"
+  },
+  {
+   "fieldname": "messaging_tab",
+   "fieldtype": "Tab Break",
+   "label": "Messages"
+  },
+  {
+   "fieldname": "messaging_rules_section",
+   "fieldtype": "Section Break",
+   "label": "What gets sent",
+   "description": "Order messages go to the phone number on the order. Offers and loyalty messages are only ever sent to customers who ticked the opt-in box. Messages are switched on by your System Manager under Capabilities."
+  },
+  {
+   "fieldname": "message_rules",
+   "fieldtype": "Table",
+   "label": "Messages",
+   "options": "Retail Message Rule"
+  },
+  {
+   "fieldname": "messaging_country_code",
+   "fieldtype": "Data",
+   "label": "Country code for local numbers",
+   "default": "230",
+   "description": "Added to 8-digit numbers (Mauritius: 230)."
+  },
+  {
+   "fieldname": "messaging_whatsapp_section",
+   "fieldtype": "Section Break",
+   "label": "WhatsApp (Meta Cloud API)",
+   "collapsible": 1,
+   "permlevel": 2,
+   "description": "Your own WhatsApp Business account. Leave on Dry run to log messages without sending anything."
+  },
+  {
+   "fieldname": "whatsapp_provider",
+   "fieldtype": "Select",
+   "label": "WhatsApp provider",
+   "options": "Dry run\nMeta WhatsApp Cloud API",
+   "default": "Dry run",
+   "permlevel": 2
+  },
+  {
+   "fieldname": "whatsapp_phone_number_id",
+   "fieldtype": "Data",
+   "label": "Phone number ID",
+   "permlevel": 2
+  },
+  {
+   "fieldname": "whatsapp_access_token",
+   "fieldtype": "Password",
+   "label": "Access token",
+   "permlevel": 2
+  },
+  {
+   "fieldname": "column_break_wa",
+   "fieldtype": "Column Break",
+   "permlevel": 2
+  },
+  {
+   "fieldname": "whatsapp_api_version",
+   "fieldtype": "Data",
+   "label": "API version",
+   "default": "v21.0",
+   "permlevel": 2
+  },
+  {
+   "fieldname": "whatsapp_api_base",
+   "fieldtype": "Data",
+   "label": "API address",
+   "default": "https://graph.facebook.com",
+   "permlevel": 2
+  },
+  {
+   "fieldname": "messaging_sms_section",
+   "fieldtype": "Section Break",
+   "label": "SMS (HTTP gateway)",
+   "collapsible": 1,
+   "permlevel": 2,
+   "description": "Any SMS gateway that sends from a web address. Leave on Dry run to log messages without sending anything."
+  },
+  {
+   "fieldname": "sms_provider",
+   "fieldtype": "Select",
+   "label": "SMS provider",
+   "options": "Dry run\nGeneric HTTP gateway",
+   "default": "Dry run",
+   "permlevel": 2
+  },
+  {
+   "fieldname": "sms_gateway_url",
+   "fieldtype": "Data",
+   "label": "Gateway address",
+   "permlevel": 2,
+   "description": "Starts with https://"
+  },
+  {
+   "fieldname": "sms_http_method",
+   "fieldtype": "Select",
+   "label": "Method",
+   "options": "POST\nGET",
+   "default": "POST",
+   "permlevel": 2
+  },
+  {
+   "fieldname": "sms_params",
+   "fieldtype": "Small Text",
+   "label": "Parameters",
+   "permlevel": 2,
+   "description": "One name=value per line. Use {to}, {to_digits}, {message}, {sender}, {username}, {password}."
+  },
+  {
+   "fieldname": "column_break_sms",
+   "fieldtype": "Column Break",
+   "permlevel": 2
+  },
+  {
+   "fieldname": "sms_username",
+   "fieldtype": "Data",
+   "label": "Username / account",
+   "permlevel": 2
+  },
+  {
+   "fieldname": "sms_password",
+   "fieldtype": "Password",
+   "label": "Password / key",
+   "permlevel": 2
+  },
+  {
+   "fieldname": "sms_sender_id",
+   "fieldtype": "Data",
+   "label": "Sender name",
+   "permlevel": 2
+  },
+  {
+   "fieldname": "sms_success_text",
+   "fieldtype": "Data",
+   "label": "Success text (optional)",
+   "permlevel": 2,
+   "description": "If set, the gateway's reply must contain this to count as sent."
   }
  ],
  "permissions": [
@@ -551,6 +711,18 @@
    "read": 1,
    "write": 1,
    "create": 1
+  },
+  {
+   "role": "System Manager",
+   "permlevel": 2,
+   "read": 1,
+   "write": 1
+  },
+  {
+   "role": "Store Owner",
+   "permlevel": 2,
+   "read": 1,
+   "write": 1
   }
  ]
 }

@@ -143,11 +143,12 @@ def run():
 	check("System Manager can read+write permlevel 1", grants.get(("System Manager", 1)) == (1, 1))
 	for role in ("Store Owner", "Store Admin"):
 		check(f"{role} keeps operational (permlevel 0) read+write", grants.get((role, 0)) == (1, 1))
-	for owner_like in ("owner@demo.example", "admin@demo.example"):
+	# Store Owner also edits the Messages connection (permlevel 2: WhatsApp / SMS credentials); Store Admin does not
+	for owner_like, expected in (("owner@demo.example", {0, 2}), ("admin@demo.example", {0})):
 		frappe.set_user(owner_like)
 		access = frappe.get_doc("Retail Store Settings").get_permlevel_access("write")
 		frappe.set_user("Administrator")
-		check(f"{owner_like} can write permlevel 0 only", access == [0] or set(access) == {0}, access)
+		check(f"{owner_like} can write permlevels {sorted(expected)} only (never the Branding / Capabilities level 1)", set(access) == expected, access)
 
 	# --- Customer defaults: ERPNext leaves Customer Group / Territory blank
 	ss = frappe.get_single("Selling Settings")
