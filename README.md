@@ -673,6 +673,8 @@ bench --site <site> execute retail_store.tests.seed_hr_demo.run
 python apps/retail_store/retail_store/tests/browser_hr.py
 # customer messages: phone numbers, consent, the three providers against a fake gateway, failure / retry, who sees credentials
 bench --site <site> execute retail_store.tests.check_messaging.run
+# every dialog type, light + dark, two window sizes, stacked dialogs and Escape (numeric checks + screenshots)
+python apps/retail_store/retail_store/tests/browser_dialogs.py
 # POS New Customer quick entry: consent boxes unticked, defaults, Edit Full Form saves, MUR findable (needs an open POS shift)
 python apps/retail_store/retail_store/tests/browser_customer_quick_entry.py
 # the same in a real browser: cart opt-in boxes, order + delivery in the Message Log, Settings tab per role (switches messaging on, then off)
@@ -696,6 +698,15 @@ shell for an owner and the Apps launcher (naming ERPNext / Frappe HR, or "Not pe
 everyone else. `public/js/landing.js` sends every retail user (anyone but System Manager) from
 that tile, from `/desk/home`, `/desk/setup/home` and any `desktop` route back to Retail Store.
 Display-side only; the server 403s stay the real boundary. Test: `tests/browser_home.py`.
+
+**Dialogs** (`public/css/dialogs.css`, `public/js/dialogs.js`). One base layer for every Frappe / ERPNext dialog, on top of the
+corner / padding / pill-button skin: it starts below the toolbar and never grows past the window (the body scrolls, header and
+footer stay), the form inside is flat (no second white card), an emptied column collapses (New Customer as an Individual puts
+Email and Mobile on one row, and fits a 1440x900 window), footer buttons share one layout, and it fades and rises 8px on open
+(off under reduced motion). A message opened over a dialog sits clear below its header, takes keyboard focus, and Escape closes
+only the dialog on top (a blocking one ignores it). Gotchas: the Desk theme redefines `--border-color` inside a dialog as a
+near-white glass value (dialog lines use `--rs-dialog-line`), forces `.form-page` backgrounds with `!important`, and Frappe
+re-uses one message element, so the opening order is read from `frappe.ui.open_dialogs`, never from the DOM. Test: `tests/browser_dialogs.py`.
 
 ### Backlog (known, not built)
 

@@ -1,0 +1,112 @@
+/* ---- Dialogs (every Frappe / ERPNext modal on the Desk and in POS) --------------------------------------------
+   One base layer on top of the corners / padding / pill buttons already set in pos_restyle.css and the Desk theme.
+   Tokens only (var(--rs-dialog-line), --text-color, --card-bg, --control-bg), so light and dark share the rules.
+
+   What it fixes:
+   * the dialog sat at the very top, under the 36px toolbar: it now starts below it, and never grows past the window
+     (the body scrolls; header and footer stay put), so a long form such as New Customer is never cut off
+   * the form inside was a second white rounded card with no padding, labels flush against its edge: it is flat now
+   * a name column emptied by "Individual" left a blank half: empty columns collapse, the rest takes the width
+   * a message ("Missing Values Required") opened over the top of the dialog it was about: it now sits clear below the
+     header (dialogs.js tags the depth), and Escape closes only the dialog on top
+   * footer buttons: secondary on the left / ghost, primary on the right, one size
+   * a short fade-and-rise on open (opacity + 8px), nothing else moves; off when the system asks for less motion */
+
+/* Inside a dialog the Desk theme redefines --border-color as a near-white glass value, so dialog lines use their own
+   neutral translucent grey, which reads on both the light and the dark surface */
+.modal { --rs-dialog-line: rgba(128, 128, 128, 0.28); }
+
+.modal-dialog {
+	margin-top: 56px;
+	margin-bottom: 16px;
+}
+.modal-content {
+	display: flex;
+	flex-direction: column;
+	max-height: calc(100vh - 72px);
+}
+.modal-content .modal-header,
+.modal-content .modal-footer { flex: none; }
+.modal-content .modal-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding-bottom: 14px; }
+
+/* the form is not a card inside a card */
+/* (the Desk theme sets the card background with !important, in light and in dark: this must outrank it) */
+html .modal .modal-body .form-page {
+	background: transparent !important;
+	background-color: transparent !important;
+	border: 0 !important;
+	box-shadow: none !important;
+	border-radius: 0;
+	padding: 0;
+}
+.modal-body .form-section { margin-bottom: 10px; padding-bottom: 0; }
+.modal-body .form-section:last-child { margin-bottom: 0; }
+.modal-body .section-head { margin-bottom: 6px; }
+.modal-body .frappe-control { margin-bottom: 8px; }
+.modal-body .form-column:not(:has(.frappe-control:not(.hide-control))) { display: none; }
+.modal-body .section-body { display: flex; gap: 0 16px; }
+.modal-body .section-body > .form-column { flex: 1 1 0; max-width: none; min-width: 0; padding: 0; }
+/* New Customer, Individual: the name column is gone, so Email and Mobile share the row instead of stacking */
+.modal-body .form-column:not(:has(.frappe-control:not(.hide-control))) + .form-column:has([data-fieldname="email_address"]) > form {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 0 16px;
+}
+/* ...and the two opt-in boxes share a row too (the hint under them is placed after them by customer_quick_entry.js) */
+.modal-body .frappe-control[data-fieldname="custom_whatsapp_optin"],
+.modal-body .frappe-control[data-fieldname="custom_sms_optin"] {
+	display: inline-block;
+	vertical-align: top;
+	width: calc(50% - 8px);
+	margin-bottom: 4px;
+}
+.modal-body .rs-consent-hint { margin: 0 0 10px; }
+
+/* a message stacked over a dialog: clear of its header, and a little lower than a lone message */
+.modal-dialog.msgprint-dialog { margin-top: 14vh; }
+.modal[data-rs-depth="2"] .modal-dialog,
+.modal[data-rs-depth="3"] .modal-dialog { margin-top: calc(14vh + 56px); }
+.msgprint-dialog .msgprint { padding: 0; line-height: 1.55; }
+.msgprint-dialog .msgprint ul { margin: 10px 0 0; padding-left: 22px; }
+.msgprint-dialog .modal-title .indicator::before,
+.msgprint-dialog .modal-title .indicator-pill::before {
+	width: 10px;
+	height: 10px;
+	box-shadow: 0 0 0 4px color-mix(in srgb, currentColor 22%, transparent);
+}
+
+/* footer: one row, secondary / custom actions left, primary right, same size */
+.modal-footer { align-items: center; gap: 12px; }
+.modal-footer .custom-actions,
+.modal-footer .standard-actions { display: flex; align-items: center; gap: 8px; }
+.modal-footer .standard-actions { margin-left: auto; }
+.modal-footer .btn-secondary,
+.modal-footer .btn-default,
+.modal-footer .custom-actions .btn {
+	background: transparent;
+	border: 1px solid var(--rs-dialog-line);
+	color: var(--text-color);
+}
+.modal-footer .btn-secondary:hover,
+.modal-footer .btn-default:hover,
+.modal-footer .custom-actions .btn:hover { background: var(--control-bg); }
+
+/* "Select Item" / "Select Currency" result lists: rows use Bootstrap's .border-bottom, a fixed light grey that glares in dark */
+html[data-theme] body .modal .modal-body .list-item.border-bottom,
+html[data-theme] body .modal .modal-body .border-bottom { border-bottom: 1px solid var(--rs-dialog-line) !important; }
+html[data-theme] body .modal .modal-body .list-item-container { border-bottom: 1px solid var(--rs-dialog-line) !important; }
+html[data-theme] body .modal .modal-body .list-item-container > .list-item.border-bottom { border-bottom: 0 !important; }
+html[data-theme] body .modal .modal-body .results { border-color: var(--rs-dialog-line) !important; }
+.modal-body .list-item:not(.list-item--head):hover { background: var(--control-bg); }
+.modal-body .list-item--head { position: sticky; top: 0; z-index: 1; background: var(--card-bg, var(--fg-color)); }
+
+/* calm entrance */
+.modal.fade .modal-dialog {
+	opacity: 0;
+	transform: translateY(8px);
+	transition: opacity 0.16s ease-out, transform 0.16s ease-out;
+}
+.modal.fade.show .modal-dialog { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+	.modal.fade .modal-dialog { transition: none; transform: none; }
+}

@@ -25,7 +25,7 @@
 		const sms = qe.fields_dict && qe.fields_dict.custom_sms_optin;
 		if (sms && !qe.$rs_hint) {
 			qe.$rs_hint = $('<div class="rs-consent-hint text-muted small"></div>').text(__("Only tick if the customer said yes."));
-			$(sms.wrapper).append(qe.$rs_hint);
+			$(sms.wrapper).after(qe.$rs_hint);
 		}
 		const company = frappe.defaults.get_user_default("Company") || (frappe.boot.sysdefaults || {}).company;
 		if (company) {
