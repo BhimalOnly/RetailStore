@@ -673,7 +673,8 @@ bench --site <site> execute retail_store.tests.seed_hr_demo.run
 python apps/retail_store/retail_store/tests/browser_hr.py
 # customer messages: phone numbers, consent, the three providers against a fake gateway, failure / retry, who sees credentials
 bench --site <site> execute retail_store.tests.check_messaging.run
-# the optional-fields fold never hides a required field (Employee Left, Attendance On Leave, Payment Entry bank, Item batches); drafts it makes are removed
+# the optional-fields fold never hides a required field, whether a field condition (Employee Left, Attendance On Leave, Payment Entry bank, Item batches)
+# or a form script (Customer internal customer, Material Request, Sales Invoice, set_df_property) makes it required; drafts it makes are removed
 python apps/retail_store/retail_store/tests/browser_fold_guard.py
 # every dialog type, light + dark, two window sizes, stacked dialogs and Escape (numeric checks + screenshots)
 python apps/retail_store/retail_store/tests/browser_dialogs.py
@@ -717,7 +718,7 @@ Attendance On Leave (Leave Type), a Payment Entry on a bank account (Reference N
 (Shelf Life). Now whenever Frappe re-evaluates the conditions the field is revealed with a note ("Relieving Date is now required
 (on the Exit tab)"), a failed Save reveals the field before Frappe scrolls to it, and the fold's own Hide button never re-hides
 it. Optional fields stay folded as before. Form-simplification work (Customize Form) must keep this true: never hide a field
-that is required or conditionally required. Test: `tests/browser_fold_guard.py` (19 checks; with the guard off 8 of them fail).
+that is required or conditionally required. It covers both ways a field becomes required: a field condition, and a form script (`frm.toggle_reqd`, `set_df_property`), which ends in `refresh_field` -> `refresh_dependency`, the one hook the guard needs. Test: `tests/browser_fold_guard.py` (29 checks; with the guard off 14 of them fail).
 
 ### Backlog (known, not built)
 

@@ -8,6 +8,12 @@ stay folded:
   * Payment Entry: a Bank account      -> Reference No / Date     (condition flipped directly on the form)
   * Item: batches + expiry date        -> Shelf Life In Days
   * Item template (variants)           -> Attributes already visible on load
+and the SECOND way a field becomes required, a form script (frm.toggle_reqd / set_df_property "reqd"), which never
+passes through the field conditions (about 90 places in ERPNext / HRMS work this way):
+  * Customer: "Internal customer" ticked    -> Represents Company   (ERPNext's own handler)
+  * Material Request: Customer Provided     -> Customer            (its refresh handler)
+  * Sales Invoice (a draft return): the same toggle_reqd call its script makes for a normal invoice -> Due Date
+  * any field: frm.set_df_property(field, "reqd", 1)
 Nothing is saved to a real record; the draft Attendance / Payment Entry it needs are created and deleted by the test.
 
 Run:  /tmp/pw/bin/python browser_fold_guard.py   (HR on + seeded employees: tests/seed_hr_demo.run)
@@ -143,6 +149,64 @@ with sync_playwright() as p:
 		at = page.evaluate(STATE, "attributes")
 		check("Item template: Attributes (required for variants) is not folded away on load", at["reqd"] == 1 and not at["folded"], at)
 		check("Item template: ordinary optional fields still are", page.evaluate("()=>cur_frm.fields_dict.brand.$wrapper[0].classList.contains('st-pf-hidden')"))
+		page.close()
+
+		# ---- the second way: form scripts (toggle_reqd / set_df_property), not field conditions
+		page, errors = open_form(ctx, "/desk/customer/DEMO%20Jane%20Shopper", "Customer")
+		spy_alerts(page)
+		c0 = page.evaluate(STATE, "represents_company")
+		page.evaluate("()=>cur_frm.set_value('is_internal_customer',1)")
+		page.wait_for_timeout(1500)
+		c1 = page.evaluate(STATE, "represents_company")
+		check("Customer: ticking 'internal customer' makes Represents Company required (ERPNext's handler) and reveals it", c0["folded"] and c1["reqd"] == 1 and not c1["folded"], (c0, c1))
+		check("Customer: the note says which tab it is on", alerts(page, "Represents Company is now required"), page.evaluate("window.__alerts"))
+		check("Customer: a failed Save lands on it", "Represents Company" in failed_save(page) and page.evaluate(STATE, "represents_company")["onScreen"])
+		check("Customer: no script errors", not errors, errors)
+		page.close()
+
+		mr = (admin.request.get(f"{B}/api/resource/Material Request?filters={q(json.dumps([['docstatus', '=', 0]]))}&limit_page_length=1&fields={q(json.dumps(['name']))}").json().get("data") or [{}])[0].get("name")
+		if mr:
+			page, errors = open_form(ctx, f"/desk/material-request/{mr}", "Material Request")
+			m0 = page.evaluate(STATE, "customer")
+			page.evaluate("()=>{cur_frm.set_value('material_request_type','Customer Provided');cur_frm.trigger('refresh')}")
+			page.wait_for_timeout(2500)
+			m1 = page.evaluate(STATE, "customer")
+			check("Material Request: 'Customer Provided' makes Customer required (its refresh handler) and reveals it", m1["reqd"] == 1 and not m1["folded"], (m0, m1))
+			check("Material Request: no script errors", not errors, errors)
+			page.close()
+		else:
+			check("Material Request: a draft exists to test on", False)
+
+		src = (admin.request.get(f"{B}/api/resource/Sales Invoice?filters={q(json.dumps([['docstatus', '=', 1], ['is_return', '=', 0]]))}&limit_page_length=1&fields={q(json.dumps(['name']))}&order_by=creation%20desc").json().get("data") or [{}])[0].get("name")
+		ret = None
+		if src:
+			doc = admin.request.get(f"{B}/api/method/erpnext.accounts.doctype.sales_invoice.sales_invoice.make_sales_return?source_name={q(src)}").json().get("message")
+			if doc:
+				doc.update({"is_pos": 0, "payments": [], "paid_amount": 0, "base_paid_amount": 0})
+				r = admin.request.post(f"{B}/api/resource/Sales Invoice", data=json.dumps(doc), headers={"Content-Type": "application/json"})
+				ret = (r.json().get("data") or {}).get("name") if r.ok else None
+		if ret:
+			made.append(("Sales Invoice", ret))
+			page, errors = open_form(ctx, f"/desk/sales-invoice/{ret}", "Sales Invoice")
+			spy_alerts(page)
+			d0 = page.evaluate(STATE, "due_date")
+			page.evaluate("()=>cur_frm.toggle_reqd('due_date', true)")
+			page.wait_for_timeout(1200)
+			d1 = page.evaluate(STATE, "due_date")
+			check("Sales Invoice (return): not required and folded to begin with", d0["reqd"] == 0 and d0["folded"], d0)
+			check("Sales Invoice: the toggle_reqd call its script makes reveals Due Date", d1["reqd"] == 1 and not d1["folded"], d1)
+			check("Sales Invoice: no script errors", not errors, errors)
+			page.close()
+		else:
+			check("Sales Invoice: a draft return could be created for the test", False, src)
+
+		page, errors = open_form(ctx, "/desk/item/DEMO-TOTE", "Item")
+		b0 = page.evaluate(STATE, "brand")
+		page.evaluate("()=>cur_frm.set_df_property('brand','reqd',1)")
+		page.wait_for_timeout(1000)
+		b1 = page.evaluate(STATE, "brand")
+		check("any field: frm.set_df_property(field, 'reqd', 1) reveals it", b0["folded"] and b1["reqd"] == 1 and not b1["folded"], (b0, b1))
+		page.evaluate("()=>cur_frm.set_df_property('brand','reqd',0)")
 		page.close()
 
 		# ---- a NEW record is untouched (the fold never applied to it)
