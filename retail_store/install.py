@@ -100,6 +100,9 @@ def run_setup():
 	ensure_home_records()
 	create_custom_fields(CUSTOM_FIELDS, ignore_validate=True)
 	ensure_single_defaults()
+	from retail_store.setup.forms import apply_form_changes
+
+	apply_form_changes()  # after the custom fields: it may collapse / relabel them
 	activate_retail_domain()
 	setup_roles_and_permissions()
 	setup_material_request_workflow()

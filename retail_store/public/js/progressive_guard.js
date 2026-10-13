@@ -12,7 +12,7 @@
 //  * a failed Save reveals the missing field before Frappe scrolls to it (scroll_to_field switches the tab, but
 //    scrolling to a folded field shows nothing)
 //  * pressing the fold's own "Hide optional fields" never re-hides a required field
-// Optional fields stay folded exactly as before.
+// A required field inside a collapsed section opens that section too. Optional fields stay folded exactly as before.
 (function () {
 	const FIELD_HIDDEN = "st-pf-hidden";
 	const HEAD_HIDDEN = "st-pf-section-head-hidden";
@@ -23,16 +23,25 @@
 		const el = field && field.$wrapper && field.$wrapper[0];
 		if (!df || !el || LAYOUT.indexOf(df.fieldtype) !== -1) return false;
 		if (!df.reqd || df.hidden || el.classList.contains("hide-control")) return false; // nothing to show right now
-		if (!el.classList.contains(FIELD_HIDDEN)) return false;
-		el.classList.remove(FIELD_HIDDEN);
-		const section = el.closest(".form-section");
-		const head = section && section.querySelector(".section-head");
-		if (head) head.classList.remove(HEAD_HIDDEN);
-		if (announce && window.frappe && frappe.show_alert) {
+		let changed = false;
+		if (el.classList.contains(FIELD_HIDDEN)) {
+			el.classList.remove(FIELD_HIDDEN);
+			const section = el.closest(".form-section");
+			const head = section && section.querySelector(".section-head");
+			if (head) head.classList.remove(HEAD_HIDDEN);
+			changed = true;
+		}
+		// a required field inside a COLLAPSED section (Customize Form collapses rarely used sections) opens it
+		const sec = field.section;
+		if (sec && sec.is_collapsed && sec.is_collapsed()) {
+			sec.collapse(false);
+			changed = true;
+		}
+		if (changed && announce && window.frappe && frappe.show_alert) {
 			const where = field.tab && !field.tab.is_active() ? " " + __("(on the {0} tab)", [field.tab.label || (field.tab.df || {}).label || ""]) : "";
 			frappe.show_alert({ message: __("{0} is now required", [__(df.label || df.fieldname)]) + where, indicator: "orange" }, 6);
 		}
-		return true;
+		return changed;
 	}
 
 	function reveal_required(frm, announce) {

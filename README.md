@@ -673,6 +673,10 @@ bench --site <site> execute retail_store.tests.seed_hr_demo.run
 python apps/retail_store/retail_store/tests/browser_hr.py
 # customer messages: phone numbers, consent, the three providers against a fake gateway, failure / retry, who sees credentials
 bench --site <site> execute retail_store.tests.check_messaging.run
+# form simplification: the audit, the audit refusing unsafe changes, reversibility, Customer flows with the changes active
+bench --site <site> execute retail_store.tests.check_forms.run
+# the simplified Customer form in a browser: collapsed sections, hidden fields, saving, auto-open, internal customer
+python apps/retail_store/retail_store/tests/browser_customer_form.py
 # the optional-fields fold never hides a required field, whether a field condition (Employee Left, Attendance On Leave, Payment Entry bank, Item batches)
 # or a form script (Customer internal customer, Material Request, Sales Invoice, set_df_property) makes it required; drafts it makes are removed
 python apps/retail_store/retail_store/tests/browser_fold_guard.py
@@ -720,9 +724,24 @@ Attendance On Leave (Leave Type), a Payment Entry on a bank account (Reference N
 it. Optional fields stay folded as before. Form-simplification work (Customize Form) must keep this true: never hide a field
 that is required or conditionally required. It covers both ways a field becomes required: a field condition, and a form script (`frm.toggle_reqd`, `set_df_property`), which ends in `refresh_field` -> `refresh_dependency`, the one hook the guard needs. Test: `tests/browser_fold_guard.py` (29 checks; with the guard off 14 of them fail).
 
+**Form simplification** (`setup/forms.py`, applied on every migrate). A declarative list, `FORM_CHANGES`, of Customize Form changes
+(Property Setters marked module "Retail Store"), each with its reason. Tools in order of preference: **collapse** a labelled section (with a
+`collapsible_depends_on` that opens it whenever it holds data, so nothing is buried), **relabel**, **default**, and only then **hide**. Nothing is
+deleted: a hidden field keeps its column, data and logic. `audit()` refuses a change that breaks a rule and `apply_form_changes()` applies only
+what passes (deny by default): never hide a required or conditionally required field, one read by another field's condition, copied onto
+another doctype (`fetch_from`), in lists / filters / search, a search / title / image field, mentioned in the doctype's own controller or form
+script, or one that holds data on the site; a collapsed section needs a label, an auto-open rule covering every field in it, and no required
+field. `remove_form_changes()` undoes exactly these. Changes are site-wide (Customize Form is not per role). Customer so far: Customer Type
+defaults to Individual, "Customer Details" reads Notes, `customer_pos_id` / `supplier_numbers` / `account_manager` (no reader, no data) are
+hidden, and the Defaults, Internal Customer, Sales Partner and References sections are collapsed. Tax withholding, market segment / industry /
+website and `so_required` / `dn_required` stay as they are: they share an *unlabelled* section with fields that must stay visible (Tax ID,
+Disabled, Language, Notes), so collapsing them would bury those. The fold guard also opens a collapsed section when a field in it becomes required.
+Tests: `tests/check_forms.py`, `tests/browser_customer_form.py`.
+
 ### Backlog (known, not built)
 
 * Report roles: `apply_report_and_page_roles` is meant to start each Custom Role from the report's standard roles, but after migrate Sales Register, Sales Analytics and Item-wise Sales Register hold only the retail roles (Profit and Loss / Balance Sheet showed the same until their accounting roles were named explicitly). Check what the Accountant can still open and fix the copy step.
+* Customer form: tax withholding, market segment / industry / website and `so_required` / `dn_required` are not collapsed (they share an unlabelled section with Tax ID, Disabled, Language and Notes); collapsing them needs new labelled sections and a field reorder. Low priority: they sit on the secondary Tax, More Info and Settings tabs.
 * Mauritian Rupee: enabled on every migrate (ERPNext ships it disabled); a fresh site whose wizard company country is Mauritius also gets System Settings country / currency set. An existing company's currency is never changed (ERPNext locks it once there are postings); the dev demo company is still on INR.
 * Staff login page still shows "Powered by Solvronix" (theme setting; the Desk and storefront credits are already hidden).
 * Customer, Employee and Stock Count are still raw Desk forms; Ctrl+K search, the "All Options" menu and the Accountant / Warehouse Manager screens have not had a wording review.
