@@ -29,6 +29,7 @@ def run():
 		_applied()
 		_reversible()
 		_flows()
+		_item_flows()
 	finally:
 		frappe.set_user("Administrator")
 		frappe.db.rollback()
@@ -66,6 +67,20 @@ def _audit():
 	for change, keyword in cases:
 		found = [p for _, p in forms.audit([change])]
 		check(f"audit refuses {change['doctype']}.{change['field']} {change['property']} ({keyword})", any(keyword.lower() in p.lower() for p in found), found)
+	manufacturing_ok = next(c["value"] for c in forms.FORM_CHANGES if c["field"] == "manufacturing")
+	purchasing_ok = next(c["value"] for c in forms.FORM_CHANGES if c["field"] == "purchasing_tab")
+	gates = [
+		(bad("Item", "manufacturing", "depends_on", "eval:frappe.boot.retail_store_capabilities.manufacturing || doc.is_sub_contracted_item || doc.default_bom || doc.production_capacity || doc.default_manufacturer_part_no || doc.default_item_manufacturer || doc.published_in_website", "gate"), "own condition"),
+		(bad("Item", "purchasing_tab", "depends_on", purchasing_ok.replace(" || doc.lead_time_days", ""), "gate"), "lead_time_days"),
+		(bad("Item", "manufacturing", "depends_on", "eval:doc.is_stock_item", "gate"), "capability"),
+		(bad("Item", "manufacturing", "depends_on", manufacturing_ok.replace("capabilities.manufacturing", "capabilities.teleport"), "gate"), "unknown capability"),
+		(bad("Item", "details", "depends_on", "eval:frappe.boot.retail_store_capabilities.crm", "gate"), "required"),
+		(bad("Item", "item_code", "depends_on", "eval:frappe.boot.retail_store_capabilities.crm", "gate"), "Tab Break"),
+	]
+	for change, keyword in gates:
+		found = [p for _, p in forms.audit([change])]
+		check(f"audit refuses a tab gate that {keyword}", any(keyword.lower() in p.lower() for p in found), found)
+
 	# a collapse whose auto-open misses a field that can hold data
 	partial = [bad("Customer", "section_break_hwkr", "collapsible", 1, "collapse"), bad("Customer", "section_break_hwkr", "collapsible_depends_on", "eval:doc.default_currency", "collapse")]
 	check("audit refuses a collapse that does not open for every field's data", any("does not open" in p for _, p in forms.audit(partial)), forms.audit(partial))
@@ -84,6 +99,15 @@ def _applied():
 	check("applied: 'Customer Details' reads Notes", m.get_field("customer_details").label == "Notes")
 	check("applied: four sections collapsible, each with an auto-open rule", all(m.get_field(f).collapsible and m.get_field(f).collapsible_depends_on for f in ("section_break_hwkr", "internal_customer_section", "sales_team_section", "references_section")))
 	check("applied: fields that must stay visible were not touched", not any(m.get_field(f).hidden for f in ("customer_name", "customer_type", "customer_group", "territory", "loyalty_program", "tax_id", "tax_category", "disabled", "language", "alias", "customer_primary_address", "customer_primary_contact")))
+
+	i = frappe.get_meta("Item")
+	check("applied: Item reads Product Code / Name / Category, Item Price reads Price", (i.get_field("item_code").label, i.get_field("item_name").label, i.get_field("item_group").label) == ("Product Code", "Product Name", "Product Category") and frappe.get_meta("Item Price").get_field("price_list_rate").label == "Price")
+	check("applied: no Item field is hidden by us", not [c for c in forms.FORM_CHANGES if c["doctype"] == "Item" and c["kind"] == "hide"])
+	check("applied: Deferred Accounting and Customer Details are collapsed with auto-open, Foreign Trade now opens on data", all(i.get_field(f).collapsible and i.get_field(f).collapsible_depends_on for f in ("deferred_accounting_section", "customer_details", "foreign_trade_details")))
+	for tab, orig in (("manufacturing", "is_stock_item"), ("purchasing_tab", "doc.is_purchase_item"), ("quality_tab", None)):
+		dep = i.get_field(tab).depends_on or ""
+		check(f"applied: the {tab} tab is gated on a capability and keeps its own condition", "retail_store_capabilities" in dep and (orig is None or orig.replace("doc.", "") in dep), dep)
+	check("applied: the tabs that must always be there are not gated", not any("retail_store_capabilities" in (i.get_field(t).depends_on or "") for t in ("details", "accounting", "uom_tab", "item_tax_section_break", "inventory_section", "variants_section", "sales_details", "pricing_tab")))
 
 	# idempotent: a second apply changes nothing
 	before = frappe.db.sql("select name, modified from `tabProperty Setter` where module=%s order by name", forms.MODULE)
@@ -108,6 +132,8 @@ def _reversible():
 	m = frappe.get_meta("Customer")
 	check("reversible: removing the changes restores ERPNext's own form", not _setters() and m.get_field("customer_type").default == "Company" and not m.get_field("customer_pos_id").hidden and m.get_field("customer_details").label == "Customer Details" and not m.get_field("section_break_hwkr").collapsible)
 	check("reversible: no data path was ever touched (the columns are all still there)", all(frappe.db.has_column("Customer", f) for f in ("customer_pos_id", "account_manager")) and frappe.db.table_exists("Customer Supplier Number") or True)
+	i = frappe.get_meta("Item")
+	check("reversible: Item is back to ERPNext's own (label, tab conditions, sections)", i.get_field("item_code").label == "Item Code" and "retail_store_capabilities" not in (i.get_field("manufacturing").depends_on or "") and i.get_field("manufacturing").depends_on == "is_stock_item" and not i.get_field("customer_details").collapsible)
 	forms.apply_form_changes()
 	check("reversible: and applying brings the changes back", len(_setters()) == len(forms.FORM_CHANGES))
 
@@ -153,3 +179,63 @@ def _flows():
 
 	# 5. (the "internal customer needs a company" rule lives in the form script, not on the server: the browser test
 	#    browser_customer_form.py covers it, and the fold guard test covers the field being revealed)
+
+
+def _item_flows():
+	"""What an Item is used for, with the changes active, as the roles that do it."""
+	from erpnext.controllers.item_variant import create_variant
+	from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+	from erpnext.stock.get_item_details import get_item_details
+
+	company = frappe.db.get_value("Company", {}, "name")
+	warehouse = frappe.db.get_single_value("Retail Store Settings", "main_warehouse")
+	group = frappe.db.get_value("Item Group", {"is_group": 0}, "name")
+	price_list = frappe.db.get_value("Price List", {"selling": 1}, "name")
+	currency = frappe.db.get_value("Price List", price_list, "currency")
+
+	def details(item_code, **extra):
+		args = {"item_code": item_code, "company": company, "doctype": "Sales Invoice", "price_list": price_list, "currency": currency, "price_list_currency": currency,
+			"conversion_rate": 1, "plc_conversion_rate": 1, "qty": 1, "customer": "DEMO Walk-in Customer", "transaction_date": today(), "warehouse": warehouse}
+		args.update(extra)
+		return get_item_details(args)
+
+	frappe.set_user("wh.manager@demo.example")
+	simple = frappe.get_doc({"doctype": "Item", "item_code": "FORMS-SIMPLE", "item_group": group, "stock_uom": "Nos"}).insert()
+	check("item flow: a warehouse manager saves a product with a code, category and unit", simple.name == "FORMS-SIMPLE" and simple.is_stock_item and simple.is_sales_item, simple.as_dict())
+	check("item flow: its name defaults from the code (the relabel changed nothing underneath)", simple.item_name == "FORMS-SIMPLE")
+
+	tpl = frappe.get_doc({"doctype": "Item", "item_code": "FORMS-TPL", "item_group": group, "stock_uom": "Nos", "has_variants": 1, "variant_based_on": "Item Attribute", "attributes": [{"attribute": "Size"}, {"attribute": "Colour"}]}).insert()
+	variant = create_variant(tpl.name, {"Size": "Small", "Colour": "Black"})
+	variant.insert()
+	check("item flow: a variant template with Size and Colour makes a variant", variant.variant_of == tpl.name and len(variant.attributes) == 2, variant.as_dict())
+
+	frappe.get_doc({"doctype": "Item Price", "item_code": variant.name, "price_list": price_list, "price_list_rate": 199}).insert()
+	check("item flow: the variant's price (Item Price) is what a sale would charge", float(details(variant.name).get("price_list_rate") or 0) == 199, details(variant.name).get("price_list_rate"))
+
+	variant.reload()
+	variant.append("barcodes", {"barcode": "FORMS-BC-0001"})
+	variant.append("reorder_levels", {"warehouse": warehouse, "warehouse_reorder_level": 2, "warehouse_reorder_qty": 10, "material_request_type": "Purchase"})
+	variant.save()
+	from erpnext.selling.page.point_of_sale.point_of_sale import search_for_serial_or_batch_or_barcode_number
+
+	frappe.set_user("cashier.downtown@demo.example")  # cashiers scan; a warehouse manager cannot open the POS
+	found = search_for_serial_or_batch_or_barcode_number("FORMS-BC-0001")
+	frappe.set_user("wh.manager@demo.example")
+	check("item flow: a barcode on the variant is found by the POS scanner", (found or {}).get("item_code") == variant.name, found)
+	check("item flow: a reorder level saves", frappe.db.count("Item Reorder", {"parent": variant.name}) == 1)
+
+	simple.reload()
+	simple.append("taxes", {"item_tax_template": "Mauritius Tax - DRC"})
+	simple.save()
+	check("item flow: an item tax template attaches and reaches the sale (item_tax_rate)", "VAT" in str(details(simple.name).get("item_tax_rate")), details(simple.name).get("item_tax_rate"))
+
+	frappe.set_user("Administrator")
+	se = make_stock_entry(item_code=variant.name, qty=5, to_warehouse=warehouse, rate=50, company=company)
+	check("item flow: stock can be received for it and the Bin shows it", se.docstatus == 1 and frappe.db.get_value("Bin", {"item_code": variant.name, "warehouse": warehouse}, "actual_qty") == 5)
+
+	frappe.set_user("wh.manager@demo.example")
+	simple.reload()
+	simple.disabled = 1
+	simple.save()
+	check("item flow: a disabled product is no longer offered", not frappe.get_all("Item", filters={"item_code": "FORMS-SIMPLE", "disabled": 0}))
+	frappe.set_user("Administrator")

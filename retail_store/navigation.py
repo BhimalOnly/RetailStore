@@ -325,10 +325,17 @@ def get_versions():
 	return {}
 
 
+CAPABILITIES = ("crm", "ecommerce", "buying", "hr", "manufacturing", "quality", "support", "assets", "projects", "loyalty", "messaging")
+
+
 def boot_session(bootinfo):
 	user = frappe.session.user
 	if user == "Guest":
 		return
+	# Retail Store Settings > Capabilities for the browser: form conditions read it (setup/forms.py gates an Item's
+	# Manufacturing / Quality / Purchasing tabs on it). Everyone gets it; a page reload picks up a change.
+	settings = frappe.get_cached_doc("Retail Store Settings")
+	bootinfo.retail_store_capabilities = {name: cint(settings.get("enable_" + name)) for name in CAPABILITIES}
 	if user == "Administrator":
 		bootinfo.retail_store_pos_form_view = True
 		return

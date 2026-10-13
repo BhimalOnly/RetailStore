@@ -22,10 +22,11 @@ from frappe.custom.doctype.property_setter.property_setter import make_property_
 
 MODULE = "Retail Store"  # marks the Property Setters this module owns
 
-PROPERTY_TYPES = {"hidden": "Check", "collapsible": "Check", "collapsible_depends_on": "Code", "label": "Data", "default": "Text"}
+PROPERTY_TYPES = {"hidden": "Check", "collapsible": "Check", "collapsible_depends_on": "Code", "depends_on": "Code", "label": "Data", "default": "Text"}
+KNOWN_CAPABILITIES = {"crm", "ecommerce", "buying", "hr", "manufacturing", "quality", "support", "assets", "projects", "loyalty", "messaging"}
 LAYOUT = {"Section Break", "Column Break", "Tab Break", "HTML", "Button", "Fold", "Heading"}
 
-# kind: hide | collapse | relabel | default
+# kind: hide | collapse | gate | relabel | default
 FORM_CHANGES = [
 	# ---- Customer ----------------------------------------------------------------------------------------------
 	{
@@ -82,7 +83,44 @@ FORM_CHANGES = [
 		"doctype": "Customer", "field": "references_section", "property": "collapsible_depends_on", "value": "eval:doc.lead_name || doc.opportunity_name || doc.prospect_name", "kind": "collapse",
 		"why": "Opens when the customer came from CRM.",
 	},
+	# ---- Item (no field is hidden: nearly every one is read somewhere; the clutter is whole feature areas) ----------
+	{"doctype": "Item", "field": "item_code", "property": "label", "value": "Product Code", "kind": "relabel", "why": "The sidebar calls Items Products."},
+	{"doctype": "Item", "field": "item_name", "property": "label", "value": "Product Name", "kind": "relabel", "why": "The sidebar calls Items Products."},
+	{"doctype": "Item", "field": "item_group", "property": "label", "value": "Product Category", "kind": "relabel", "why": "The sidebar already says Product Categories."},
+	{"doctype": "Item", "field": "deferred_accounting_section", "property": "collapsible", "value": 1, "kind": "collapse", "why": "Deferred revenue / expense: an accountant's feature."},
+	{
+		"doctype": "Item", "field": "deferred_accounting_section", "property": "collapsible_depends_on", "kind": "collapse",
+		"value": "eval:doc.enable_deferred_expense || doc.enable_deferred_revenue || doc.no_of_months_exp || doc.no_of_months",
+		"why": "Opens when deferred accounting is on.",
+	},
+	{"doctype": "Item", "field": "customer_details", "property": "collapsible", "value": 1, "kind": "collapse", "why": "A customer's own codes for this product: B2B only."},
+	{"doctype": "Item", "field": "customer_details", "property": "collapsible_depends_on", "value": "eval:(doc.customer_items || []).length", "kind": "collapse", "why": "Opens when there are customer codes."},
+	{
+		"doctype": "Item", "field": "foreign_trade_details", "property": "collapsible_depends_on", "kind": "collapse",
+		"value": "eval:doc.country_of_origin || doc.customs_tariff_number",
+		"why": "ERPNext already collapses this section but never opens it: it would bury a country or tariff number if there ever is one.",
+	},
+	# Tabs for features the owner switches on under Capabilities (the toggles reach the browser as frappe.boot.retail_store_capabilities).
+	# Each keeps the tab's own ERPNext condition and also shows the tab for any product that already holds data in it.
+	{
+		"doctype": "Item", "field": "manufacturing", "property": "depends_on", "kind": "gate",
+		"value": "eval:doc.is_stock_item && (frappe.boot.retail_store_capabilities.manufacturing || frappe.boot.retail_store_capabilities.ecommerce || doc.is_sub_contracted_item || doc.default_bom || doc.production_capacity || doc.default_manufacturer_part_no || doc.default_item_manufacturer || doc.published_in_website)",
+		"why": "Manufacturing is off in a retail starter pack. The tab also shows with the Online Store on, because ERPNext keeps the read-only 'published on website' status in it (backlog: move that field to the Details tab).",
+	},
+	{
+		"doctype": "Item", "field": "quality_tab", "property": "depends_on", "kind": "gate",
+		"value": "eval:frappe.boot.retail_store_capabilities.quality || doc.inspection_required_before_purchase || doc.inspection_required_before_delivery || doc.quality_inspection_template",
+		"why": "Quality inspection is an optional capability.",
+	},
+	{
+		"doctype": "Item", "field": "purchasing_tab", "property": "depends_on", "kind": "gate",
+		"value": "eval:doc.is_purchase_item && (frappe.boot.retail_store_capabilities.buying || doc.purchase_uom || doc.min_order_qty || doc.safety_stock || doc.lead_time_days || doc.last_purchase_rate || doc.delivered_by_supplier || (doc.supplier_items || []).length || doc.country_of_origin || doc.customs_tariff_number)",
+		"why": "Buying is an optional capability.",
+	},
+	# ---- Item Price ----------------------------------------------------------------------------------------------
+	{"doctype": "Item Price", "field": "price_list_rate", "property": "label", "value": "Price", "kind": "relabel", "why": "Plain word."},
 ]
+
 
 APPS = os.path.abspath(os.path.join(os.path.dirname(frappe.__file__), "..", ".."))
 
@@ -126,6 +164,32 @@ def _fields_in_section(meta, section_fieldname):
 			if f.fieldtype != "Column Break":
 				inside.append(f)
 	return inside
+
+
+def _fields_in_tab(meta, tab_fieldname):
+	inside, found = [], False
+	for f in meta.fields:
+		if f.fieldname == tab_fieldname:
+			found = True
+			continue
+		if found:
+			if f.fieldtype == "Tab Break":
+				break
+			if f.fieldtype not in ("Section Break", "Column Break"):
+				inside.append(f)
+	return inside
+
+
+def _truthy_default(field):
+	return str(field.default or "").strip() not in ("", "0", "0.0", "0.00", "0.000")
+
+
+def _normal(expression):
+	"""An expression without its "eval:" prefix and whitespace; a bare field name means doc.<field>."""
+	text = str(expression or "").strip()
+	if text.startswith("eval:"):
+		return re.sub(r"\s+", "", text[5:])
+	return f"doc.{text}" if re.fullmatch(r"\w+", text) else re.sub(r"\s+", "", text)
 
 
 def audit(changes=None):
@@ -191,8 +255,34 @@ def audit(changes=None):
 				problems.append((change, "needs collapsible_depends_on, so a section holding data opens by itself"))
 			if change["property"] == "collapsible_depends_on":
 				for f in inside:
-					if f.fieldtype not in LAYOUT and not f.hidden and not f.read_only and not re.search(r"\b%s\b" % re.escape(f.fieldname), change["value"]):
+					if f.fieldtype not in LAYOUT and not f.hidden and not f.read_only and not _truthy_default(f) and not re.search(r"\b%s\b" % re.escape(f.fieldname), change["value"]):
 						problems.append((change, f"does not open for data in {f.fieldname}"))
+		elif kind == "gate":
+			# show a TAB only when a capability is on, or when the record already holds data in it (so data is never
+			# hidden from someone who needs it), and ALWAYS keeping the tab's own condition
+			if field.fieldtype != "Tab Break" or change["property"] != "depends_on":
+				problems.append((change, "only a Tab Break's depends_on can be gated"))
+				continue
+			inside = _fields_in_tab(meta, fn)
+			if any(f.reqd or f.mandatory_depends_on for f in inside):
+				problems.append((change, "the tab contains a required or conditionally required field"))
+			expression = str(change["value"])
+			if not expression.startswith("eval:"):
+				problems.append((change, "must be an eval: expression"))
+			flat = _normal(expression)
+			original = frappe.db.get_value("DocField", {"parent": dt, "fieldname": fn}, "depends_on")
+			if original and _normal(original) not in flat:
+				problems.append((change, f"drops the tab's own condition ({original})"))
+			caps = re.findall(r"retail_store_capabilities\.(\w+)", expression)
+			if not caps:
+				problems.append((change, "does not look at any capability"))
+			if any(c not in KNOWN_CAPABILITIES for c in caps):
+				problems.append((change, "unknown capability"))
+			for f in inside:
+				if f.fieldtype in LAYOUT or f.hidden or _truthy_default(f):
+					continue
+				if not re.search(r"doc\.%s\b" % re.escape(f.fieldname), flat):
+					problems.append((change, f"does not show the tab for data in {f.fieldname}"))
 		elif kind == "relabel":
 			if not str(change["value"]).strip():
 				problems.append((change, "empty label"))

@@ -675,6 +675,8 @@ python apps/retail_store/retail_store/tests/browser_hr.py
 bench --site <site> execute retail_store.tests.check_messaging.run
 # form simplification: the audit, the audit refusing unsafe changes, reversibility, Customer flows with the changes active
 bench --site <site> execute retail_store.tests.check_forms.run
+# the simplified Item form in a browser: labels, collapsed sections, tabs following the Capabilities toggles (+ one real toggle), data-aware escape
+python apps/retail_store/retail_store/tests/browser_item_form.py
 # the simplified Customer form in a browser: collapsed sections, hidden fields, saving, auto-open, internal customer
 python apps/retail_store/retail_store/tests/browser_customer_form.py
 # the optional-fields fold never hides a required field, whether a field condition (Employee Left, Attendance On Leave, Payment Entry bank, Item batches)
@@ -736,7 +738,17 @@ defaults to Individual, "Customer Details" reads Notes, `customer_pos_id` / `sup
 hidden, and the Defaults, Internal Customer, Sales Partner and References sections are collapsed. Tax withholding, market segment / industry /
 website and `so_required` / `dn_required` stay as they are: they share an *unlabelled* section with fields that must stay visible (Tax ID,
 Disabled, Language, Notes), so collapsing them would bury those. The fold guard also opens a collapsed section when a field in it becomes required.
-Tests: `tests/check_forms.py`, `tests/browser_customer_form.py`.
+**Item** (no field is hidden: nearly every field is read somewhere, so the clutter is whole feature areas). *Product Code / Name / Category* labels;
+Deferred Accounting and Customer Details collapsed (opening on data; Foreign Trade, which ERPNext collapses but never opens, now opens on data); and
+the **Manufacturing, Quality and Purchasing tabs are gated on the Capabilities toggles**: the toggles reach the browser as
+`frappe.boot.retail_store_capabilities` (`navigation.boot_session`; a reload picks up a change) and a `gate` change sets the tab's `depends_on`. A gate
+always keeps the tab's own ERPNext condition (`is_stock_item`, `is_purchase_item`) and also shows the tab for a product that already holds data in it,
+so data is never hidden from someone who needs it; the audit refuses a gate that drops the original condition, misses a field of the tab, names no
+or an unknown capability, or sits on a tab with a required field. The Manufacturing tab also shows with the Online Store on, because ERPNext keeps the
+read-only "published on website" status in it (backlog: move that field to the Details tab, which needs a doctype-level field-order override that
+restates every Item field). Item Price: the rate reads *Price*, nothing else changes (its extra fields are read by pricing logic).
+Tests: `tests/check_forms.py` (incl. Item flows: product, variant template + variant, price, barcode scan, reorder level, item tax template, receiving
+stock, disabling), `tests/browser_customer_form.py`, `tests/browser_item_form.py`.
 
 ### Backlog (known, not built)
 
