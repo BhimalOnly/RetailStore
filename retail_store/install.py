@@ -45,11 +45,11 @@ CUSTOM_FIELDS = {
 			"description": "Order messages go to the number on the order. Offers and loyalty messages need the customer's own yes: leave unticked unless they said so.",
 			"module": "Retail Store",
 		},
-		{"fieldname": "custom_whatsapp_optin", "fieldtype": "Check", "label": "Offers by WhatsApp", "insert_after": "custom_messaging_section", "allow_in_quick_entry": 1, "module": "Retail Store"},
+		{"fieldname": "custom_whatsapp_optin", "fieldtype": "Check", "label": "Offers by WhatsApp", "insert_after": "custom_messaging_section", "default": "0", "allow_in_quick_entry": 1, "module": "Retail Store"},
 		{"fieldname": "custom_whatsapp_optin_on", "fieldtype": "Datetime", "label": "WhatsApp opt-in recorded", "insert_after": "custom_whatsapp_optin", "read_only": 1, "depends_on": "custom_whatsapp_optin_on", "module": "Retail Store"},
 		{"fieldname": "custom_whatsapp_optout_on", "fieldtype": "Datetime", "label": "WhatsApp opt-out recorded", "insert_after": "custom_whatsapp_optin_on", "read_only": 1, "depends_on": "custom_whatsapp_optout_on", "module": "Retail Store"},
 		{"fieldname": "custom_messaging_column", "fieldtype": "Column Break", "insert_after": "custom_whatsapp_optout_on", "module": "Retail Store"},
-		{"fieldname": "custom_sms_optin", "fieldtype": "Check", "label": "Offers by SMS", "insert_after": "custom_messaging_column", "allow_in_quick_entry": 1, "module": "Retail Store"},
+		{"fieldname": "custom_sms_optin", "fieldtype": "Check", "label": "Offers by SMS", "insert_after": "custom_messaging_column", "default": "0", "allow_in_quick_entry": 1, "module": "Retail Store"},
 		{"fieldname": "custom_sms_optin_on", "fieldtype": "Datetime", "label": "SMS opt-in recorded", "insert_after": "custom_sms_optin", "read_only": 1, "depends_on": "custom_sms_optin_on", "module": "Retail Store"},
 		{"fieldname": "custom_sms_optout_on", "fieldtype": "Datetime", "label": "SMS opt-out recorded", "insert_after": "custom_sms_optin_on", "read_only": 1, "depends_on": "custom_sms_optout_on", "module": "Retail Store"},
 		{"fieldname": "custom_consent_source", "fieldtype": "Select", "label": "Last changed", "options": "\nStorefront checkout\nRecorded by staff", "insert_after": "custom_sms_optout_on", "read_only": 1, "depends_on": "custom_consent_source", "module": "Retail Store"},
@@ -82,6 +82,11 @@ def after_setup_wizard(args=None):
 
 	setup_company_defaults()
 	set_site_time_zone()  # the wizard writes its own choice after install
+	ensure_mauritian_rupee()
+	if (args or {}).get("country") == "Mauritius":
+		# a fresh Mauritian site: country and currency for the whole system (an existing site's are never changed here)
+		frappe.db.set_single_value("System Settings", "country", "Mauritius")
+		frappe.db.set_single_value("System Settings", "currency", "MUR")
 
 
 def run_setup():
@@ -100,6 +105,7 @@ def run_setup():
 	setup_material_request_workflow()
 	apply_capabilities()
 	lock_user_themes()
+	ensure_mauritian_rupee()
 	ensure_message_rules()
 	setup_company_defaults()
 	from retail_store.hr import backfill_employee_stores
@@ -140,6 +146,14 @@ def ensure_message_rules():
 				"template_language": "en",
 			}
 		).db_insert()
+
+
+def ensure_mauritian_rupee():
+	"""Mauritian Rupee ships with ERPNext switched OFF, and Link pickers only list enabled currencies ("Select Currency"
+	search for MUR: No Results). Enabled on every migrate; the company's own currency is never touched (ERPNext locks
+	it once there are postings)."""
+	if frappe.db.exists("Currency", "MUR") and not frappe.db.get_value("Currency", "MUR", "enabled"):
+		frappe.db.set_value("Currency", "MUR", "enabled", 1)
 
 
 def lock_user_themes():

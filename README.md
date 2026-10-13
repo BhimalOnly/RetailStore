@@ -673,6 +673,8 @@ bench --site <site> execute retail_store.tests.seed_hr_demo.run
 python apps/retail_store/retail_store/tests/browser_hr.py
 # customer messages: phone numbers, consent, the three providers against a fake gateway, failure / retry, who sees credentials
 bench --site <site> execute retail_store.tests.check_messaging.run
+# POS New Customer quick entry: consent boxes unticked, defaults, Edit Full Form saves, MUR findable (needs an open POS shift)
+python apps/retail_store/retail_store/tests/browser_customer_quick_entry.py
 # the same in a real browser: cart opt-in boxes, order + delivery in the Message Log, Settings tab per role (switches messaging on, then off)
 python apps/retail_store/retail_store/tests/browser_messages.py
 # who may open which workspace, as each demo user, over HTTP. Enumerates EVERY workspace on the
@@ -698,6 +700,7 @@ Display-side only; the server 403s stay the real boundary. Test: `tests/browser_
 ### Backlog (known, not built)
 
 * Report roles: `apply_report_and_page_roles` is meant to start each Custom Role from the report's standard roles, but after migrate Sales Register, Sales Analytics and Item-wise Sales Register hold only the retail roles (Profit and Loss / Balance Sheet showed the same until their accounting roles were named explicitly). Check what the Accountant can still open and fix the copy step.
+* Mauritian Rupee: enabled on every migrate (ERPNext ships it disabled); a fresh site whose wizard company country is Mauritius also gets System Settings country / currency set. An existing company's currency is never changed (ERPNext locks it once there are postings); the dev demo company is still on INR.
 * Staff login page still shows "Powered by Solvronix" (theme setting; the Desk and storefront credits are already hidden).
 * Customer, Employee and Stock Count are still raw Desk forms; Ctrl+K search, the "All Options" menu and the Accountant / Warehouse Manager screens have not had a wording review.
 * The Retail Store home page colour/icon badges (`public/js/home_cards.js`) are keyed on the English card titles; update its lookup table if a shortcut or card is ever relabelled or translated (unknown titles just get no badge).
@@ -734,6 +737,7 @@ Frappe's own email / Desk notifications.
 only while messaging is on: never ticked for the shopper (only if they ticked them before), saved as they press Place Order,
 and unticking withdraws. POS's new-customer dialog carries the same two boxes; staff record or withdraw a customer's choice on the Customer form's **Messages** tab (the theme keeps optional fields behind "Show N optional fields" on every form). The engine already refuses a
 **marketing**-kind message without that opt-in (Skipped, "has not opted in"); no marketing message is built yet.
+**New Customer quick entry (POS and Desk)** (`public/js/customer_quick_entry.js`): the two boxes are forced off every time the dialog opens, with "Only tick if the customer said yes"; Customer Type starts as *Individual* and Country as the company's country (Country becomes mandatory once an address line or city is typed); and *Edit Full Form* hands over the real field names, as Save does (ERPNext's dialog works with alias fields and mapped them only on Save, so the full form had no Country and refused to save). Test: `tests/browser_customer_quick_entry.py`.
 Gap to close before launch: the storefront has no separate "manage my messages" page, only the cart boxes.
 
 **Set up for a client:** a System Manager switches **Customer Messages** on (Capabilities); the Store Owner picks the provider

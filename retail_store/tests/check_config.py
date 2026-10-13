@@ -150,6 +150,10 @@ def run():
 		frappe.set_user("Administrator")
 		check(f"{owner_like} can write permlevels {sorted(expected)} only (never the Branding / Capabilities level 1)", set(access) == expected, access)
 
+	check("Mauritian Rupee (MUR) is enabled, so the currency pickers can find it", frappe.db.get_value("Currency", "MUR", "enabled") == 1)
+	for field in ("custom_whatsapp_optin", "custom_sms_optin"):
+		check(f"{field}: opt-in defaults to 0 (never pre-ticked)", str(frappe.db.get_value("Custom Field", {"dt": "Customer", "fieldname": field}, "default")) == "0")
+
 	# --- Customer defaults: ERPNext leaves Customer Group / Territory blank
 	ss = frappe.get_single("Selling Settings")
 	check("Selling Settings has a default Customer Group", bool(ss.customer_group), ss.customer_group)
