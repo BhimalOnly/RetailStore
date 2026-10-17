@@ -120,7 +120,7 @@ FORM_CHANGES = [
 	},
 	# ---- Item Price ----------------------------------------------------------------------------------------------
 	{"doctype": "Item Price", "field": "price_list_rate", "property": "label", "value": "Price", "kind": "relabel", "why": "Plain word."},
-	# ---- Manager-only fields (permlevel 1): everyone who can open the document still SEES them; only Store Manager /
+	# ---- Manager-only fields (permlevel 1): on most doctypes everyone who can open the document still SEES them; only Store Manager /
 	# Store Owner / Store Admin can change them (setup/roles.py apply_level1_permissions grants exactly that) ----------
 	{"doctype": "Customer", "field": "payment_terms", "property": "permlevel", "value": 1, "kind": "restrict", "why": "The customer's default payment terms: a credit decision for a manager, not for the till."},
 	{"doctype": "Customer", "field": "credit_limits", "property": "permlevel", "value": 1, "kind": "restrict", "why": "Per-company credit limits: a credit decision for a manager, not for the till."},
@@ -130,6 +130,11 @@ FORM_CHANGES = [
 	{"doctype": "Sales Invoice", "field": "payment_schedule", "property": "permlevel", "value": 1, "kind": "restrict", "why": "The due-date schedule that follows the payment terms: manager-set, visible to the till."},
 	{"doctype": "POS Invoice", "field": "payment_terms_template", "property": "permlevel", "value": 1, "kind": "restrict", "why": "Setting a customer's payment terms (e.g. Net 30) is a manager's call; the till can still see them."},
 	{"doctype": "POS Invoice", "field": "payment_schedule", "property": "permlevel", "value": 1, "kind": "restrict", "why": "The due-date schedule that follows the payment terms: manager-set, visible to the till."},
+	# POS Profile till policies: unlike the payment terms above, the till roles get NO level-1 read, so only managers see them
+	{"doctype": "POS Profile", "field": "allow_discount_change", "property": "permlevel", "value": 1, "kind": "restrict", "why": "Whether the till may edit a discount is a store policy a manager sets per location; the till itself still honours it."},
+	{"doctype": "POS Profile", "field": "allow_rate_change", "property": "permlevel", "value": 1, "kind": "restrict", "why": "Whether the till may edit an item's price is a store policy a manager sets per location; the till itself still honours it."},
+	{"doctype": "POS Profile", "field": "ignore_pricing_rule", "property": "permlevel", "value": 1, "kind": "restrict", "why": "Switching pricing rules off for a location is a manager's policy call; the till itself still honours it."},
+	{"doctype": "POS Profile", "field": "validate_stock_on_save", "property": "permlevel", "value": 1, "kind": "restrict", "why": "Whether a sale is blocked when stock is short is a manager's policy call; the till itself still honours it."},
 ]
 
 

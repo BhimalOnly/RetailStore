@@ -336,17 +336,7 @@
 	},
 	{
 		"doctype": "POS Profile",
-		"field": "allow_discount_change",
-		"why": "Feature toggle: A one-time on/off setting for this record, not something changed per transaction."
-	},
-	{
-		"doctype": "POS Profile",
 		"field": "allow_partial_payment",
-		"why": "Feature toggle: A one-time on/off setting for this record, not something changed per transaction."
-	},
-	{
-		"doctype": "POS Profile",
-		"field": "allow_rate_change",
 		"why": "Feature toggle: A one-time on/off setting for this record, not something changed per transaction."
 	},
 	{
@@ -367,11 +357,6 @@
 	{
 		"doctype": "POS Profile",
 		"field": "hide_unavailable_items",
-		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
-	},
-	{
-		"doctype": "POS Profile",
-		"field": "ignore_pricing_rule",
 		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
 	},
 	{
@@ -403,11 +388,6 @@
 		"doctype": "POS Profile",
 		"field": "utm_source",
 		"why": "Marketing attribution: Online ad/campaign source tracking — not produced by an in-person or simple online retail sale."
-	},
-	{
-		"doctype": "POS Profile",
-		"field": "validate_stock_on_save",
-		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
 	},
 	{
 		"doctype": "Payment Entry",

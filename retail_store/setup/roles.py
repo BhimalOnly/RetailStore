@@ -431,7 +431,9 @@ def apply_portal_permissions():
 # Fields moved to permlevel 1 (setup/forms.py kind "restrict"): whoever can work with the document still READS them,
 # only managers can WRITE them. Additive, like apply_role_permissions: nothing existing is removed or lowered, so Frappe's
 # own level-1 rows (e.g. "All" read on Sales Invoice / POS Invoice) are left exactly as they are.
-LEVEL1_DOCTYPES = ("Customer", "Sales Order", "Sales Invoice", "POS Invoice")
+LEVEL1_DOCTYPES = ("Customer", "Sales Order", "Sales Invoice", "POS Invoice", "POS Profile")
+# ...except these: the fields are the managers' alone, so no one else is given level-1 read (till policy toggles on POS Profile)
+LEVEL1_MANAGERS_ONLY = ("POS Profile",)
 LEVEL1_WRITERS = ("Store Manager", "Store Owner", "Store Admin")
 
 
@@ -445,7 +447,7 @@ def apply_level1_permissions():
 		rows = frappe.get_all("Custom DocPerm", filters={"parent": doctype, "permlevel": 1}, fields=["role", "read", "if_owner"])
 		everyone_reads = any(r.role == "All" and r.read and not r.if_owner for r in rows)
 		wanted = {role: {"read": 1, "write": 1} for role in LEVEL1_WRITERS}
-		if not everyone_reads:
+		if not everyone_reads and doctype not in LEVEL1_MANAGERS_ONLY:
 			for role, perms in PERMISSIONS.items():
 				if role in ALL and "r" in perms.get(doctype, "").split():
 					wanted.setdefault(role, {"read": 1})
