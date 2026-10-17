@@ -187,6 +187,18 @@
 		}
 	});
 
+	// quantity stepper + Add to cart, shared by the quick-view modal and the product-page picker
+	function wireActions(el, picker) {
+		el.querySelectorAll(".rs-qty button").forEach(function (b) {
+			b.addEventListener("click", function () {
+				var n = el.querySelector(".rs-qty-n");
+				n.textContent = Math.max(1, Math.min(99, parseInt(n.textContent, 10) + parseInt(b.dataset.d, 10)));
+			});
+		});
+		el.querySelector(".rs-add").addEventListener("click", function () { picker.add(this); });
+	}
+
+
 	// ---------------------------------------------------------------------------------------------
 	// quick view
 	// ---------------------------------------------------------------------------------------------
@@ -217,13 +229,7 @@
 			document.body.appendChild(el);
 			var me = this;
 			el.querySelector(".rs-x").addEventListener("click", function () { me.close(); });
-			el.querySelectorAll(".rs-qty button").forEach(function (b) {
-				b.addEventListener("click", function () {
-					var n = el.querySelector(".rs-qty-n");
-					n.textContent = Math.max(1, Math.min(99, parseInt(n.textContent, 10) + parseInt(b.dataset.d, 10)));
-				});
-			});
-			el.querySelector(".rs-add").addEventListener("click", function () { me.add(this); });
+			wireActions(el, me);
 			this.el = el;
 		},
 
@@ -516,5 +522,39 @@
 		true
 	);
 
-	window.RS = { quick: quick, drawer: drawer, items: items, options: options };
+	// ---------------------------------------------------------------------------------------------
+	// product page: the same option picker, inline instead of Webshop's "Select Variant" dialog.
+	// Inherits quick's renderOptions / refresh / paint / add; only the container differs.
+	// ---------------------------------------------------------------------------------------------
+	var pdp = Object.create(quick);
+	pdp.el = null;
+	pdp.state = null;
+	pdp.close = function () {}; // nothing to dismiss; the cart drawer opens after a successful add
+
+	pdp.mount = function () {
+		var trigger = document.querySelector(".btn-configure");
+		if (!trigger || this.el) return;
+		var code = trigger.dataset.itemCode;
+		var name = trigger.dataset.itemName || code;
+		var el = document.createElement("div");
+		el.className = "rs-pdp-picker";
+		el.innerHTML =
+			'<div class="rs-qv-price"></div><div class="rs-qv-stock"></div>' +
+			'<div class="rs-qv-opts"></div>' +
+			'<div class="rs-qv-actions">' +
+			'<div class="rs-qty"><button type="button" data-d="-1" aria-label="Fewer">&minus;</button><span class="rs-qty-n">1</span><button type="button" data-d="1" aria-label="More">+</button></div>' +
+			'<button type="button" class="rs-add">Add to cart</button></div>';
+		trigger.insertAdjacentElement("afterend", el);
+		trigger.style.display = "none";
+		wireActions(el, this);
+		this.el = el;
+		this.state = { item: { item_code: code, item_name: name, web_item_name: name, has_variants: true }, selected: {}, exact: null, price: null, out: false, valid: null };
+		this.renderOptions();
+		this.refresh();
+	};
+
+	if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { pdp.mount(); });
+	else pdp.mount();
+
+	window.RS = { quick: quick, pdp: pdp, drawer: drawer, items: items, options: options };
 })();

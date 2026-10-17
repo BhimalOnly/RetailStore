@@ -520,3 +520,8 @@ body:not(.sl-split) footer.web-footer .footer-link a, body:not(.sl-split) footer
    .btn.btn-primary-light.btn-configure, which nothing else targeted -> plain grey. Match .rs-add. The `html` + :not(.btn-md) outrank Frappe's .btn:not(.btn-md):not(.btn-lg):not(.btn-xs) padding. */
 html body:not(.sl-split) .btn.btn-configure:not(.btn-md) { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 22px; border: 0; border-radius: var(--rs-r); background: var(--rs-b); color: #fff; font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
 html body:not(.sl-split) .btn.btn-configure:hover, html body:not(.sl-split) .btn.btn-configure:focus { background: var(--rs-b); color: #fff; filter: brightness(1.1); }
+
+/* product page: inline variant picker (shop_ui.js pdp.mount) -- reuses the quick-view .rs-opt / .rs-qty / .rs-add styles above */
+.rs-pdp-picker { display: flex; flex-direction: column; gap: 14px; max-width: 460px; margin-top: 12px; }
+.rs-pdp-picker .rs-qv-actions { margin-top: 6px; }
+.rs-pdp-picker .rs-qv-opts { display: flex; flex-direction: column; gap: 14px; }
