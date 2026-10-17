@@ -13,6 +13,8 @@
 """
 
 import frappe
+from frappe import _
+from frappe.utils import fmt_money
 
 
 def website_warehouse(item_code):
@@ -262,3 +264,62 @@ def update_cart(item_code, qty, additional_notes=None, with_items=False):
 		if frappe.utils.flt(qty) == 0 and not frappe.utils.cint(with_items):
 			return {"name": None}
 		raise
+
+
+# ---- product page: description heading + "You may also like" ---------------------------------------------
+
+RELATED = 4
+
+
+def product_card(item):
+	"""One .rs-prod tile (store-home's New arrivals and the product page's cross-sell row)."""
+	return {
+		"title": item.web_item_name,
+		"route": "/" + (item.route or ""),
+		"image": item.website_image,
+		"abbr": frappe.utils.get_abbr(item.web_item_name or ""),
+		"group": item.item_group,
+		"price": list_price(item),
+	}
+
+
+def list_price(item):
+	"""List price for a plain item; blank for a variant template (its price depends on the pick)."""
+	if item.has_variants:
+		return ""
+	price_list = frappe.get_cached_doc("Webshop Settings").price_list
+	if not price_list:
+		return ""
+	rate = frappe.db.get_value("Item Price", {"item_code": item.item_code, "price_list": price_list}, "price_list_rate")
+	currency = frappe.db.get_value("Price List", price_list, "currency")
+	return fmt_money(rate, currency=currency) if rate else ""
+
+
+def _related_items(doc):
+	"""Other published products from the same Item Group, topped up with the newest others so the row
+	is never a lone tile. Webshop's own "Recommended" is a hand-picked per-item table, so there is
+	nothing to reuse for this."""
+	fields = ["name", "item_code", "web_item_name", "website_image", "route", "item_group", "has_variants"]
+	base = {"published": 1, "name": ["!=", doc.name]}
+	same = frappe.get_all("Website Item", filters={**base, "item_group": doc.item_group}, fields=fields, order_by="creation desc", limit=RELATED)
+	if len(same) < RELATED:
+		taken = [doc.name] + [i.name for i in same]
+		same += frappe.get_all("Website Item", filters={"published": 1, "name": ["not in", taken]}, fields=fields, order_by="creation desc", limit=RELATED - len(same))
+	return [product_card(i) for i in same]
+
+
+def product_page_extras(context):
+	"""update_website_context: webshop's product page prints the description as bare text and stops
+	after the add-to-cart block. Add a "Details" heading above the description and a cross-sell row
+	below. Display only: the Website Item in the context is never saved. The row goes into
+	`website_content`, the full-width slot the template prints under the product."""
+	doc = context.get("doc")
+	if not doc or doc.get("doctype") != "Website Item":
+		return
+	body = doc.web_long_description if frappe.utils.strip_html(doc.web_long_description or "") else doc.description
+	if frappe.utils.strip_html(body or ""):
+		doc.web_long_description = '<h2 class="rs-pdp-h">{0}</h2>{1}'.format(_("Details"), body)
+	items = _related_items(doc)
+	if items:
+		html = frappe.render_template("retail_store/templates/includes/rs_related.html", {"items": items})
+		doc.website_content = (doc.get("website_content") or "") + html

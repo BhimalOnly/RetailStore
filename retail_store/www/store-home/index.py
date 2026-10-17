@@ -8,7 +8,7 @@ Retail Store Settings (Storefront Home Page); everything else is read from publi
 
 import frappe
 from frappe import _
-from frappe.utils import fmt_money
+from retail_store.storefront import product_card as _card
 
 no_cache = 1
 NEWEST = 8
@@ -34,29 +34,6 @@ def get_context(context):
 	context.rs_hero_art = [p for p in context.rs_new if p.get('image')][:4]  # fills the right half of the banner
 	context.rs_categories = _categories(items)
 	context.rs_has_products = bool(items)
-
-
-def _card(item):
-	return {
-		"title": item.web_item_name,
-		"route": "/" + (item.route or ""),
-		"image": item.website_image,
-		"abbr": frappe.utils.get_abbr(item.web_item_name or ""),
-		"group": item.item_group,
-		"price": _price(item),
-	}
-
-
-def _price(item):
-	"""List price for a plain item; blank for a variant template (its price depends on the pick)."""
-	if item.has_variants:
-		return ""
-	price_list = frappe.get_cached_doc("Webshop Settings").price_list
-	if not price_list:
-		return ""
-	rate = frappe.db.get_value("Item Price", {"item_code": item.item_code, "price_list": price_list}, "price_list_rate")
-	currency = frappe.db.get_value("Price List", price_list, "currency")
-	return fmt_money(rate, currency=currency) if rate else ""
 
 
 def _categories(items):
