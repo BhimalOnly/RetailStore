@@ -29,6 +29,18 @@
 	box-shadow: var(--rs-pos-shadow-hover);
 }
 
+/* Customer avatar in the cart header: a rounded square, the same corner as the product image tiles (ERPNext makes it a circle) */
+.point-of-sale-app:not(#rs-pos) .customer-section .customer-display .customer-image,
+.point-of-sale-app:not(#rs-pos) .customer-section .customer-display .customer-image > img {
+	border-radius: calc(var(--rs-pos-radius) - 4px);
+}
+/* ERPNext sets only the photo's height, so a portrait photo became a narrow strip: fill the square */
+.point-of-sale-app:not(#rs-pos) .customer-section .customer-display .customer-image > img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
 /* Image / initials tile */
 .point-of-sale-app:not(#rs-pos) .item-wrapper .item-display {
 	border-radius: calc(var(--rs-pos-radius) - 4px);
