@@ -18,6 +18,12 @@
 	const HEAD_HIDDEN = "st-pf-section-head-hidden";
 	const LAYOUT = ["Section Break", "Column Break", "Tab Break", "HTML", "Button", "Fold", "Heading"];
 
+	function missing(field) {
+		const frm = field.frm;
+		const v = frm && frm.doc ? frm.doc[field.df.fieldname] : undefined;
+		return v === undefined || v === null || v === "" || (Array.isArray(v) && v.length === 0);
+	}
+
 	function reveal_field(field, announce) {
 		const df = field && field.df;
 		const el = field && field.$wrapper && field.$wrapper[0];
@@ -37,7 +43,9 @@
 			sec.collapse(false);
 			changed = true;
 		}
-		if (changed && announce && window.frappe && frappe.show_alert) {
+		// only say so when the person has something to do: a field that is required AND still empty. A filled one (Currency, Status on
+		// every sales document) is revealed quietly; announcing it repeated "is now required" on every edit.
+		if (changed && announce && missing(field) && window.frappe && frappe.show_alert) {
 			const where = field.tab && !field.tab.is_active() ? " " + __("(on the {0} tab)", [field.tab.label || (field.tab.df || {}).label || ""]) : "";
 			frappe.show_alert({ message: __("{0} is now required", [__(df.label || df.fieldname)]) + where, indicator: "orange" }, 6);
 		}

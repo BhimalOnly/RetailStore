@@ -4,6 +4,7 @@ Setters, idempotency, reversibility, and the Customer flows that must keep worki
 Run:  bench --site retail.localhost execute retail_store.tests.check_forms.run
 The flows run inside one transaction that is rolled back; the site ends with the changes applied."""
 import copy
+import re
 
 import frappe
 from frappe.utils import add_days, today
@@ -71,11 +72,31 @@ def _audit():
 	for change, keyword in cases:
 		found = [p for _, p in forms.audit([change])]
 		check(f"audit refuses {change['doctype']}.{change['field']} {change['property']} ({keyword})", any(keyword.lower() in p.lower() for p in found), found)
+	# the reviewed-hide carve-outs (ack / filled_ok / inert_ok) must not be a way round the audit
+	everything = sorted(forms.ACKNOWLEDGEABLE)
+	two = next(c for c in forms.FORM_CHANGES if c["kind"] == "hide" and len(c.get("ack", [])) >= 2)
+	short = {**two, "ack": two["ack"][:-1]}
+	check("audit: an ack only covers what it names (drop one and the hide is refused)", bool(forms.audit([short])) and not forms.audit([two]), (two["doctype"], two["field"], two["ack"]))
+	carve = [
+		({**bad("Item", "item_name", "hidden", 1, "hide"), "ack": ["telepathy"]}, "unknown ack"),
+		({**bad("Sales Order", "currency", "hidden", 1, "hide"), "ack": everything, "filled_ok": True}, "required"),  # flagged, but nothing fills it: a person must choose it
+		({**bad("POS Invoice", "is_pos", "hidden", 1, "hide"), "ack": everything}, "required"),  # it does fill itself (default), but the explicit flag is missing
+		({**bad("Customer", "basic_info", "hidden", 1, "hide"), "ack": everything, "inert_ok": True}, "layout"),  # a section is never inert
+		({**bad("Item", "uom_help_html", "hidden", 1, "hide"), "ack": everything}, "layout"),  # an HTML block without inert_ok
+		({**bad("Customer", "represents_company", "hidden", 1, "hide"), "ack": everything}, "unique"),
+		({**bad("Item", "asset_category", "hidden", 1, "hide"), "ack": everything}, "conditionally required"),
+	]
+	for change, keyword in carve:
+		found = [p for _, p in forms.audit([change])]
+		check(f"audit still refuses {change['doctype']}.{change['field']} even with its carve-out ({keyword})", any(keyword.lower() in p.lower() for p in found), found)
 	manufacturing_ok = next(c["value"] for c in forms.FORM_CHANGES if c["field"] == "manufacturing")
 	purchasing_ok = next(c["value"] for c in forms.FORM_CHANGES if c["field"] == "purchasing_tab")
+	# a field the gate shows the tab for, that is still on the form (the audit does not ask for hidden fields, and the reviewed hides took some)
+	item_meta = frappe.get_meta("Item")
+	shown = next(f for f in re.findall(r"doc\.(\w+)", purchasing_ok) if item_meta.get_field(f) and not item_meta.get_field(f).hidden and not forms._truthy_default(item_meta.get_field(f)) and item_meta.get_field(f).fieldtype not in forms.LAYOUT)
 	gates = [
 		(bad("Item", "manufacturing", "depends_on", "eval:frappe.boot.retail_store_capabilities.manufacturing || doc.is_sub_contracted_item || doc.default_bom || doc.production_capacity || doc.default_manufacturer_part_no || doc.default_item_manufacturer || doc.published_in_website", "gate"), "own condition"),
-		(bad("Item", "purchasing_tab", "depends_on", purchasing_ok.replace(" || doc.lead_time_days", ""), "gate"), "lead_time_days"),
+		(bad("Item", "purchasing_tab", "depends_on", purchasing_ok.replace(f" || doc.{shown}", ""), "gate"), shown),
 		(bad("Item", "manufacturing", "depends_on", "eval:doc.is_stock_item", "gate"), "capability"),
 		(bad("Item", "manufacturing", "depends_on", manufacturing_ok.replace("capabilities.manufacturing", "capabilities.teleport"), "gate"), "unknown capability"),
 		(bad("Item", "details", "depends_on", "eval:frappe.boot.retail_store_capabilities.crm", "gate"), "required"),

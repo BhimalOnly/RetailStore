@@ -26,6 +26,9 @@ MODULE = "Retail Store"  # marks the Property Setters this module owns
 PROPERTY_TYPES = {"permlevel": "Int", "hidden": "Check", "collapsible": "Check", "collapsible_depends_on": "Code", "depends_on": "Code", "label": "Data", "default": "Text"}
 KNOWN_CAPABILITIES = {"crm", "ecommerce", "buying", "hr", "manufacturing", "quality", "support", "assets", "projects", "loyalty", "messaging"}
 LAYOUT = {"Section Break", "Column Break", "Tab Break", "HTML", "Button", "Fold", "Heading"}
+INERT = {"HTML", "Button"}  # may be hidden (with inert_ok) when only help text or an action nobody needs; never a Section / Column / Tab Break
+# findings a reviewed hide may acknowledge (see audit); the hard rules are not on this list
+ACKNOWLEDGEABLE = {"controller", "logic", "data", "list", "title", "fetch"}
 
 # kind: hide | collapse | gate | relabel | default | restrict
 FORM_CHANGES = [
@@ -141,7 +144,10 @@ FORM_CHANGES = [
 # Hides generated from the field review (setup/form_hides.json: doctype, field, reason). Each one passed audit() when it was
 # added; audit() runs again on every migrate and refuses any that no longer does, so a bad entry can never reach a form.
 FORM_CHANGES.extend(
-	{"doctype": h["doctype"], "field": h["field"], "property": "hidden", "value": 1, "kind": "hide", "why": h["why"]}
+	{
+		"doctype": h["doctype"], "field": h["field"], "property": h.get("property", "hidden"), "value": h.get("value", 1), "kind": h.get("kind", "hide"), "why": h["why"],
+		**{k: h[k] for k in ("ack", "filled_ok", "inert_ok") if h.get(k)},
+	}
 	for h in json.load(open(os.path.join(os.path.dirname(__file__), "form_hides.json")))
 )
 
@@ -204,6 +210,13 @@ def _fields_in_tab(meta, tab_fieldname):
 	return inside
 
 
+def _fills_itself(field, changes):
+	"""A required field nobody has to type: read-only (derived), fetched from its source, or with a default (ERPNext's own or one of ours)."""
+	if field.read_only or field.fetch_from or _truthy_default(field):
+		return True
+	return any(c["doctype"] == field.parent and c["field"] == field.fieldname and c["property"] == "default" and str(c["value"]).strip() for c in changes)
+
+
 def _truthy_default(field):
 	return str(field.default or "").strip() not in ("", "0", "0.0", "0.00", "0.000")
 
@@ -236,35 +249,50 @@ def audit(changes=None):
 			problems.append((change, "a change needs its reason"))
 
 		if kind == "hide":
+			# A reviewed hide names, in `ack`, exactly which of the findings below it has been checked and judged harmless (a
+			# value only ever read; nothing needs the field's own widget or a person typing it). Anything not acknowledged
+			# still refuses, so a NEW finding after an ERPNext update blocks the hide at the next migrate. The hard rules
+			# (required, conditionally required, unique, layout) cannot be acknowledged: required has its own two-key carve-out.
+			ack = set(change.get("ack") or [])
+			unknown = ack - ACKNOWLEDGEABLE
+			if unknown:
+				problems.append((change, f"unknown ack {sorted(unknown)}"))
+
+			def finding(category, message):
+				if category not in ack:
+					problems.append((change, message))
+
 			if field.reqd:
-				problems.append((change, "required: never hide"))
+				# only a field that fills itself (read-only, a default, or fetched) and is flagged filled_ok: never one a person must type
+				if not (change.get("filled_ok") and _fills_itself(field, changes or FORM_CHANGES)):
+					problems.append((change, "required: never hide"))
 			if field.mandatory_depends_on:
 				problems.append((change, "conditionally required: never hide"))
-			if field.fieldtype in LAYOUT:
+			if field.fieldtype in LAYOUT and not (field.fieldtype in INERT and change.get("inert_ok")):
 				problems.append((change, "hide fields, not layout (a hidden section hides its fields)"))
 			if field.unique:
 				problems.append((change, "unique: other records depend on it"))
 			if field.in_list_view or field.in_standard_filter or field.in_global_search:
-				problems.append((change, "shown in lists, filters or search"))
+				finding("list", "shown in lists, filters or search")
 			if fn in (meta.search_fields or "").replace(" ", "").split(",") or fn in (meta.title_field, meta.image_field, meta.sort_field):
-				problems.append((change, "a search / title / image / sort field of the doctype"))
+				finding("title", "a search / title / image / sort field of the doctype")
 			for other in meta.fields:
 				if other.fieldname == fn:
 					continue
 				logic = " ".join(str(other.get(k) or "") for k in ("depends_on", "mandatory_depends_on", "read_only_depends_on", "fetch_from", "collapsible_depends_on"))
 				if re.search(r"\b%s\b" % re.escape(fn), logic):
-					problems.append((change, f"read by the logic of {other.fieldname}"))
+					finding("logic", f"read by the logic of {other.fieldname}")
 			if re.search(r"\b%s\b" % re.escape(fn), _controller_text(meta)):
-				problems.append((change, "mentioned in the doctype's own controller / form script"))
+				finding("controller", "mentioned in the doctype's own controller / form script")
 			for parent, fetcher, fetch_from in frappe.db.sql(
 				"select parent, fieldname, fetch_from from tabDocField where fetch_from like %s union select dt, fieldname, fetch_from from `tabCustom Field` where fetch_from like %s",
 				(f"%.{fn}", f"%.{fn}"),
 			):
 				link = frappe.get_meta(parent).get_field(fetch_from.split(".")[0])
 				if link and link.options == dt:
-					problems.append((change, f"copied onto {parent}.{fetcher} (fetch_from)"))
+					finding("fetch", f"copied onto {parent}.{fetcher} (fetch_from)")
 			if _site_data(dt, field) and not change.get("has_data_ok"):
-				problems.append((change, "holds data on this site"))
+				finding("data", "holds data on this site")
 		elif kind == "collapse":
 			if field.fieldtype != "Section Break":
 				problems.append((change, "only a Section Break can be collapsed"))
@@ -329,6 +357,13 @@ def audit(changes=None):
 
 
 # ---- apply / remove -------------------------------------------------------------------------------------------------
+def _delete_setter(name):
+	"""Delete one Property Setter. frappe.delete_doc would queue a delete_dynamic_links job per setter (a Property Setter has no
+	dynamic links), and a few hundred removals in one migrate trip Frappe's "Too many queued background jobs" guard. The callers
+	clear the doctype caches themselves."""
+	frappe.db.delete("Property Setter", {"name": name})
+
+
 def _setter_name(change):
 	return f"{change['doctype']}-{change['field']}-{change['property']}"
 
@@ -342,7 +377,7 @@ def apply_form_changes():
 	for name in frappe.get_all("Property Setter", filters={"module": MODULE}, pluck="name"):
 		doc = frappe.get_doc("Property Setter", name)
 		if name not in wanted:
-			frappe.delete_doc("Property Setter", name, ignore_permissions=True, force=True)
+			_delete_setter(name)
 			touched.add(doc.doc_type)
 	for name, change in wanted.items():
 		value = str(change["value"])
@@ -350,7 +385,7 @@ def apply_form_changes():
 		if existing and existing.value == value and existing.module == MODULE:
 			continue
 		if existing:
-			frappe.delete_doc("Property Setter", name, ignore_permissions=True, force=True)
+			_delete_setter(name)
 		make_property_setter(change["doctype"], change["field"], change["property"], value, PROPERTY_TYPES[change["property"]], validate_fields_for_doctype=False)
 		frappe.db.set_value("Property Setter", name, "module", MODULE)
 		touched.add(change["doctype"])
@@ -365,6 +400,6 @@ def remove_form_changes():
 	doctypes = set()
 	for name in frappe.get_all("Property Setter", filters={"module": MODULE}, pluck="name"):
 		doctypes.add(frappe.db.get_value("Property Setter", name, "doc_type"))
-		frappe.delete_doc("Property Setter", name, ignore_permissions=True, force=True)
+		_delete_setter(name)
 	for dt in doctypes:
 		frappe.clear_cache(doctype=dt)

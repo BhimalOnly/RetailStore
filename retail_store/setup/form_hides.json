@@ -1,8 +1,33 @@
 [
 	{
 		"doctype": "Customer",
+		"field": "accounts",
+		"why": "Accounting: Default Accounts. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Customer",
 		"field": "companies",
 		"why": "Multi-company: Restricts which companies this customer can transact with — only matters with more than one company in this ERPNext instance."
+	},
+	{
+		"doctype": "Customer",
+		"field": "custom_consent_by",
+		"why": "Messaging/consent: Last changed by. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Customer",
+		"field": "custom_consent_source",
+		"why": "Messaging/consent: Last changed. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
 	},
 	{
 		"doctype": "Customer",
@@ -16,8 +41,80 @@
 	},
 	{
 		"doctype": "Customer",
+		"field": "custom_whatsapp_optin_on",
+		"why": "Messaging/consent: WhatsApp opt-in recorded. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Customer",
+		"field": "custom_whatsapp_optout_on",
+		"why": "Messaging/consent: WhatsApp opt-out recorded. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Customer",
+		"field": "default_bank_account",
+		"why": "Accounting: Company Bank Account. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Customer",
+		"field": "default_commission_rate",
+		"why": "Sales/CRM: Commission Rate. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Customer",
+		"field": "default_currency",
+		"why": "Multi-currency: Billing Currency. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"fetch",
+			"list",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Customer",
+		"field": "default_price_list",
+		"why": "Uncategorized: Price List. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Customer",
+		"field": "default_sales_partner",
+		"why": "Sales/CRM: Sales Partner. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Customer",
 		"field": "dn_required",
 		"why": "Accounting: Controls whether staff can invoice this customer without first creating a Delivery Note — an accounting-workflow guardrail, set up once."
+	},
+	{
+		"doctype": "Customer",
+		"field": "first_name",
+		"why": "System: First Name. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
 	},
 	{
 		"doctype": "Customer",
@@ -36,8 +133,90 @@
 	},
 	{
 		"doctype": "Customer",
+		"field": "is_internal_customer",
+		"why": "Multi-company: Is Internal Customer. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"fetch",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Customer",
+		"field": "last_name",
+		"why": "System: Last Name. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Customer",
+		"field": "lead_name",
+		"why": "Sales/CRM: Lead. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Customer",
 		"field": "market_segment",
 		"why": "Sales/CRM: Enterprise CRM customer-segmentation field."
+	},
+	{
+		"doctype": "Customer",
+		"field": "naming_series",
+		"why": "System: Series. Reviewed: a script may re-show it in some states.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Customer",
+		"field": "opportunity_name",
+		"why": "Sales/CRM: Opportunity. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Customer",
+		"field": "portal_users",
+		"why": "Admin control: Customer Portal Users. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Customer",
+		"field": "primary_address",
+		"why": "Uncategorized: Primary Address. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data",
+			"title"
+		]
+	},
+	{
+		"doctype": "Customer",
+		"field": "prospect_name",
+		"why": "Sales/CRM: Prospect. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Customer",
+		"field": "sales_team",
+		"why": "Sales/CRM: Sales Team. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
 	},
 	{
 		"doctype": "Customer",
@@ -66,13 +245,171 @@
 	},
 	{
 		"doctype": "Item",
+		"field": "allow_negative_stock",
+		"why": "Feature toggle: Allow Negative Stock. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Item",
+		"field": "asset_naming_series",
+		"why": "Fixed assets: Asset Naming Series. Reviewed: a script may re-show it in some states.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Item",
+		"field": "auto_create_assets",
+		"why": "Fixed assets: Auto create assets on purchase. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Item",
+		"field": "batch_number_series",
+		"why": "Setup only: Batch Number Series. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Item",
+		"field": "create_new_batch",
+		"why": "Uncategorized: Automatically Create New Batch. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Item",
+		"field": "customer_items",
+		"why": "Sales/CRM: Customer Items. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Item",
+		"field": "default_material_request_type",
+		"why": "Uncategorized: Default Material Request Type. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Item",
+		"field": "enable_deferred_expense",
+		"why": "Accounting: Enable Deferred Expense. Reviewed: only ever read as a value.",
+		"ack": [
+			"logic"
+		]
+	},
+	{
+		"doctype": "Item",
+		"field": "enable_deferred_revenue",
+		"why": "Accounting: Enable Deferred Revenue. Reviewed: only ever read as a value.",
+		"ack": [
+			"logic"
+		]
+	},
+	{
+		"doctype": "Item",
+		"field": "end_of_life",
+		"why": "Uncategorized: End of Life. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Item",
+		"field": "grant_commission",
+		"why": "Sales/CRM: Grant Commission. Reviewed: only ever read as a value.",
+		"ack": [
+			"data",
+			"fetch"
+		]
+	},
+	{
+		"doctype": "Item",
+		"field": "is_customer_provided_item",
+		"why": "Advanced inventory planning: Is Customer Provided Item. Reviewed: server code branches on it, it is not a person-entered requirement.",
+		"ack": [
+			"controller",
+			"fetch",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Item",
+		"field": "is_fixed_asset",
+		"why": "Fixed assets: Is Fixed Asset. Reviewed: a script may re-show it in some states; server code branches on it, it is not a person-entered requirement.",
+		"ack": [
+			"controller",
+			"fetch",
+			"list",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Item",
 		"field": "is_grouped_asset",
 		"why": "Fixed assets: Groups purchased items as a single depreciable asset — for equipment you buy, not goods you sell."
 	},
 	{
 		"doctype": "Item",
+		"field": "is_purchase_item",
+		"why": "Purchasing: Allow Purchase. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Item",
 		"field": "max_discount",
 		"why": "Uncategorized: System description: \"Maximum discount % allowed when selling this item. Eg: if set to 20%, a discount greater than 20% cannot be applied in sales transactions.\". Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Item",
+		"field": "naming_series",
+		"why": "System: Series. Reviewed: a script may re-show it in some states.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Item",
+		"field": "no_of_months",
+		"why": "Accounting: No of Months (Revenue). Reviewed: only ever read as a value.",
+		"ack": [
+			"logic"
+		]
+	},
+	{
+		"doctype": "Item",
+		"field": "no_of_months_exp",
+		"why": "Accounting: No of Months (Expense). Reviewed: only ever read as a value.",
+		"ack": [
+			"logic"
+		]
+	},
+	{
+		"doctype": "Item",
+		"field": "opening_stock",
+		"why": "Setup only: Opening Stock. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
 	},
 	{
 		"doctype": "Item",
@@ -91,8 +428,155 @@
 	},
 	{
 		"doctype": "Item",
+		"field": "retain_sample",
+		"why": "Uncategorized: Retain Sample. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"fetch",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Item",
 		"field": "sales_tax_withholding_category",
 		"why": "Accounting: Tax-withholding-at-source category — a jurisdiction-specific accounting detail, not a day-to-day retail field."
+	},
+	{
+		"doctype": "Item",
+		"field": "sales_uom",
+		"why": "Uncategorized: Default Sales Unit of Measure. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"fetch"
+		]
+	},
+	{
+		"doctype": "Item",
+		"field": "sample_quantity",
+		"why": "Uncategorized: Max Sample Quantity. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"fetch"
+		]
+	},
+	{
+		"doctype": "Item",
+		"field": "serial_no_series",
+		"why": "Setup only: Serial Number Series. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Item",
+		"field": "uom_help_html",
+		"why": "System: uom_help_html. Reviewed: help text / Auto-Repeat-only button: nothing to act on.",
+		"inert_ok": true
+	},
+	{
+		"doctype": "Item",
+		"field": "uoms",
+		"why": "Uncategorized: uoms. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Item",
+		"field": "use_serial_no_wise_valuation",
+		"why": "Accounting: Use Serial No Wise Valuation. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Item",
+		"field": "valuation_method",
+		"why": "Uncategorized: Valuation Method. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Item",
+		"field": "valuation_rate",
+		"why": "Accounting: Valuation Rate. Reviewed: server code branches on it, it is not a person-entered requirement.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Item",
+		"field": "warranty_period",
+		"why": "Uncategorized: Warranty Period (in days). Reviewed: only ever read as a value.",
+		"ack": [
+			"fetch"
+		]
+	},
+	{
+		"doctype": "Item",
+		"field": "weight_per_unit",
+		"why": "Advanced inventory planning: Weight Per Unit. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Item",
+		"field": "weight_uom",
+		"why": "Advanced inventory planning: Weight UOM. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Item Price",
+		"field": "batch_no",
+		"why": "Uncategorized: Batch No. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Item Price",
+		"field": "brand",
+		"why": "Uncategorized: Brand. Reviewed: only ever read as a value.",
+		"ack": [
+			"data",
+			"list"
+		]
+	},
+	{
+		"doctype": "Item Price",
+		"field": "buying",
+		"why": "Uncategorized: Buying. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Item Price",
+		"field": "item_description",
+		"why": "Uncategorized: Item Description. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Item Price",
+		"field": "item_name",
+		"why": "Uncategorized: Item Name. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data",
+			"list",
+			"title"
+		]
 	},
 	{
 		"doctype": "Item Price",
@@ -103,6 +587,66 @@
 		"doctype": "Item Price",
 		"field": "note",
 		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Item Price",
+		"field": "packing_unit",
+		"why": "Uncategorized: Packing Unit. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Item Price",
+		"field": "reference",
+		"why": "Uncategorized: Reference. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"list"
+		]
+	},
+	{
+		"doctype": "Item Price",
+		"field": "supplier",
+		"why": "Purchasing: Supplier. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Item Price",
+		"field": "uom",
+		"why": "Uncategorized: UOM. Reviewed: required, filled from item_code.stock_uom the moment its source is chosen.",
+		"ack": [
+			"controller",
+			"data"
+		],
+		"filled_ok": true
+	},
+	{
+		"doctype": "Loyalty Program",
+		"field": "customer_group",
+		"why": "Uncategorized: Customer Group. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Loyalty Program",
+		"field": "customer_territory",
+		"why": "Uncategorized: Customer Territory. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Loyalty Program",
+		"field": "loyalty_program_help",
+		"why": "System: Loyalty Program Help. Reviewed: help text / Auto-Repeat-only button: nothing to act on.",
+		"ack": [
+			"controller"
+		],
+		"inert_ok": true
 	},
 	{
 		"doctype": "Loyalty Program",
@@ -126,8 +670,50 @@
 	},
 	{
 		"doctype": "Material Request",
+		"field": "buying_price_list",
+		"why": "Uncategorized: Price List. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Material Request",
+		"field": "job_card",
+		"why": "Manufacturing: Job Card. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Material Request",
 		"field": "last_scanned_warehouse",
 		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Material Request",
+		"field": "letter_head",
+		"why": "Print/locale: Letter Head. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Material Request",
+		"field": "naming_series",
+		"property": "default",
+		"value": "MAT-MR-.YYYY.-",
+		"kind": "default",
+		"why": "The only number series, so it fills the field once the field is hidden (Material Request)."
+	},
+	{
+		"doctype": "Material Request",
+		"field": "naming_series",
+		"why": "System: Series. Reviewed: required Select with a single series: the series becomes its default.",
+		"ack": [
+			"data"
+		],
+		"filled_ok": true
 	},
 	{
 		"doctype": "Material Request",
@@ -138,6 +724,99 @@
 		"doctype": "Material Request",
 		"field": "select_print_heading",
 		"why": "Print/locale: Which print heading to use — a one-time setup choice, not a per-transaction field."
+	},
+	{
+		"doctype": "Material Request",
+		"field": "tc_name",
+		"why": "Uncategorized: Terms. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Material Request",
+		"field": "terms",
+		"why": "Uncategorized: Terms and Conditions Content. Reviewed: only ever read as a value.",
+		"ack": [
+			"logic"
+		]
+	},
+	{
+		"doctype": "Material Request",
+		"field": "transfer_status",
+		"why": "Uncategorized: Transfer Status. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Material Request",
+		"field": "work_order",
+		"why": "Manufacturing: Work Order. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Closing Entry",
+		"field": "amended_from",
+		"why": "System: Amended From. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Closing Entry",
+		"field": "pos_invoices",
+		"why": "Uncategorized: POS Transactions. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Closing Entry",
+		"field": "posting_time",
+		"why": "System: Posting Time. Reviewed: required with the default 'Now': it fills itself.",
+		"ack": [
+			"controller",
+			"data"
+		],
+		"filled_ok": true
+	},
+	{
+		"doctype": "POS Closing Entry",
+		"field": "sales_invoices",
+		"why": "Uncategorized: Sales Invoice Transactions. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "POS Closing Entry",
+		"field": "taxes",
+		"why": "Uncategorized: Taxes. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Closing Entry",
+		"field": "total_quantity",
+		"why": "Uncategorized: Total Quantity. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "account_for_change_amount",
+		"why": "Uncategorized: Account for Change Amount. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
 	},
 	{
 		"doctype": "POS Invoice",
@@ -151,8 +830,40 @@
 	},
 	{
 		"doctype": "POS Invoice",
+		"field": "amended_from",
+		"why": "System: Amended From. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
 		"field": "amount_eligible_for_commission",
 		"why": "Sales/CRM: Sales commission tracking — a B2B/wholesale concept, not a direct retail sale."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "apply_discount_on",
+		"why": "Uncategorized: Apply Additional Discount On. Reviewed: server code branches on it, it is not a person-entered requirement.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "auto_repeat",
+		"why": "Subscriptions / Auto Repeat: Auto Repeat. Reviewed: only ever read as a value.",
+		"ack": [
+			"logic"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "base_change_amount",
+		"why": "Multi-currency (duplicate): Base Change Amount (Company Currency). Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
 	},
 	{
 		"doctype": "POS Invoice",
@@ -161,8 +872,40 @@
 	},
 	{
 		"doctype": "POS Invoice",
+		"field": "base_grand_total",
+		"why": "Multi-currency (duplicate): Grand Total (Company Currency). Reviewed: read-only and system-derived: a user cannot fix it by typing.",
+		"ack": [
+			"controller",
+			"title"
+		],
+		"filled_ok": true
+	},
+	{
+		"doctype": "POS Invoice",
 		"field": "base_in_words",
 		"why": "Multi-currency (duplicate): Duplicate of another field, shown in company currency — redundant once you hide multi-currency fields."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "base_net_total",
+		"why": "Multi-currency (duplicate): Net Total (Company Currency). Reviewed: read-only and system-derived: a user cannot fix it by typing.",
+		"filled_ok": true
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "base_paid_amount",
+		"why": "Multi-currency (duplicate): Paid Amount (Company Currency). Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "base_rounded_total",
+		"why": "Multi-currency (duplicate): Rounded Total (Company Currency). Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
 	},
 	{
 		"doctype": "POS Invoice",
@@ -181,8 +924,24 @@
 	},
 	{
 		"doctype": "POS Invoice",
+		"field": "base_write_off_amount",
+		"why": "Multi-currency (duplicate): Write Off Amount (Company Currency). Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
 		"field": "commission_rate",
 		"why": "Sales/CRM: Sales commission tracking — a B2B/wholesale concept, not a direct retail sale."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "company_address",
+		"why": "Uncategorized: Company Address Name. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
 	},
 	{
 		"doctype": "POS Invoice",
@@ -191,13 +950,61 @@
 	},
 	{
 		"doctype": "POS Invoice",
+		"field": "consolidated_invoice",
+		"why": "Uncategorized: Consolidated Sales Invoice. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
 		"field": "contact_display",
 		"why": "System: Auto-filled display copy of the linked Contact Person's details — the Contact Person field already covers this."
 	},
 	{
 		"doctype": "POS Invoice",
+		"field": "contact_mobile",
+		"why": "System: Mobile No. Reviewed: server code branches on it, it is not a person-entered requirement.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "contact_person",
+		"why": "Uncategorized: Contact Person. Reviewed: only ever read as a value.",
+		"ack": [
+			"list"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "cost_center",
+		"why": "Accounting: Cost Center. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "coupon_code",
+		"why": "Uncategorized: Coupon Code. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
 		"field": "customer_address",
 		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "customer_group",
+		"why": "Uncategorized: Customer Group. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
 	},
 	{
 		"doctype": "POS Invoice",
@@ -211,6 +1018,14 @@
 	},
 	{
 		"doctype": "POS Invoice",
+		"field": "ignore_pricing_rule",
+		"why": "Uncategorized: Ignore Pricing Rule. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
 		"field": "in_words",
 		"why": "Accounting: Spelled-out total amount, used on formal printed invoices — not needed on the working form."
 	},
@@ -221,8 +1036,36 @@
 	},
 	{
 		"doctype": "POS Invoice",
+		"field": "is_discounted",
+		"why": "Uncategorized: Is Discounted. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
 		"field": "is_opening",
 		"why": "Accounting: Marks this as an opening/balance-forward entry during initial setup — not a normal transaction field."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "is_pos",
+		"why": "Uncategorized: Include Payment (POS). Reviewed: read-only and system-derived: a user cannot fix it by typing.",
+		"ack": [
+			"controller",
+			"logic"
+		],
+		"filled_ok": true
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "is_return",
+		"why": "Uncategorized: Is Return (Credit Note). Reviewed: server code branches on it, it is not a person-entered requirement.",
+		"ack": [
+			"controller",
+			"fetch",
+			"logic"
+		]
 	},
 	{
 		"doctype": "POS Invoice",
@@ -236,8 +1079,71 @@
 	},
 	{
 		"doctype": "POS Invoice",
+		"field": "letter_head",
+		"why": "Print/locale: Letter Head. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "loyalty_program",
+		"why": "Uncategorized: Loyalty Program. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "loyalty_redemption_account",
+		"why": "Uncategorized: Redemption Account. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "loyalty_redemption_cost_center",
+		"why": "Accounting: Redemption Cost Center. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "naming_series",
+		"property": "default",
+		"value": "ACC-PSINV-.YYYY.-",
+		"kind": "default",
+		"why": "The only number series, so it fills the field once the field is hidden (POS Invoice)."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "naming_series",
+		"why": "System: Series. Reviewed: required Select with a single series: the series becomes its default.",
+		"filled_ok": true
+	},
+	{
+		"doctype": "POS Invoice",
 		"field": "other_charges_calculation",
 		"why": "System: Auto-generated breakdown of how taxes/charges were computed — shown on the printed document, not edited."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "packed_items",
+		"why": "Advanced inventory planning: Packed Items. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "party_account_currency",
+		"why": "Multi-currency: Party Account Currency. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
 	},
 	{
 		"doctype": "POS Invoice",
@@ -246,8 +1152,22 @@
 	},
 	{
 		"doctype": "POS Invoice",
+		"field": "po_no",
+		"why": "Uncategorized: Customer's Purchase Order. Reviewed: only ever read as a value.",
+		"ack": [
+			"logic"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
 		"field": "posting_time",
 		"why": "System: Frappe-internal bookkeeping field — not something staff would ever touch directly."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "price_list_currency",
+		"why": "Multi-currency: Price List Currency. Reviewed: read-only and system-derived: a user cannot fix it by typing.",
+		"filled_ok": true
 	},
 	{
 		"doctype": "POS Invoice",
@@ -256,13 +1176,61 @@
 	},
 	{
 		"doctype": "POS Invoice",
+		"field": "product_bundle_help",
+		"why": "System: Product Bundle Help. Reviewed: help text / Auto-Repeat-only button: nothing to act on.",
+		"inert_ok": true
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "project",
+		"why": "Uncategorized: Project. Reviewed: only ever read as a value.",
+		"ack": [
+			"list"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
 		"field": "remarks",
 		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
 	},
 	{
 		"doctype": "POS Invoice",
+		"field": "return_against",
+		"why": "Uncategorized: Return Against. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"fetch",
+			"logic"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "rounded_total",
+		"why": "Accounting: Rounded Total. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
 		"field": "rounding_adjustment",
 		"why": "Accounting: Rounding-off bookkeeping detail, computed automatically — nobody needs to see or edit it."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "sales_partner",
+		"why": "Sales/CRM: Sales Partner. Reviewed: only ever read as a value.",
+		"ack": [
+			"logic"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "select_print_heading",
+		"why": "Print/locale: Print Heading. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
 	},
 	{
 		"doctype": "POS Invoice",
@@ -286,8 +1254,33 @@
 	},
 	{
 		"doctype": "POS Invoice",
+		"field": "tax_category",
+		"why": "Accounting: Tax Category. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
 		"field": "tax_id",
 		"why": "Accounting: Tax registration number — relevant mainly for formal B2B invoicing/compliance."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "tc_name",
+		"why": "Uncategorized: Terms. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "terms",
+		"why": "Uncategorized: Terms and Conditions Details. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
 	},
 	{
 		"doctype": "POS Invoice",
@@ -298,6 +1291,14 @@
 		"doctype": "POS Invoice",
 		"field": "timesheets",
 		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "title",
+		"why": "Uncategorized: Title. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
 	},
 	{
 		"doctype": "POS Invoice",
@@ -321,6 +1322,12 @@
 	},
 	{
 		"doctype": "POS Invoice",
+		"field": "update_auto_repeat_reference",
+		"why": "Subscriptions / Auto Repeat: Update Auto Repeat Reference. Reviewed: help text / Auto-Repeat-only button: nothing to act on.",
+		"inert_ok": true
+	},
+	{
+		"doctype": "POS Invoice",
 		"field": "update_billed_amount_in_delivery_note",
 		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
 	},
@@ -330,9 +1337,100 @@
 		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
 	},
 	{
+		"doctype": "POS Invoice",
+		"field": "update_stock",
+		"why": "Uncategorized: Update Stock. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "utm_campaign",
+		"why": "Marketing attribution: Campaign. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "utm_medium",
+		"why": "Marketing attribution: Medium. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "utm_source",
+		"why": "Marketing attribution: Source. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "write_off_account",
+		"why": "Uncategorized: Write Off Account. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "write_off_cost_center",
+		"why": "Accounting: Write Off Cost Center. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "write_off_outstanding_amount_automatically",
+		"why": "Uncategorized: Write Off Outstanding Amount. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
 		"doctype": "POS Opening Entry",
 		"field": "amended_from",
 		"why": "System: Link to the original document when this one is a correction/amendment — informational only, rarely read directly."
+	},
+	{
+		"doctype": "POS Opening Entry",
+		"field": "pos_closing_entry",
+		"why": "Uncategorized: POS Closing Entry. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "POS Opening Entry",
+		"field": "set_posting_date",
+		"why": "Uncategorized: Set Posting Date. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Profile",
+		"field": "account_for_change_amount",
+		"why": "Uncategorized: Account for Change Amount. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Profile",
+		"field": "action_on_new_invoice",
+		"why": "Uncategorized: Action on New Invoice. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
 	},
 	{
 		"doctype": "POS Profile",
@@ -341,13 +1439,62 @@
 	},
 	{
 		"doctype": "POS Profile",
+		"field": "apply_discount_on",
+		"why": "Uncategorized: Apply Discount On. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "POS Profile",
 		"field": "auto_add_item_to_cart",
 		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
 	},
 	{
 		"doctype": "POS Profile",
+		"field": "company_address",
+		"why": "Uncategorized: Company Address. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Profile",
+		"field": "cost_center",
+		"why": "Accounting: Cost Center. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "POS Profile",
+		"field": "country",
+		"why": "Uncategorized: Country. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "POS Profile",
+		"field": "customer_groups",
+		"why": "Uncategorized: Customer Groups. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Profile",
 		"field": "disable_rounded_total",
 		"why": "Accounting: Computed rounded total — the Grand Total field already shows the figure staff need."
+	},
+	{
+		"doctype": "POS Profile",
+		"field": "expense_account",
+		"why": "Uncategorized: Expense Account. Reviewed: a script may re-show it in some states.",
+		"ack": [
+			"controller"
+		]
 	},
 	{
 		"doctype": "POS Profile",
@@ -361,6 +1508,30 @@
 	},
 	{
 		"doctype": "POS Profile",
+		"field": "income_account",
+		"why": "Uncategorized: Income Account. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Profile",
+		"field": "letter_head",
+		"why": "Print/locale: Letter Head. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "POS Profile",
+		"field": "print_format",
+		"why": "Uncategorized: Print Format. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Profile",
 		"field": "print_receipt_on_order_complete",
 		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
 	},
@@ -371,8 +1542,41 @@
 	},
 	{
 		"doctype": "POS Profile",
+		"field": "select_print_heading",
+		"why": "Print/locale: Print Heading. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Profile",
+		"field": "set_grand_total_to_default_mop",
+		"why": "Uncategorized: Set Grand Total to Default Payment Method. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "POS Profile",
 		"field": "tax_category",
 		"why": "Accounting: Determines which tax template applies — a setup-level classification, not a per-sale field."
+	},
+	{
+		"doctype": "POS Profile",
+		"field": "tc_name",
+		"why": "Uncategorized: Terms and Conditions. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "POS Profile",
+		"field": "update_stock",
+		"why": "Uncategorized: Update Stock. Reviewed: only ever read as a value.",
+		"ack": [
+			"data",
+			"logic"
+		]
 	},
 	{
 		"doctype": "POS Profile",
@@ -396,8 +1600,109 @@
 	},
 	{
 		"doctype": "Payment Entry",
+		"field": "apply_tds",
+		"why": "Uncategorized: Consider for Tax Withholding. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Payment Entry",
 		"field": "auto_repeat",
 		"why": "Subscriptions / Auto Repeat: Recurring-order (subscription) link — only relevant if you sell on a repeat schedule."
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "bank",
+		"why": "Uncategorized: Bank. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "bank_account",
+		"why": "Uncategorized: Company Bank Account. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "bank_account_no",
+		"why": "Accounting: Bank Account No. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "base_in_words",
+		"why": "Multi-currency (duplicate): In Words (Company Currency). Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "base_paid_amount",
+		"why": "Multi-currency (duplicate): Paid Amount (Company Currency). Reviewed: read-only and system-derived: a user cannot fix it by typing.",
+		"ack": [
+			"controller"
+		],
+		"filled_ok": true
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "base_paid_amount_after_tax",
+		"why": "Multi-currency (duplicate): Paid Amount After Tax (Company Currency). Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "base_received_amount",
+		"why": "Multi-currency (duplicate): Received Amount (Company Currency). Reviewed: read-only and system-derived: a user cannot fix it by typing.",
+		"ack": [
+			"controller"
+		],
+		"filled_ok": true
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "base_received_amount_after_tax",
+		"why": "Multi-currency (duplicate): Received Amount After Tax (Company Currency). Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "base_total_allocated_amount",
+		"why": "Multi-currency (duplicate): Total Allocated Amount (Company Currency). Reviewed: a script may re-show it in some states.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "base_total_taxes_and_charges",
+		"why": "Multi-currency (duplicate): Total Taxes and Charges (Company Currency). Reviewed: a script may re-show it in some states.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "book_advance_payments_in_separate_party_account",
+		"why": "Uncategorized: Book Advance Payments in Separate Party Account. Reviewed: server code branches on it, it is not a person-entered requirement.",
+		"ack": [
+			"controller",
+			"logic"
+		]
 	},
 	{
 		"doctype": "Payment Entry",
@@ -406,8 +1711,150 @@
 	},
 	{
 		"doctype": "Payment Entry",
+		"field": "contact_email",
+		"why": "System: Email. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "contact_person",
+		"why": "Uncategorized: Contact. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "cost_center",
+		"why": "Accounting: Cost Center. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "custom_remarks",
+		"why": "Uncategorized: Custom Remarks. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "deductions",
+		"why": "Uncategorized: Payment Deductions or Loss. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Payment Entry",
 		"field": "ignore_tax_withholding_threshold",
 		"why": "Accounting: Tax-withholding-at-source category — a jurisdiction-specific accounting detail, not a day-to-day retail field."
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "in_words",
+		"why": "Accounting: In Words. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "is_opening",
+		"why": "Accounting: Is Opening. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "letter_head",
+		"why": "Print/locale: Letter Head. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "naming_series",
+		"property": "default",
+		"value": "ACC-PAY-.YYYY.-",
+		"kind": "default",
+		"why": "The only number series, so it fills the field once the field is hidden (Payment Entry)."
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "naming_series",
+		"why": "System: Series. Reviewed: required Select with a single series: the series becomes its default.",
+		"filled_ok": true
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "override_tax_withholding_entries",
+		"why": "Accounting: Edit Tax Withholding Entries. Reviewed: only ever read as a value.",
+		"ack": [
+			"logic"
+		]
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "paid_from_account_currency",
+		"why": "Uncategorized: Account Currency (From). Reviewed: read-only and system-derived: a user cannot fix it by typing.",
+		"ack": [
+			"controller"
+		],
+		"filled_ok": true
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "paid_from_account_type",
+		"why": "Uncategorized: Paid From Account Type. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "paid_to_account_currency",
+		"why": "Uncategorized: Account Currency (To). Reviewed: read-only and system-derived: a user cannot fix it by typing.",
+		"ack": [
+			"controller"
+		],
+		"filled_ok": true
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "paid_to_account_type",
+		"why": "Uncategorized: Paid To Account Type. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "party_bank_account",
+		"why": "Uncategorized: Party Bank Account. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "party_name",
+		"why": "Uncategorized: Party Name. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"list"
+		]
 	},
 	{
 		"doctype": "Payment Entry",
@@ -421,8 +1868,65 @@
 	},
 	{
 		"doctype": "Payment Entry",
+		"field": "project",
+		"why": "Uncategorized: Project. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "purchase_taxes_and_charges_template",
+		"why": "Uncategorized: Purchase Taxes and Charges Template. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "remarks",
+		"why": "Uncategorized: Remarks. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "sales_taxes_and_charges_template",
+		"why": "Uncategorized: Sales Taxes and Charges Template. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "tax_withholding_entries",
+		"why": "Accounting: Tax Withholding Entries. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Payment Entry",
 		"field": "tax_withholding_group",
 		"why": "Accounting: Tax-withholding-at-source category — a jurisdiction-specific accounting detail, not a day-to-day retail field."
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "taxes",
+		"why": "Uncategorized: Advance Taxes and Charges. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "title",
+		"why": "Uncategorized: Title. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"title"
+		]
 	},
 	{
 		"doctype": "Pick List",
@@ -431,13 +1935,307 @@
 	},
 	{
 		"doctype": "Pick List",
+		"field": "consider_rejected_warehouses",
+		"why": "Uncategorized: Consider Rejected Warehouses. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Pick List",
+		"field": "customer",
+		"why": "Uncategorized: Customer. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"list",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Pick List",
 		"field": "customer_name",
 		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Pick List",
+		"field": "delivery_status",
+		"why": "Uncategorized: Delivery Status. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data",
+			"list"
+		]
+	},
+	{
+		"doctype": "Pick List",
+		"field": "group_same_items",
+		"why": "Uncategorized: Group Same Items. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Pick List",
+		"field": "ignore_pricing_rule",
+		"why": "Uncategorized: Ignore Pricing Rule. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Pick List",
+		"field": "material_request",
+		"why": "Uncategorized: Material Request. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Pick List",
+		"field": "naming_series",
+		"property": "default",
+		"value": "STO-PICK-.YYYY.-",
+		"kind": "default",
+		"why": "The only number series, so it fills the field once the field is hidden (Pick List)."
+	},
+	{
+		"doctype": "Pick List",
+		"field": "naming_series",
+		"why": "System: Series. Reviewed: required Select with a single series: the series becomes its default.",
+		"ack": [
+			"data"
+		],
+		"filled_ok": true
+	},
+	{
+		"doctype": "Pick List",
+		"field": "pick_manually",
+		"why": "Uncategorized: Pick Manually. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Pick List",
+		"field": "work_order",
+		"why": "Manufacturing: Work Order. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Retail Staff Access",
+		"field": "full_name",
+		"why": "Uncategorized: Full Name. Reviewed: only ever read as a value.",
+		"ack": [
+			"data",
+			"list",
+			"title"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "account_for_change_amount",
+		"why": "Uncategorized: Account for Change Amount. Reviewed: server code branches on it, it is not a person-entered requirement.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "additional_discount_percentage",
+		"why": "Uncategorized: Additional Discount Percentage. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "address_display",
+		"why": "System: Address. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "against_income_account",
+		"why": "Accounting: Against Income Account. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "amended_from",
+		"why": "System: Amended From. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "amount_eligible_for_commission",
+		"why": "Sales/CRM: Amount Eligible for Commission. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "apply_discount_on",
+		"why": "Uncategorized: Apply Additional Discount On. Reviewed: server code branches on it, it is not a person-entered requirement.",
+		"ack": [
+			"controller",
+			"data",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "apply_tds",
+		"why": "Uncategorized: Consider for Tax Withholding. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "auto_repeat",
+		"why": "Subscriptions / Auto Repeat: Auto Repeat. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "base_change_amount",
+		"why": "Multi-currency (duplicate): Base Change Amount (Company Currency). Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "base_discount_amount",
+		"why": "Multi-currency (duplicate): Additional Discount Amount (Company Currency). Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "base_grand_total",
+		"why": "Multi-currency (duplicate): Grand Total. Reviewed: read-only and system-derived: a user cannot fix it by typing.",
+		"ack": [
+			"controller",
+			"data",
+			"title"
+		],
+		"filled_ok": true
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "base_in_words",
+		"why": "Multi-currency (duplicate): In Words. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "base_net_total",
+		"why": "Multi-currency (duplicate): Net Total (Company Currency). Reviewed: read-only and system-derived: a user cannot fix it by typing.",
+		"ack": [
+			"data"
+		],
+		"filled_ok": true
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "base_paid_amount",
+		"why": "Multi-currency (duplicate): Paid Amount (Company Currency). Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "base_rounded_total",
+		"why": "Multi-currency (duplicate): Rounded Total. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "base_rounding_adjustment",
+		"why": "Multi-currency (duplicate): Rounding Adjustment. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "base_total",
+		"why": "Multi-currency (duplicate): Total (Company Currency). Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "base_total_taxes_and_charges",
+		"why": "Multi-currency (duplicate): Total Taxes and Charges (Company Currency). Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "base_write_off_amount",
+		"why": "Multi-currency (duplicate): Write Off Amount (Company Currency). Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "cash_bank_account",
+		"why": "Uncategorized: Cash/Bank Account. Reviewed: server code branches on it, it is not a person-entered requirement.",
+		"ack": [
+			"controller"
+		]
 	},
 	{
 		"doctype": "Sales Invoice",
 		"field": "commission_rate",
 		"why": "Sales/CRM: Sales commission tracking — a B2B/wholesale concept, not a direct retail sale."
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "company_address",
+		"why": "Uncategorized: Company Address Name. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "company_address_display",
+		"why": "System: Company Address. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
 	},
 	{
 		"doctype": "Sales Invoice",
@@ -451,8 +2249,140 @@
 	},
 	{
 		"doctype": "Sales Invoice",
+		"field": "contact_display",
+		"why": "System: Contact. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "contact_email",
+		"why": "System: Contact Email. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "contact_mobile",
+		"why": "System: Mobile No. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "contact_person",
+		"why": "Uncategorized: Contact Person. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "cost_center",
+		"why": "Accounting: Cost Center. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "coupon_code",
+		"why": "Uncategorized: Coupon Code. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "customer_address",
+		"why": "Uncategorized: Customer Address. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "customer_group",
+		"why": "Uncategorized: Customer Group. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "disable_rounded_total",
+		"why": "Accounting: Disable Rounded Total. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "dispatch_address",
+		"why": "Multi-company: Dispatch Address. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "dispatch_address_name",
+		"why": "Multi-company: Dispatch Address Name. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "dont_create_loyalty_points",
+		"why": "Uncategorized: Don't Create Loyalty Points. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "from_date",
+		"why": "Subscriptions / Auto Repeat: From Date. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
 		"field": "group_same_items",
 		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "has_subcontracted",
+		"why": "Manufacturing: Has Subcontracted. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "ignore_default_payment_terms_template",
+		"why": "Accounting: Ignore Default Payment Terms Template. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "ignore_pricing_rule",
+		"why": "Uncategorized: Ignore Pricing Rule. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
 	},
 	{
 		"doctype": "Sales Invoice",
@@ -461,8 +2391,149 @@
 	},
 	{
 		"doctype": "Sales Invoice",
+		"field": "in_words",
+		"why": "Accounting: In Words. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "incoterm",
+		"why": "Foreign trade: Incoterm. Reviewed: only ever read as a value.",
+		"ack": [
+			"logic"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "inter_company_invoice_reference",
+		"why": "Multi-company: Inter Company Invoice Reference. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "is_cash_or_non_trade_discount",
+		"why": "Uncategorized: Is Cash or Non Trade Discount. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "is_consolidated",
+		"why": "Uncategorized: Is Consolidated. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "is_created_using_pos",
+		"why": "Uncategorized: Is created using POS. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "is_debit_note",
+		"why": "Uncategorized: Is Rate Adjustment Entry (Debit Note). Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "is_discounted",
+		"why": "Uncategorized: Is Discounted. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "is_internal_customer",
+		"why": "Multi-company: Is Internal Customer. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "is_opening",
+		"why": "Accounting: Is Opening Entry. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "is_return",
+		"why": "Uncategorized: Is Return (Credit Note). Reviewed: server code branches on it, it is not a person-entered requirement.",
+		"ack": [
+			"controller",
+			"fetch",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "language",
+		"why": "Print/locale: Print Language. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
 		"field": "last_scanned_warehouse",
 		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "letter_head",
+		"why": "Print/locale: Letter Head. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "loyalty_program",
+		"why": "Uncategorized: Loyalty Program. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "loyalty_redemption_account",
+		"why": "Uncategorized: Redemption Account. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "loyalty_redemption_cost_center",
+		"why": "Accounting: Redemption Cost Center. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
 	},
 	{
 		"doctype": "Sales Invoice",
@@ -481,13 +2552,297 @@
 	},
 	{
 		"doctype": "Sales Invoice",
+		"field": "override_tax_withholding_entries",
+		"why": "Accounting: Edit Tax Withholding Entries. Reviewed: only ever read as a value.",
+		"ack": [
+			"logic"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "packed_items",
+		"why": "Advanced inventory planning: Packed Items. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "party_account_currency",
+		"why": "Multi-currency: Party Account Currency. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "po_date",
+		"why": "Uncategorized: Customer's Purchase Order Date. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "po_no",
+		"why": "Uncategorized: Customer's Purchase Order. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"list",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "pos_closing_entry",
+		"why": "Uncategorized: POS Closing Entry. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "pos_profile",
+		"why": "Uncategorized: POS Profile. Reviewed: server code branches on it, it is not a person-entered requirement.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "posting_time",
+		"why": "System: Posting Time. Reviewed: a script may re-show it in some states.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "price_list_currency",
+		"why": "Multi-currency: Price List Currency. Reviewed: read-only and system-derived: a user cannot fix it by typing.",
+		"ack": [
+			"data"
+		],
+		"filled_ok": true
+	},
+	{
+		"doctype": "Sales Invoice",
 		"field": "pricing_rules",
 		"why": "Status tracking: Shows which pricing rules applied to this order — useful for a Manager to review, not needed by a cashier. [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
 	},
 	{
 		"doctype": "Sales Invoice",
+		"field": "product_bundle_help",
+		"why": "System: Product Bundle Help. Reviewed: help text / Auto-Repeat-only button: nothing to act on.",
+		"inert_ok": true
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "project",
+		"why": "Uncategorized: Project. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "remarks",
+		"why": "Uncategorized: Remarks. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "represents_company",
+		"why": "Multi-company: Represents Company. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "return_against",
+		"why": "Uncategorized: Return Against. Reviewed: a script may re-show it in some states; server code branches on it, it is not a person-entered requirement.",
+		"ack": [
+			"controller",
+			"fetch",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "rounded_total",
+		"why": "Accounting: Rounded Total. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "rounding_adjustment",
+		"why": "Accounting: Rounding Adjustment. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "sales_partner",
+		"why": "Sales/CRM: Sales Partner. Reviewed: only ever read as a value.",
+		"ack": [
+			"logic"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "select_print_heading",
+		"why": "Print/locale: Print Heading. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "set_posting_time",
+		"why": "Uncategorized: Edit Posting Date and Time. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "set_target_warehouse",
+		"why": "Uncategorized: Set Target Warehouse. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "shipping_address",
+		"why": "System: Shipping Address. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "shipping_address_name",
+		"why": "System: Shipping Address Name. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
 		"field": "shipping_rule",
 		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "subscription",
+		"why": "Uncategorized: Subscription. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "tax_category",
+		"why": "Accounting: Tax Category. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "tax_id",
+		"why": "Accounting: Tax Id. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "tax_withholding_entries",
+		"why": "Accounting: Tax Withholding Entries. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "tax_withholding_group",
+		"why": "Accounting: Tax Withholding Group. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "tc_name",
+		"why": "Uncategorized: Terms. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "terms",
+		"why": "Uncategorized: Terms and Conditions Details. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "territory",
+		"why": "Uncategorized: Territory. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "timesheets",
+		"why": "Uncategorized: Time Sheets. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "title",
+		"why": "Uncategorized: Title. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "to_date",
+		"why": "Subscriptions / Auto Repeat: To Date. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "total_billing_hours",
+		"why": "Uncategorized: Total Billing Hours. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
 	},
 	{
 		"doctype": "Sales Invoice",
@@ -501,8 +2856,165 @@
 	},
 	{
 		"doctype": "Sales Invoice",
+		"field": "total_qty",
+		"why": "Uncategorized: Total Quantity. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "unrealized_profit_loss_account",
+		"why": "Uncategorized: Unrealized Profit / Loss Account. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "update_auto_repeat_reference",
+		"why": "Subscriptions / Auto Repeat: Update Auto Repeat Reference. Reviewed: help text / Auto-Repeat-only button: nothing to act on.",
+		"inert_ok": true
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "update_billed_amount_in_delivery_note",
+		"why": "Uncategorized: Update Billed Amount in Delivery Note. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "update_billed_amount_in_sales_order",
+		"why": "Uncategorized: Update Billed Amount in Sales Order. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "use_company_roundoff_cost_center",
+		"why": "Accounting: Use Company default Cost Center for Round off. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "utm_campaign",
+		"why": "Marketing attribution: Campaign. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
 		"field": "utm_content",
 		"why": "Marketing attribution: Online ad/campaign source tracking — not produced by an in-person or simple online retail sale."
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "utm_medium",
+		"why": "Marketing attribution: Medium. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "utm_source",
+		"why": "Marketing attribution: Source. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "write_off_account",
+		"why": "Uncategorized: Write Off Account. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "write_off_cost_center",
+		"why": "Accounting: Write Off Cost Center. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "write_off_outstanding_amount_automatically",
+		"why": "Uncategorized: Write Off Outstanding Amount. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "additional_discount_percentage",
+		"why": "Uncategorized: Additional Discount Percentage. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "address_display",
+		"why": "System: Address. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "advance_paid",
+		"why": "Accounting: Advance Paid. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "advance_payment_status",
+		"why": "Accounting: Advance Payment Status. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data",
+			"list"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "amended_from",
+		"why": "System: Amended From. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "amount_eligible_for_commission",
+		"why": "Sales/CRM: Amount Eligible for Commission. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "auto_repeat",
+		"why": "Subscriptions / Auto Repeat: Auto Repeat. Reviewed: only ever read as a value.",
+		"ack": [
+			"logic"
+		]
 	},
 	{
 		"doctype": "Sales Order",
@@ -511,13 +3023,70 @@
 	},
 	{
 		"doctype": "Sales Order",
+		"field": "base_grand_total",
+		"why": "Multi-currency (duplicate): Grand Total. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "base_in_words",
+		"why": "Multi-currency (duplicate): In Words. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "base_net_total",
+		"why": "Multi-currency (duplicate): Net Total (Company Currency). Reviewed: a script may re-show it in some states.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "base_rounded_total",
+		"why": "Multi-currency (duplicate): Rounded Total. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Order",
 		"field": "base_rounding_adjustment",
 		"why": "Multi-currency (duplicate): Duplicate of another field, shown in company currency — redundant once you hide multi-currency fields."
 	},
 	{
 		"doctype": "Sales Order",
+		"field": "base_total",
+		"why": "Multi-currency (duplicate): Total (Company Currency). Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Order",
 		"field": "base_total_taxes_and_charges",
 		"why": "Multi-currency (duplicate): Duplicate of another field, shown in company currency — redundant once you hide multi-currency fields."
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "commission_rate",
+		"why": "Sales/CRM: Commission Rate. Reviewed: only ever read as a value.",
+		"ack": [
+			"logic"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "company_address",
+		"why": "Uncategorized: Company Address Name. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
 	},
 	{
 		"doctype": "Sales Order",
@@ -531,8 +3100,75 @@
 	},
 	{
 		"doctype": "Sales Order",
+		"field": "contact_display",
+		"why": "System: Contact. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "contact_email",
+		"why": "System: Contact Email. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "contact_mobile",
+		"why": "System: Mobile No. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "contact_person",
+		"why": "Uncategorized: Contact Person. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Order",
 		"field": "contact_phone",
 		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "cost_center",
+		"why": "Accounting: Cost Center. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "customer_address",
+		"why": "Uncategorized: Customer Address. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "customer_group",
+		"why": "Uncategorized: Customer Group. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "disable_rounded_total",
+		"why": "Accounting: Disable Rounded Total. Reviewed: only ever read as a value.",
+		"ack": [
+			"logic"
+		]
 	},
 	{
 		"doctype": "Sales Order",
@@ -541,8 +3177,90 @@
 	},
 	{
 		"doctype": "Sales Order",
+		"field": "dispatch_address_name",
+		"why": "Multi-company: Dispatch Address Name. Reviewed: only ever read as a value.",
+		"ack": [
+			"logic"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "from_date",
+		"why": "Subscriptions / Auto Repeat: From Date. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Order",
 		"field": "group_same_items",
 		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "has_unit_price_items",
+		"why": "Uncategorized: Has Unit Price Items. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "ignore_pricing_rule",
+		"why": "Uncategorized: Ignore Pricing Rule. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "in_words",
+		"why": "Accounting: In Words. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "incoterm",
+		"why": "Foreign trade: Incoterm. Reviewed: only ever read as a value.",
+		"ack": [
+			"logic"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "inter_company_order_reference",
+		"why": "Multi-company: Inter Company Order Reference. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "is_internal_customer",
+		"why": "Multi-company: Is Internal Customer. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "is_subcontracted",
+		"why": "Manufacturing: Is Subcontracted. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "language",
+		"why": "Print/locale: Print Language. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
 	},
 	{
 		"doctype": "Sales Order",
@@ -551,8 +3269,33 @@
 	},
 	{
 		"doctype": "Sales Order",
+		"field": "letter_head",
+		"why": "Print/locale: Letter Head. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Order",
 		"field": "named_place",
 		"why": "Foreign trade: Incoterm reference location — only relevant to international freight."
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "naming_series",
+		"property": "default",
+		"value": "SAL-ORD-.YYYY.-",
+		"kind": "default",
+		"why": "The only number series, so it fills the field once the field is hidden (Sales Order)."
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "naming_series",
+		"why": "System: Series. Reviewed: required Select with a single series: the series becomes its default.",
+		"ack": [
+			"data"
+		],
+		"filled_ok": true
 	},
 	{
 		"doctype": "Sales Order",
@@ -561,8 +3304,101 @@
 	},
 	{
 		"doctype": "Sales Order",
+		"field": "packed_items",
+		"why": "Advanced inventory planning: Packed Items. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "party_account_currency",
+		"why": "Multi-currency: Party Account Currency. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "po_date",
+		"why": "Uncategorized: Customer's Purchase Order Date. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "po_no",
+		"why": "Uncategorized: Customer's Purchase Order. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"list",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "price_list_currency",
+		"why": "Multi-currency: Price List Currency. Reviewed: read-only and system-derived: a user cannot fix it by typing.",
+		"ack": [
+			"data"
+		],
+		"filled_ok": true
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "pricing_rules",
+		"why": "Status tracking: Pricing Rule Detail. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "project",
+		"why": "Uncategorized: Project. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "represents_company",
+		"why": "Multi-company: Represents Company. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "reserve_stock",
+		"why": "Uncategorized: Reserve Stock. Reviewed: a script may re-show it in some states.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "rounded_total",
+		"why": "Accounting: Rounded Total. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Order",
 		"field": "rounding_adjustment",
 		"why": "Accounting: Rounding-off bookkeeping detail, computed automatically — nobody needs to see or edit it."
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "sales_partner",
+		"why": "Sales/CRM: Sales Partner. Reviewed: only ever read as a value.",
+		"ack": [
+			"logic"
+		]
 	},
 	{
 		"doctype": "Sales Order",
@@ -571,13 +3407,90 @@
 	},
 	{
 		"doctype": "Sales Order",
+		"field": "shipping_address",
+		"why": "System: Shipping Address. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "shipping_address_name",
+		"why": "System: Shipping Address Name. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "shipping_rule",
+		"why": "Uncategorized: Shipping Rule. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "skip_delivery_note",
+		"why": "Accounting: Skip Delivery Note. Reviewed: server code branches on it, it is not a person-entered requirement.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Sales Order",
 		"field": "tax_category",
 		"why": "Accounting: Determines which tax template applies — a setup-level classification, not a per-sale field."
 	},
 	{
 		"doctype": "Sales Order",
+		"field": "tax_id",
+		"why": "Accounting: Tax Id. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Order",
 		"field": "taxes_and_charges",
 		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "tc_name",
+		"why": "Uncategorized: Terms. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "terms",
+		"why": "Uncategorized: Terms and Conditions Details. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "territory",
+		"why": "Uncategorized: Territory. Reviewed: only ever read as a value.",
+		"ack": [
+			"data",
+			"title"
+		]
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "to_date",
+		"why": "Subscriptions / Auto Repeat: To Date. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
 	},
 	{
 		"doctype": "Sales Order",
@@ -588,6 +3501,12 @@
 		"doctype": "Sales Order",
 		"field": "total_net_weight",
 		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "update_auto_repeat_reference",
+		"why": "Subscriptions / Auto Repeat: Update Auto Repeat Reference. Reviewed: help text / Auto-Repeat-only button: nothing to act on.",
+		"inert_ok": true
 	},
 	{
 		"doctype": "Sales Order",
@@ -611,13 +3530,340 @@
 	},
 	{
 		"doctype": "Stock Entry",
+		"field": "additional_costs",
+		"why": "Uncategorized: Additional Costs. Reviewed: a script may re-show it in some states.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "address_display",
+		"why": "System: Address. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "amended_from",
+		"why": "System: Amended From. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "apply_putaway_rule",
+		"why": "Uncategorized: Apply Putaway Rule. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "asset_repair",
+		"why": "Uncategorized: Asset Repair. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "cost_center",
+		"why": "Accounting: Cost Center. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "delivery_note_no",
+		"why": "Uncategorized: Delivery Note No. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "from_bom",
+		"why": "Manufacturing: From BOM. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "inspection_required",
+		"why": "Quality control: Inspection Required. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "is_opening",
+		"why": "Accounting: Is Opening. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "is_return",
+		"why": "Uncategorized: Is Return. Reviewed: server code branches on it, it is not a person-entered requirement.",
+		"ack": [
+			"controller",
+			"list"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "job_card",
+		"why": "Manufacturing: Job Card. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
 		"field": "last_scanned_warehouse",
 		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
 	},
 	{
 		"doctype": "Stock Entry",
+		"field": "letter_head",
+		"why": "Print/locale: Letter Head. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "naming_series",
+		"property": "default",
+		"value": "MAT-STE-.YYYY.-",
+		"kind": "default",
+		"why": "The only number series, so it fills the field once the field is hidden (Stock Entry)."
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "naming_series",
+		"why": "System: Series. Reviewed: required Select with a single series: the series becomes its default.",
+		"ack": [
+			"data"
+		],
+		"filled_ok": true
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "outgoing_stock_entry",
+		"why": "Uncategorized: Stock Entry (Outward GIT). Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data",
+			"logic"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "pick_list",
+		"why": "Uncategorized: Pick List. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "posting_time",
+		"why": "System: Posting Time. Reviewed: a script may re-show it in some states; server code branches on it, it is not a person-entered requirement.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "process_loss_percentage",
+		"why": "Uncategorized: % Process Loss. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "process_loss_qty",
+		"why": "Uncategorized: Process Loss Qty. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "project",
+		"why": "Uncategorized: Project. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "purchase_order",
+		"why": "Uncategorized: Purchase Order. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "purchase_receipt_no",
+		"why": "Uncategorized: Purchase Receipt No. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "purpose",
+		"why": "Uncategorized: Purpose. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data",
+			"list",
+			"logic",
+			"title"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "remarks",
+		"why": "Uncategorized: Remarks. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data",
+			"title"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "sales_invoice_no",
+		"why": "Uncategorized: Sales Invoice No. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
 		"field": "select_print_heading",
 		"why": "Print/locale: Which print heading to use — a one-time setup choice, not a per-transaction field."
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "set_posting_time",
+		"why": "Uncategorized: Edit Posting Date and Time. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "source_address_display",
+		"why": "System: Source Warehouse Address. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "source_stock_entry",
+		"why": "Uncategorized: Source Stock Entry (Manufacture). Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "source_warehouse_address",
+		"why": "Uncategorized: Source Warehouse Address Link. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "subcontracting_inward_order",
+		"why": "Manufacturing: Subcontracting Inward Order. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "subcontracting_order",
+		"why": "Manufacturing: Subcontracting Order. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "supplier",
+		"why": "Purchasing: Supplier. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "supplier_address",
+		"why": "Purchasing: Supplier Address. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "supplier_name",
+		"why": "Purchasing: Supplier Name. Reviewed: a script may re-show it in some states.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "target_address_display",
+		"why": "System: Target Warehouse Address. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "target_warehouse_address",
+		"why": "Uncategorized: Target Warehouse Address Link. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "use_multi_level_bom",
+		"why": "Manufacturing: Use Multi-Level BOM. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "work_order",
+		"why": "Manufacturing: Work Order. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller"
+		]
 	},
 	{
 		"doctype": "Stock Reconciliation",
@@ -626,13 +3872,64 @@
 	},
 	{
 		"doctype": "Stock Reconciliation",
+		"field": "cost_center",
+		"why": "Accounting: Cost Center. Reviewed: a script may re-show it in some states.",
+		"ack": [
+			"controller",
+			"list"
+		]
+	},
+	{
+		"doctype": "Stock Reconciliation",
+		"field": "expense_account",
+		"why": "Uncategorized: Difference Account. Reviewed: a script may re-show it in some states; server code branches on it, it is not a person-entered requirement.",
+		"ack": [
+			"controller",
+			"list"
+		]
+	},
+	{
+		"doctype": "Stock Reconciliation",
 		"field": "last_scanned_warehouse",
 		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
 	},
 	{
 		"doctype": "Stock Reconciliation",
+		"field": "naming_series",
+		"property": "default",
+		"value": "MAT-RECO-.YYYY.-",
+		"kind": "default",
+		"why": "The only number series, so it fills the field once the field is hidden (Stock Reconciliation)."
+	},
+	{
+		"doctype": "Stock Reconciliation",
+		"field": "naming_series",
+		"why": "System: Series. Reviewed: required Select with a single series: the series becomes its default.",
+		"filled_ok": true
+	},
+	{
+		"doctype": "Stock Reconciliation",
+		"field": "posting_time",
+		"why": "System: Posting Time. Reviewed: required with the default 'Now': it fills itself.",
+		"ack": [
+			"controller",
+			"list"
+		],
+		"filled_ok": true
+	},
+	{
+		"doctype": "Stock Reconciliation",
 		"field": "set_posting_time",
 		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Warehouse",
+		"field": "account",
+		"why": "Uncategorized: Account. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"list"
+		]
 	},
 	{
 		"doctype": "Warehouse",
@@ -651,13 +3948,47 @@
 	},
 	{
 		"doctype": "Warehouse",
+		"field": "customer",
+		"why": "Uncategorized: Customer. Reviewed: a script may re-show it in some states.",
+		"ack": [
+			"controller"
+		]
+	},
+	{
+		"doctype": "Warehouse",
+		"field": "default_in_transit_warehouse",
+		"why": "Uncategorized: Default In-Transit Warehouse. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Warehouse",
 		"field": "is_rejected_warehouse",
 		"why": "Uncategorized: System description: \"If yes, then this warehouse will be used to store rejected materials\". Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
 	},
 	{
 		"doctype": "Warehouse",
+		"field": "lft",
+		"why": "System: lft. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Warehouse",
 		"field": "mobile_no",
 		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Warehouse",
+		"field": "old_parent",
+		"why": "Uncategorized: Old Parent. Reviewed: only ever read as a value.",
+		"ack": [
+			"data"
+		]
 	},
 	{
 		"doctype": "Warehouse",
@@ -671,7 +4002,26 @@
 	},
 	{
 		"doctype": "Warehouse",
+		"field": "rgt",
+		"why": "System: rgt. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data"
+		]
+	},
+	{
+		"doctype": "Warehouse",
 		"field": "state",
 		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Warehouse",
+		"field": "warehouse_type",
+		"why": "Uncategorized: Warehouse Type. Reviewed: only ever read as a value.",
+		"ack": [
+			"controller",
+			"data",
+			"logic"
+		]
 	}
 ]
