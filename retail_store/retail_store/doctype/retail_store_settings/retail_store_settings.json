@@ -1,6 +1,6 @@
 {
  "creation": "2026-10-08 19:30:00.000000",
- "modified": "2026-10-13 13:10:00.000000",
+ "modified": "2026-10-17 06:30:00.000000",
  "modified_by": "Administrator",
  "owner": "Administrator",
  "module": "Retail Store",
@@ -23,6 +23,7 @@
   "column_break_brand",
   "brand_color",
   "accent_color",
+  "storefront_theme",
   "apply_brand_to_desk",
   "storefront_section",
   "storefront_headline",
@@ -145,6 +146,15 @@
    "fieldtype": "Color",
    "label": "Accent Colour",
    "default": "#F59E0B",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "storefront_theme",
+   "fieldtype": "Select",
+   "label": "Storefront Theme",
+   "options": "Calm\nBold\nEditorial\nPlayful",
+   "default": "Calm",
+   "description": "The storefront's visual language (layout, type, shape, motion). Brand Colour / Accent Colour above are layered on top of whichever theme is chosen.",
    "permlevel": 1
   },
   {

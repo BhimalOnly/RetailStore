@@ -14,6 +14,24 @@ from frappe.utils import escape_html
 
 DEFAULT_LOGO = "/assets/retail_store/images/retail-store-logo.svg"
 
+# Storefront theme presets: each is a CSS file loaded *after* storefront.css (so its
+# overrides win) plus the Google Fonts it needs. "Calm" is today's default look and
+# ships entirely from storefront.css, so it needs no extra asset here.
+STOREFRONT_THEMES = {
+	"Bold": {
+		"css": "/assets/retail_store/css/theme-bold.css?v=1",
+		"font": "https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@500;600;700;800&display=swap",
+	},
+	"Editorial": {
+		"css": "/assets/retail_store/css/theme-editorial.css?v=1",
+		"font": "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;1,9..144,300&family=Work+Sans:wght@300;400;500&display=swap",
+	},
+	"Playful": {
+		"css": "/assets/retail_store/css/theme-playful.css?v=1",
+		"font": "https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700&display=swap",
+	},
+}
+
 
 def get_branding():
 	if not frappe.db.exists("DocType", "Retail Store Settings"):
@@ -26,6 +44,7 @@ def get_branding():
 		"brand_color": s.brand_color or None,
 		"accent_color": s.accent_color or None,
 		"apply_to_desk": bool(s.apply_brand_to_desk),
+		"theme": s.storefront_theme or "Calm",
 	}
 
 
@@ -61,6 +80,12 @@ def update_website_context(context):
 	)
 	if css_vars:
 		context.head_html = (context.get("head_html") or "") + f"<style>:root{{{css_vars}}}</style>"
+
+	theme = STOREFRONT_THEMES.get(branding.get("theme"))
+	if theme:
+		context.head_html = (context.get("head_html") or "") + (
+			f'<link rel="stylesheet" href="{theme["font"]}"><link rel="stylesheet" href="{theme["css"]}">'
+		)
 
 
 def apply_branding(settings):
