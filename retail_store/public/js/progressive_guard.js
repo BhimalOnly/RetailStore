@@ -44,8 +44,17 @@
 		return changed;
 	}
 
+	// A form that is not on screen has nothing to reveal and nobody to tell. The POS keeps a Sales Invoice form of its
+	// own that is never attached to the page: it is built, filled and saved in the background, and its required fields
+	// (Currency, Debit To) are set by the server. Announcing them there repeated "is now required" on every item added,
+	// piling up over the Checkout button.
+	function on_screen(frm) {
+		const el = frm && frm.$wrapper && frm.$wrapper[0];
+		return !!(el && el.isConnected && el.getClientRects().length);
+	}
+
 	function reveal_required(frm, announce) {
-		if (!frm || !frm.fields) return;
+		if (!frm || !frm.fields || !on_screen(frm)) return;
 		frm.fields.forEach((f) => reveal_field(f, announce));
 	}
 
