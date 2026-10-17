@@ -14,20 +14,26 @@ from frappe.utils import escape_html
 
 DEFAULT_LOGO = "/assets/retail_store/images/retail-store-logo.svg"
 
-# Storefront theme presets: each is a CSS file loaded *after* storefront.css (so its
-# overrides win) plus the Google Fonts it needs. "Calm" is today's default look and
-# ships entirely from storefront.css, so it needs no extra asset here.
+# Storefront theme presets: each is a CSS file plus the Google Fonts it needs.
+# Its position in <head> relative to storefront.css isn't guaranteed (both land
+# in head_html / web_include_css assets, and the exact order between those two
+# isn't something this app controls), so every selector inside the theme file
+# itself carries an extra `html` ancestor to outrank storefront.css's plain
+# `body:not(.sl-split)` rules on specificity rather than on load order. "Calm"
+# is today's default look and ships entirely from storefront.css, so it needs
+# no extra asset here. Bump a file's ?v= when its CSS changes, so browsers
+# don't keep serving a stale cached copy.
 STOREFRONT_THEMES = {
 	"Bold": {
-		"css": "/assets/retail_store/css/theme-bold.css?v=1",
+		"css": "/assets/retail_store/css/theme-bold.css?v=2",
 		"font": "https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@500;600;700;800&display=swap",
 	},
 	"Editorial": {
-		"css": "/assets/retail_store/css/theme-editorial.css?v=1",
+		"css": "/assets/retail_store/css/theme-editorial.css?v=2",
 		"font": "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;1,9..144,300&family=Work+Sans:wght@300;400;500&display=swap",
 	},
 	"Playful": {
-		"css": "/assets/retail_store/css/theme-playful.css?v=1",
+		"css": "/assets/retail_store/css/theme-playful.css?v=2",
 		"font": "https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700&display=swap",
 	},
 }

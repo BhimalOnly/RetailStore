@@ -1,13 +1,17 @@
 /* Storefront preset: Bold & Energetic.
-   Loaded after storefront.css (branding.py, when Retail Store Settings > Storefront
-   Theme = "Bold") so these rules win on the shared selectors. Re-skins the --rs-*
-   look tokens storefront.css already exposes, plus a handful of signature touches
-   (angled hero scrim, hard-offset shadows, heavier type). The client's own
-   --rs-brand / --rs-accent still drive buttons and links underneath this file;
-   only the surrounding chrome changes. Markup: webshop's item-card / product-page,
-   retail_store's store-home + quick-view/cart-drawer (shop_ui.js). */
+   Loaded alongside storefront.css (branding.py, when Retail Store Settings >
+   Storefront Theme = "Bold"). Every selector here is prefixed with an extra
+   `html` ancestor so it outranks storefront.css's plain `body:not(.sl-split)`
+   rules on specificity alone — this file's actual position in <head> relative
+   to storefront.css isn't guaranteed, so winning can't depend on load order.
+   Re-skins the --rs-* look tokens storefront.css already exposes, plus a
+   handful of signature touches (angled hero scrim, hard-offset shadows,
+   heavier type). The client's own --rs-brand / --rs-accent still drive
+   buttons and links underneath this file; only the surrounding chrome
+   changes. Markup: webshop's item-card / product-page, retail_store's
+   store-home + quick-view/cart-drawer (shop_ui.js). */
 
-body:not(.sl-split) {
+html body:not(.sl-split) {
 	--rs-surface: #f4f0e4;
 	--rs-paper: #ffffff;
 	--rs-ink: #14120f;
@@ -19,52 +23,52 @@ body:not(.sl-split) {
 
 /* nav: heavier rule, heavier labels */
 html body:not(.sl-split) nav.navbar { border-bottom: 2px solid var(--rs-ink); }
-body:not(.sl-split) nav.navbar .nav-link { font-weight: 800; }
+html body:not(.sl-split) nav.navbar .nav-link { font-weight: 800; }
 
 /* product image tiles: dark, so colour/shape (not a muted backdrop) carries the grid */
-body:not(.sl-split) .item-card .card-img-container,
-body:not(.sl-split) .product-image {
+html body:not(.sl-split) .item-card .card-img-container,
+html body:not(.sl-split) .product-image {
 	background: #14120f;
 }
-body:not(.sl-split) .item-card .card-img-top.no-image,
-body:not(.sl-split) .no-image-list,
-body:not(.sl-split) .product-image .no-image,
-body:not(.sl-split) .product-image .no-image-item {
+html body:not(.sl-split) .item-card .card-img-top.no-image,
+html body:not(.sl-split) .no-image-list,
+html body:not(.sl-split) .product-image .no-image,
+html body:not(.sl-split) .product-image .no-image-item {
 	background: #14120f;
 	color: #d6d0c4;
 }
 
 /* cards: a hard offset shadow kick on hover instead of a soft lift */
-body:not(.sl-split) .item-card .card { transition: transform 0.15s ease; }
-body:not(.sl-split) .item-card:hover .card { transform: translate(-3px, -3px); }
-body:not(.sl-split) .item-card:hover .card-img-container img { transform: scale(1.06) rotate(-1deg); }
-body:not(.sl-split) .item-card .product-title { font-weight: 800; }
+html body:not(.sl-split) .item-card .card { transition: transform 0.15s ease; }
+html body:not(.sl-split) .item-card:hover .card { transform: translate(-3px, -3px); }
+html body:not(.sl-split) .item-card:hover .card-img-container img { transform: scale(1.06) rotate(-1deg); }
+html body:not(.sl-split) .item-card .product-title { font-weight: 800; }
 
 /* buttons: sharp corners, heavy weight, an offset shadow that presses on hover */
-body:not(.sl-split) .btn-primary,
-body:not(.sl-split) .btn-add-to-cart,
-body:not(.sl-split) .btn-add-to-cart-list {
+html body:not(.sl-split) .btn-primary,
+html body:not(.sl-split) .btn-add-to-cart,
+html body:not(.sl-split) .btn-add-to-cart-list {
 	font-weight: 800;
 	border: 2px solid var(--rs-ink);
 	box-shadow: 3px 3px 0 var(--rs-ink);
 	transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
-body:not(.sl-split) .btn-primary:hover,
-body:not(.sl-split) .btn-primary:focus,
-body:not(.sl-split) .btn-add-to-cart:hover,
-body:not(.sl-split) .btn-add-to-cart-list:hover {
+html body:not(.sl-split) .btn-primary:hover,
+html body:not(.sl-split) .btn-primary:focus,
+html body:not(.sl-split) .btn-add-to-cart:hover,
+html body:not(.sl-split) .btn-add-to-cart-list:hover {
 	transform: translate(-2px, -2px);
 	box-shadow: 5px 5px 0 var(--rs-ink);
 }
 
 /* sale badge: squared off, heavier */
-body:not(.sl-split) .item-card .card:has(.striked-price) .card-img-container::after {
+html body:not(.sl-split) .item-card .card:has(.striked-price) .card-img-container::after {
 	border-radius: 3px;
 	font-weight: 800;
 }
 
 /* ---- store-home hero: a diagonal accent scrim instead of a flat dim ---- */
-body:not(.sl-split) .rs-hero { background: #14120f; }
+html body:not(.sl-split) .rs-hero { background: #14120f; }
 html body:not(.sl-split) .rs-hero::before,
 html body:not(.sl-split) .rs-hero.has-image::before {
 	content: "";
@@ -79,7 +83,7 @@ html body:not(.sl-split) .rs-hero.has-image::before {
 	);
 	opacity: 0.92;
 }
-body:not(.sl-split) .rs-hero-cta {
+html body:not(.sl-split) .rs-hero-cta {
 	border-radius: var(--rs-r);
 	border: 2px solid #14120f;
 	font-weight: 800;
@@ -88,27 +92,27 @@ body:not(.sl-split) .rs-hero-cta {
 }
 
 /* store-home grids: dark tiles, heavier labels, a touch of lift on hover */
-body:not(.sl-split) .rs-cat-img, body:not(.sl-split) .rs-prod-img { background: #14120f; }
-body:not(.sl-split) .rs-prod-abbr { color: #786f5e; }
-body:not(.sl-split) .rs-cat-name, body:not(.sl-split) .rs-prod-title { font-weight: 800; }
-body:not(.sl-split) .rs-cat:hover img, body:not(.sl-split) .rs-prod:hover img { transform: scale(1.06) rotate(-1deg); }
+html body:not(.sl-split) .rs-cat-img, html body:not(.sl-split) .rs-prod-img { background: #14120f; }
+html body:not(.sl-split) .rs-prod-abbr { color: #786f5e; }
+html body:not(.sl-split) .rs-cat-name, html body:not(.sl-split) .rs-prod-title { font-weight: 800; }
+html body:not(.sl-split) .rs-cat:hover img, html body:not(.sl-split) .rs-prod:hover img { transform: scale(1.06) rotate(-1deg); }
 
 /* quick-view modal + cart drawer: sharp corners, heavier add-to-cart, chunkier swatch ring */
-body:not(.sl-split) .rs-qv { border-radius: 10px; }
-body:not(.sl-split) .rs-qv-title { font-weight: 400; }
-body:not(.sl-split) .rs-add, body:not(.sl-split) .rs-btn {
+html body:not(.sl-split) .rs-qv { border-radius: 10px; }
+html body:not(.sl-split) .rs-qv-title { font-weight: 400; }
+html body:not(.sl-split) .rs-add, html body:not(.sl-split) .rs-btn {
 	border-radius: var(--rs-r);
 	font-weight: 800;
 	border: 2px solid var(--rs-ink);
 }
-body:not(.sl-split) .rs-sw.is-on { outline-width: 3px; }
-body:not(.sl-split) .rs-drawer-head h2 { font-weight: 400; }
+html body:not(.sl-split) .rs-sw.is-on { outline-width: 3px; }
+html body:not(.sl-split) .rs-drawer-head h2 { font-weight: 400; }
 
 /* shopper sign-in: match the heavier button weight used everywhere else */
-body.rs-shop-login .for-login .btn-login,
-body.rs-shop-login .for-login .btn-primary.btn-block,
-body.rs-shop-login .for-forgot .btn-primary.btn-block,
-body.rs-shop-login .for-signup .btn-primary.btn-block,
-body.rs-shop-login .es-button.w-full:not(:disabled):not([disabled]) {
+html body.rs-shop-login .for-login .btn-login,
+html body.rs-shop-login .for-login .btn-primary.btn-block,
+html body.rs-shop-login .for-forgot .btn-primary.btn-block,
+html body.rs-shop-login .for-signup .btn-primary.btn-block,
+html body.rs-shop-login .es-button.w-full:not(:disabled):not([disabled]) {
 	font-weight: 800 !important;
 }

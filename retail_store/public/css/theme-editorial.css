@@ -1,13 +1,17 @@
 /* Storefront preset: Editorial Luxury.
-   Loaded after storefront.css (branding.py, when Retail Store Settings > Storefront
-   Theme = "Editorial") so these rules win on the shared selectors. Re-skins the
-   --rs-* look tokens storefront.css already exposes, plus a handful of signature
-   touches (serif display type, a moody hero wash, fade-not-zoom hover). The
-   client's own --rs-brand / --rs-accent still drive buttons and links underneath
-   this file. Markup: webshop's item-card / product-page, retail_store's
-   store-home + quick-view/cart-drawer (shop_ui.js). */
+   Loaded alongside storefront.css (branding.py, when Retail Store Settings >
+   Storefront Theme = "Editorial"). Every selector here is prefixed with an
+   extra `html` ancestor so it outranks storefront.css's plain
+   `body:not(.sl-split)` rules on specificity alone -- this file's actual
+   position in <head> relative to storefront.css isn't guaranteed, so winning
+   can't depend on load order. Re-skins the --rs-* look tokens storefront.css
+   already exposes, plus a handful of signature touches (serif display type,
+   a moody hero wash, fade-not-zoom hover). The client's own --rs-brand /
+   --rs-accent still drive buttons and links underneath this file. Markup:
+   webshop's item-card / product-page, retail_store's store-home +
+   quick-view/cart-drawer (shop_ui.js). */
 
-body:not(.sl-split) {
+html body:not(.sl-split) {
 	--rs-surface: #efe8d8;
 	--rs-paper: #fbf8f1;
 	--rs-ink: #241f18;
@@ -18,33 +22,33 @@ body:not(.sl-split) {
 }
 
 /* nav: lighter weight, wider tracking, quieter */
-body:not(.sl-split) nav.navbar .nav-link { font-weight: 500; letter-spacing: 0.1em; }
+html body:not(.sl-split) nav.navbar .nav-link { font-weight: 500; letter-spacing: 0.1em; }
 
 /* product cards: a serif title in its natural case, no shouting caps */
-body:not(.sl-split) .item-card .product-title {
+html body:not(.sl-split) .item-card .product-title {
 	font-family: var(--rs-display);
 	font-weight: 400;
 	font-size: 15px;
 	text-transform: none;
 	letter-spacing: 0;
 }
-body:not(.sl-split) .item-card .product-price,
-body:not(.sl-split) .list-row .product-price { font-weight: 500; }
+html body:not(.sl-split) .item-card .product-price,
+html body:not(.sl-split) .list-row .product-price { font-weight: 500; }
 
 /* hover: a quiet fade, not a zoom */
-body:not(.sl-split) .item-card .card-img-container img { transition: opacity 0.3s ease; }
-body:not(.sl-split) .item-card:hover .card-img-container img { transform: none; opacity: 0.82; }
+html body:not(.sl-split) .item-card .card-img-container img { transition: opacity 0.3s ease; }
+html body:not(.sl-split) .item-card:hover .card-img-container img { transform: none; opacity: 0.82; }
 
 /* buttons: thin, quiet, no shout */
-body:not(.sl-split) .btn-primary,
-body:not(.sl-split) .btn-add-to-cart,
-body:not(.sl-split) .btn-add-to-cart-list {
+html body:not(.sl-split) .btn-primary,
+html body:not(.sl-split) .btn-add-to-cart,
+html body:not(.sl-split) .btn-add-to-cart-list {
 	font-weight: 600;
 	letter-spacing: 0.08em;
 }
 
 /* sale tag: a sharp small label, not a loud pill */
-body:not(.sl-split) .item-card .card:has(.striked-price) .card-img-container::after {
+html body:not(.sl-split) .item-card .card:has(.striked-price) .card-img-container::after {
 	background: var(--rs-ink);
 	border-radius: 0;
 	font-weight: 500;
@@ -53,13 +57,13 @@ body:not(.sl-split) .item-card .card:has(.striked-price) .card-img-container::af
 }
 
 /* product detail title: lighter, roomier */
-body:not(.sl-split) .product-details .product-title,
-body:not(.sl-split) .product-details h2 { font-weight: 300; }
+html body:not(.sl-split) .product-details .product-title,
+html body:not(.sl-split) .product-details h2 { font-weight: 300; }
 
 /* ---- store-home hero: a moody charcoal wash, an italic serif line ---- */
 html body:not(.sl-split) .rs-hero { background: #1f1a14; }
 html body:not(.sl-split) .rs-hero.has-image::before { background: rgba(20, 16, 10, 0.56); }
-body:not(.sl-split) .rs-hero h1 { font-style: italic; font-weight: 300; }
+html body:not(.sl-split) .rs-hero h1 { font-style: italic; font-weight: 300; }
 html body:not(.sl-split) .rs-hero-cta {
 	background: transparent;
 	border: 1px solid #fff;
@@ -76,18 +80,18 @@ html body:not(.sl-split) .rs-hero-cta:focus {
 }
 
 /* store-home grids: serif captions, a fade instead of a zoom */
-body:not(.sl-split) .rs-cat-name, body:not(.sl-split) .rs-prod-title {
+html body:not(.sl-split) .rs-cat-name, html body:not(.sl-split) .rs-prod-title {
 	font-family: var(--rs-display);
 	font-weight: 400;
 	text-transform: none;
 	letter-spacing: 0;
 	font-size: 15px;
 }
-body:not(.sl-split) .rs-cat-img img, body:not(.sl-split) .rs-prod-img img { transition: opacity 0.3s ease; }
-body:not(.sl-split) .rs-cat:hover img, body:not(.sl-split) .rs-prod:hover img { transform: none; opacity: 0.82; }
+html body:not(.sl-split) .rs-cat-img img, html body:not(.sl-split) .rs-prod-img img { transition: opacity 0.3s ease; }
+html body:not(.sl-split) .rs-cat:hover img, html body:not(.sl-split) .rs-prod:hover img { transform: none; opacity: 0.82; }
 
 /* quick-view modal + cart drawer: serif title, quieter buttons */
-body:not(.sl-split) .rs-qv { border-radius: 4px; }
-body:not(.sl-split) .rs-qv-title { font-style: italic; font-weight: 300; }
-body:not(.sl-split) .rs-add, body:not(.sl-split) .rs-btn { font-weight: 600; letter-spacing: 0.06em; }
-body:not(.sl-split) .rs-drawer-head h2 { font-style: italic; font-weight: 300; }
+html body:not(.sl-split) .rs-qv { border-radius: 4px; }
+html body:not(.sl-split) .rs-qv-title { font-style: italic; font-weight: 300; }
+html body:not(.sl-split) .rs-add, html body:not(.sl-split) .rs-btn { font-weight: 600; letter-spacing: 0.06em; }
+html body:not(.sl-split) .rs-drawer-head h2 { font-style: italic; font-weight: 300; }
