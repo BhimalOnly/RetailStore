@@ -252,6 +252,10 @@ body.rs-shop-login .for-forgot .page-card-actions::after { content: none !import
    defeats (both cards showed at once on #signup); honour the inline hide again for the shopper variant. */
 body.rs-shop-login section[style*="display: none"] { display: none !important; }
 /* Frappe v16 login buttons are .es-button, not .btn-primary */
+/* Solvronix renders these ~25px tall next to 48px inputs; at that height any theme radius above 12px
+   (Playful's 18px) collapses into a full pill. Match the inputs so --rs-r reads as a corner radius. */
+body.rs-shop-login .es-button.w-full { min-height: 48px; }
+body.rs-shop-login .es-button.w-full + .es-button.w-full { margin-top: 12px; }
 body.rs-shop-login .es-button.w-full:not(:disabled):not([disabled]) {
 	background: var(--rs-b) !important;
 	color: #fff !important;
