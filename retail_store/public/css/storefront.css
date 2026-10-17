@@ -515,3 +515,8 @@ body:not(.sl-split) footer.web-footer .footer-link a, body:not(.sl-split) footer
 /* Cart: opt-in boxes for offers by WhatsApp / SMS (retail_store/messaging; storefront.js) */
 .rs-consent .rs-consent-row { display: flex; align-items: flex-start; gap: 10px; margin: 0 0 8px; cursor: pointer; font-size: 14px; line-height: 1.35; }
 .rs-consent .rs-consent-row input { flex: none; width: 16px; height: 16px; margin: 2px 0 0; position: static; }
+
+/* product page: webshop's "Select Variant" / "Continue Selection" trigger (item_configure.html) renders as
+   .btn.btn-primary-light.btn-configure, which nothing else targeted -> plain grey. Match .rs-add. The `html` + :not(.btn-md) outrank Frappe's .btn:not(.btn-md):not(.btn-lg):not(.btn-xs) padding. */
+html body:not(.sl-split) .btn.btn-configure:not(.btn-md) { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 22px; border: 0; border-radius: var(--rs-r); background: var(--rs-b); color: #fff; font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+html body:not(.sl-split) .btn.btn-configure:hover, html body:not(.sl-split) .btn.btn-configure:focus { background: var(--rs-b); color: #fff; filter: brightness(1.1); }

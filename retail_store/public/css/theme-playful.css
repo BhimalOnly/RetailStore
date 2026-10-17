@@ -89,3 +89,21 @@ html body:not(.sl-split) .rs-cat-name, html body:not(.sl-split) .rs-prod-title {
 /* quick-view modal + cart drawer: the display font on the big headings */
 html body:not(.sl-split) .rs-qv-title { font-weight: 700; }
 html body:not(.sl-split) .rs-drawer-head h2 { font-weight: 700; }
+
+/* store-home hero, structure: the product collage floats as a rounded white
+   card, tilted a touch, with a soft shadow and pill-rounded tiles. Same
+   breakpoint as storefront.css's collage; below it the art stays hidden. */
+@media (min-width: 900px) {
+	html body:not(.sl-split) .rs-hero-inner { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; }
+	html body:not(.sl-split) .rs-hero-art {
+		gap: 12px;
+		padding: 16px 16px 30px;
+		background: var(--rs-paper);
+		border-radius: 32px;
+		box-shadow: 0 22px 44px rgba(20, 20, 50, 0.28), 0 4px 0 rgba(255, 255, 255, 0.5) inset;
+		transform: rotate(-2.5deg);
+		max-width: 440px;
+		justify-self: center;
+	}
+	html body:not(.sl-split) .rs-hero-art a { border-radius: 20px; background: var(--rs-surface); }
+}

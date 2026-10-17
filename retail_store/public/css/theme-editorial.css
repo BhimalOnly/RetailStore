@@ -95,3 +95,21 @@ html body:not(.sl-split) .rs-qv { border-radius: 4px; }
 html body:not(.sl-split) .rs-qv-title { font-style: italic; font-weight: 300; }
 html body:not(.sl-split) .rs-add, html body:not(.sl-split) .rs-btn { font-weight: 600; letter-spacing: 0.06em; }
 html body:not(.sl-split) .rs-drawer-head h2 { font-style: italic; font-weight: 300; }
+
+/* store-home hero, structure: an asymmetric split -- a wide text column and the
+   product collage as its own framed paper panel (hairline border, square
+   corners, upright 3:4 tiles, no stagger). Same breakpoint as storefront.css's
+   collage; below it the art stays hidden and the hero is the single column. */
+@media (min-width: 900px) {
+	html body:not(.sl-split) .rs-hero-inner { grid-template-columns: minmax(0, 1.5fr) minmax(0, 0.7fr); gap: 56px; }
+	html body:not(.sl-split) .rs-hero-art {
+		gap: 10px;
+		padding: 14px;
+		background: var(--rs-paper);
+		border: 1px solid var(--rs-line);
+		box-shadow: 14px 14px 0 rgba(251, 248, 241, 0.12);
+	}
+	html body:not(.sl-split) .rs-hero-art a { aspect-ratio: 3 / 4; border-radius: 0; background: var(--rs-surface); }
+	html body:not(.sl-split) .rs-hero-art a:nth-child(even) { transform: none; }
+	html body:not(.sl-split) .rs-hero-art.rs-art-1 { max-width: 300px; }
+}
