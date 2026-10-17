@@ -1,0 +1,697 @@
+[
+	{
+		"doctype": "Customer",
+		"field": "companies",
+		"why": "Multi-company: Restricts which companies this customer can transact with — only matters with more than one company in this ERPNext instance."
+	},
+	{
+		"doctype": "Customer",
+		"field": "custom_sms_optin_on",
+		"why": "Messaging/consent: Automatic timestamp recorded by the messaging-consent system — not something staff set manually."
+	},
+	{
+		"doctype": "Customer",
+		"field": "custom_sms_optout_on",
+		"why": "Messaging/consent: Automatic timestamp recorded by the messaging-consent system — not something staff set manually."
+	},
+	{
+		"doctype": "Customer",
+		"field": "dn_required",
+		"why": "Accounting: Controls whether staff can invoice this customer without first creating a Delivery Note — an accounting-workflow guardrail, set up once."
+	},
+	{
+		"doctype": "Customer",
+		"field": "gender",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Customer",
+		"field": "industry",
+		"why": "Sales/CRM: Enterprise CRM industry-classification field."
+	},
+	{
+		"doctype": "Customer",
+		"field": "is_frozen",
+		"why": "Admin control: Freezes the customer account from new transactions — an admin control, not a daily field."
+	},
+	{
+		"doctype": "Customer",
+		"field": "market_segment",
+		"why": "Sales/CRM: Enterprise CRM customer-segmentation field."
+	},
+	{
+		"doctype": "Customer",
+		"field": "so_required",
+		"why": "Accounting: Controls whether staff can invoice this customer without first creating a Sales Order — an accounting-workflow guardrail, set up once."
+	},
+	{
+		"doctype": "Customer",
+		"field": "tax_withholding_category",
+		"why": "Accounting: Tax-withholding-at-source category — a jurisdiction-specific accounting detail, not a day-to-day retail field."
+	},
+	{
+		"doctype": "Customer",
+		"field": "tax_withholding_group",
+		"why": "Accounting: Tax-withholding-at-source category — a jurisdiction-specific accounting detail, not a day-to-day retail field."
+	},
+	{
+		"doctype": "Customer",
+		"field": "website",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Item",
+		"field": "allow_alternative_item",
+		"why": "Feature toggle: A one-time on/off setting for this record, not something changed per transaction."
+	},
+	{
+		"doctype": "Item",
+		"field": "is_grouped_asset",
+		"why": "Fixed assets: Groups purchased items as a single depreciable asset — for equipment you buy, not goods you sell."
+	},
+	{
+		"doctype": "Item",
+		"field": "max_discount",
+		"why": "Uncategorized: System description: \"Maximum discount % allowed when selling this item. Eg: if set to 20%, a discount greater than 20% cannot be applied in sales transactions.\". Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Item",
+		"field": "over_billing_allowance",
+		"why": "Uncategorized: System description: \"Percentage by which over-billing is allowed against a Sales/Purchase Order for this item. If not set, value from Accounts Settings will be used.\". Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Item",
+		"field": "over_delivery_receipt_allowance",
+		"why": "Uncategorized: System description: \"Percentage by which over-delivery or over-receipt is allowed against a Sales/Purchase Order for this item. If not set, value from Stock Settings will be used.\". Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Item",
+		"field": "purchase_tax_withholding_category",
+		"why": "Accounting: Tax-withholding-at-source category — a jurisdiction-specific accounting detail, not a day-to-day retail field."
+	},
+	{
+		"doctype": "Item",
+		"field": "sales_tax_withholding_category",
+		"why": "Accounting: Tax-withholding-at-source category — a jurisdiction-specific accounting detail, not a day-to-day retail field."
+	},
+	{
+		"doctype": "Item Price",
+		"field": "lead_time_days",
+		"why": "Purchasing: Supplier lead-time planning — a buying-side field."
+	},
+	{
+		"doctype": "Item Price",
+		"field": "note",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Loyalty Program",
+		"field": "project",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Loyalty Program",
+		"field": "to_date",
+		"why": "Subscriptions / Auto Repeat: Only used if this order is set up as a recurring Auto Repeat subscription."
+	},
+	{
+		"doctype": "Material Request",
+		"field": "amended_from",
+		"why": "System: Link to the original document when this one is a correction/amendment — informational only, rarely read directly."
+	},
+	{
+		"doctype": "Material Request",
+		"field": "auto_created_via_reorder",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Material Request",
+		"field": "last_scanned_warehouse",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Material Request",
+		"field": "scan_barcode",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Material Request",
+		"field": "select_print_heading",
+		"why": "Print/locale: Which print heading to use — a one-time setup choice, not a per-transaction field."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "additional_discount_percentage",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "address_display",
+		"why": "System: Auto-generated formatted address shown on printed documents — not edited directly."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "amount_eligible_for_commission",
+		"why": "Sales/CRM: Sales commission tracking — a B2B/wholesale concept, not a direct retail sale."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "base_discount_amount",
+		"why": "Multi-currency (duplicate): Duplicate of another field, shown in company currency — redundant once you hide multi-currency fields."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "base_in_words",
+		"why": "Multi-currency (duplicate): Duplicate of another field, shown in company currency — redundant once you hide multi-currency fields."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "base_rounding_adjustment",
+		"why": "Multi-currency (duplicate): Duplicate of another field, shown in company currency — redundant once you hide multi-currency fields."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "base_total",
+		"why": "Multi-currency (duplicate): Duplicate of another field, shown in company currency — redundant once you hide multi-currency fields."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "base_total_taxes_and_charges",
+		"why": "Multi-currency (duplicate): Duplicate of another field, shown in company currency — redundant once you hide multi-currency fields."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "commission_rate",
+		"why": "Sales/CRM: Sales commission tracking — a B2B/wholesale concept, not a direct retail sale."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "company_contact_person",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "contact_display",
+		"why": "System: Auto-filled display copy of the linked Contact Person's details — the Contact Person field already covers this."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "customer_address",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "from_date",
+		"why": "Subscriptions / Auto Repeat: Only used if this order is set up as a recurring Auto Repeat subscription."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "group_same_items",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "in_words",
+		"why": "Accounting: Spelled-out total amount, used on formal printed invoices — not needed on the working form."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "inter_company_invoice_reference",
+		"why": "Multi-company: Inter-company transaction linking — not relevant to a single-company store."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "is_opening",
+		"why": "Accounting: Marks this as an opening/balance-forward entry during initial setup — not a normal transaction field."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "language",
+		"why": "Print/locale: Print/communication language — a one-time setup choice."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "last_scanned_warehouse",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "other_charges_calculation",
+		"why": "System: Auto-generated breakdown of how taxes/charges were computed — shown on the printed document, not edited."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "po_date",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "posting_time",
+		"why": "System: Frappe-internal bookkeeping field — not something staff would ever touch directly."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "pricing_rules",
+		"why": "Status tracking: Shows which pricing rules applied to this order — useful for a Manager to review, not needed by a cashier. [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "remarks",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "rounding_adjustment",
+		"why": "Accounting: Rounding-off bookkeeping detail, computed automatically — nobody needs to see or edit it."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "set_posting_time",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "shipping_address",
+		"why": "System: Auto-generated formatted shipping address shown on printed documents — not edited directly, unless you ship to a different address than billing."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "shipping_address_name",
+		"why": "System: Auto-generated formatted shipping address shown on printed documents — not edited directly, unless you ship to a different address than billing."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "shipping_rule",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "tax_id",
+		"why": "Accounting: Tax registration number — relevant mainly for formal B2B invoicing/compliance."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "territory",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "timesheets",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "to_date",
+		"why": "Subscriptions / Auto Repeat: Only used if this order is set up as a recurring Auto Repeat subscription."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "total_commission",
+		"why": "Sales/CRM: Sales commission tracking — a B2B/wholesale concept, not a direct retail sale."
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "total_net_weight",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "total_qty",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "update_billed_amount_in_delivery_note",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "POS Invoice",
+		"field": "update_billed_amount_in_sales_order",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "POS Opening Entry",
+		"field": "amended_from",
+		"why": "System: Link to the original document when this one is a correction/amendment — informational only, rarely read directly."
+	},
+	{
+		"doctype": "POS Profile",
+		"field": "allow_discount_change",
+		"why": "Feature toggle: A one-time on/off setting for this record, not something changed per transaction."
+	},
+	{
+		"doctype": "POS Profile",
+		"field": "allow_partial_payment",
+		"why": "Feature toggle: A one-time on/off setting for this record, not something changed per transaction."
+	},
+	{
+		"doctype": "POS Profile",
+		"field": "allow_rate_change",
+		"why": "Feature toggle: A one-time on/off setting for this record, not something changed per transaction."
+	},
+	{
+		"doctype": "POS Profile",
+		"field": "auto_add_item_to_cart",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "POS Profile",
+		"field": "disable_rounded_total",
+		"why": "Accounting: Computed rounded total — the Grand Total field already shows the figure staff need."
+	},
+	{
+		"doctype": "POS Profile",
+		"field": "hide_images",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "POS Profile",
+		"field": "hide_unavailable_items",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "POS Profile",
+		"field": "ignore_pricing_rule",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "POS Profile",
+		"field": "print_receipt_on_order_complete",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "POS Profile",
+		"field": "project",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "POS Profile",
+		"field": "tax_category",
+		"why": "Accounting: Determines which tax template applies — a setup-level classification, not a per-sale field."
+	},
+	{
+		"doctype": "POS Profile",
+		"field": "utm_campaign",
+		"why": "Marketing attribution: Online ad/campaign source tracking — not produced by an in-person or simple online retail sale."
+	},
+	{
+		"doctype": "POS Profile",
+		"field": "utm_medium",
+		"why": "Marketing attribution: Online ad/campaign source tracking — not produced by an in-person or simple online retail sale."
+	},
+	{
+		"doctype": "POS Profile",
+		"field": "utm_source",
+		"why": "Marketing attribution: Online ad/campaign source tracking — not produced by an in-person or simple online retail sale."
+	},
+	{
+		"doctype": "POS Profile",
+		"field": "validate_stock_on_save",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "amended_from",
+		"why": "System: Link to the original document when this one is a correction/amendment — informational only, rarely read directly."
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "auto_repeat",
+		"why": "Subscriptions / Auto Repeat: Recurring-order (subscription) link — only relevant if you sell on a repeat schedule."
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "clearance_date",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "ignore_tax_withholding_threshold",
+		"why": "Accounting: Tax-withholding-at-source category — a jurisdiction-specific accounting detail, not a day-to-day retail field."
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "payment_order",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "print_heading",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Payment Entry",
+		"field": "tax_withholding_group",
+		"why": "Accounting: Tax-withholding-at-source category — a jurisdiction-specific accounting detail, not a day-to-day retail field."
+	},
+	{
+		"doctype": "Pick List",
+		"field": "amended_from",
+		"why": "System: Link to the original document when this one is a correction/amendment — informational only, rarely read directly."
+	},
+	{
+		"doctype": "Pick List",
+		"field": "customer_name",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "commission_rate",
+		"why": "Sales/CRM: Sales commission tracking — a B2B/wholesale concept, not a direct retail sale."
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "company_contact_person",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "company_tax_id",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "group_same_items",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "ignore_tax_withholding_threshold",
+		"why": "Accounting: Tax-withholding-at-source category — a jurisdiction-specific accounting detail, not a day-to-day retail field."
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "last_scanned_warehouse",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "named_place",
+		"why": "Foreign trade: Incoterm reference location — only relevant to international freight."
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "only_include_allocated_payments",
+		"why": "Uncategorized: System description: \"Advance payments allocated against orders will only be fetched\". Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "other_charges_calculation",
+		"why": "System: Auto-generated breakdown of how taxes/charges were computed — shown on the printed document, not edited."
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "pricing_rules",
+		"why": "Status tracking: Shows which pricing rules applied to this order — useful for a Manager to review, not needed by a cashier. [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "shipping_rule",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "total_commission",
+		"why": "Sales/CRM: Sales commission tracking — a B2B/wholesale concept, not a direct retail sale."
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "total_net_weight",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Sales Invoice",
+		"field": "utm_content",
+		"why": "Marketing attribution: Online ad/campaign source tracking — not produced by an in-person or simple online retail sale."
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "base_discount_amount",
+		"why": "Multi-currency (duplicate): Duplicate of another field, shown in company currency — redundant once you hide multi-currency fields."
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "base_rounding_adjustment",
+		"why": "Multi-currency (duplicate): Duplicate of another field, shown in company currency — redundant once you hide multi-currency fields."
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "base_total_taxes_and_charges",
+		"why": "Multi-currency (duplicate): Duplicate of another field, shown in company currency — redundant once you hide multi-currency fields."
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "company_address_display",
+		"why": "System: Auto-generated formatted address shown on printed documents — not edited directly."
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "company_contact_person",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "contact_phone",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "dispatch_address",
+		"why": "Multi-company: Separate dispatch-location address, typically used for multi-warehouse/drop-ship B2B shipping."
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "group_same_items",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "last_scanned_warehouse",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "named_place",
+		"why": "Foreign trade: Incoterm reference location — only relevant to international freight."
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "other_charges_calculation",
+		"why": "System: Auto-generated breakdown of how taxes/charges were computed — shown on the printed document, not edited."
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "rounding_adjustment",
+		"why": "Accounting: Rounding-off bookkeeping detail, computed automatically — nobody needs to see or edit it."
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "select_print_heading",
+		"why": "Print/locale: Which print heading to use — a one-time setup choice, not a per-transaction field."
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "tax_category",
+		"why": "Accounting: Determines which tax template applies — a setup-level classification, not a per-sale field."
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "taxes_and_charges",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "total_commission",
+		"why": "Sales/CRM: Sales commission tracking — a B2B/wholesale concept, not a direct retail sale."
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "total_net_weight",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "utm_campaign",
+		"why": "Marketing attribution: Online ad/campaign source tracking — not produced by an in-person or simple online retail sale."
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "utm_content",
+		"why": "Marketing attribution: Online ad/campaign source tracking — not produced by an in-person or simple online retail sale."
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "utm_medium",
+		"why": "Marketing attribution: Online ad/campaign source tracking — not produced by an in-person or simple online retail sale."
+	},
+	{
+		"doctype": "Sales Order",
+		"field": "utm_source",
+		"why": "Marketing attribution: Online ad/campaign source tracking — not produced by an in-person or simple online retail sale."
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "last_scanned_warehouse",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Stock Entry",
+		"field": "select_print_heading",
+		"why": "Print/locale: Which print heading to use — a one-time setup choice, not a per-transaction field."
+	},
+	{
+		"doctype": "Stock Reconciliation",
+		"field": "amended_from",
+		"why": "System: Link to the original document when this one is a correction/amendment — informational only, rarely read directly."
+	},
+	{
+		"doctype": "Stock Reconciliation",
+		"field": "last_scanned_warehouse",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Stock Reconciliation",
+		"field": "set_posting_time",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Warehouse",
+		"field": "address_line_1",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Warehouse",
+		"field": "address_line_2",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Warehouse",
+		"field": "city",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Warehouse",
+		"field": "is_rejected_warehouse",
+		"why": "Uncategorized: System description: \"If yes, then this warehouse will be used to store rejected materials\". Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Warehouse",
+		"field": "mobile_no",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Warehouse",
+		"field": "phone_no",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Warehouse",
+		"field": "pin",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	},
+	{
+		"doctype": "Warehouse",
+		"field": "state",
+		"why": "Uncategorized: Not auto-classified — please review and decide (Keep / Hide / Keep for Manager+ only). [Resolved from Review: defaulting to Hide per agreed philosophy — not a day-to-day retail field.]"
+	}
+]

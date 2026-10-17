@@ -14,6 +14,7 @@ Tests: tests/check_forms.py (the audit, the audit refusing bad changes, reversib
 tests/browser_customer_form.py.
 """
 
+import json
 import os
 import re
 
@@ -22,11 +23,11 @@ from frappe.custom.doctype.property_setter.property_setter import make_property_
 
 MODULE = "Retail Store"  # marks the Property Setters this module owns
 
-PROPERTY_TYPES = {"hidden": "Check", "collapsible": "Check", "collapsible_depends_on": "Code", "depends_on": "Code", "label": "Data", "default": "Text"}
+PROPERTY_TYPES = {"permlevel": "Int", "hidden": "Check", "collapsible": "Check", "collapsible_depends_on": "Code", "depends_on": "Code", "label": "Data", "default": "Text"}
 KNOWN_CAPABILITIES = {"crm", "ecommerce", "buying", "hr", "manufacturing", "quality", "support", "assets", "projects", "loyalty", "messaging"}
 LAYOUT = {"Section Break", "Column Break", "Tab Break", "HTML", "Button", "Fold", "Heading"}
 
-# kind: hide | collapse | gate | relabel | default
+# kind: hide | collapse | gate | relabel | default | restrict
 FORM_CHANGES = [
 	# ---- Customer ----------------------------------------------------------------------------------------------
 	{
@@ -83,7 +84,7 @@ FORM_CHANGES = [
 		"doctype": "Customer", "field": "references_section", "property": "collapsible_depends_on", "value": "eval:doc.lead_name || doc.opportunity_name || doc.prospect_name", "kind": "collapse",
 		"why": "Opens when the customer came from CRM.",
 	},
-	# ---- Item (no field is hidden: nearly every one is read somewhere; the clutter is whole feature areas) ----------
+	# ---- Item (the clutter is mostly whole feature areas; the few dead-weight fields are hidden via form_hides.json) ----------
 	{"doctype": "Item", "field": "item_code", "property": "label", "value": "Product Code", "kind": "relabel", "why": "The sidebar calls Items Products."},
 	{"doctype": "Item", "field": "item_name", "property": "label", "value": "Product Name", "kind": "relabel", "why": "The sidebar calls Items Products."},
 	{"doctype": "Item", "field": "item_group", "property": "label", "value": "Product Category", "kind": "relabel", "why": "The sidebar already says Product Categories."},
@@ -119,7 +120,25 @@ FORM_CHANGES = [
 	},
 	# ---- Item Price ----------------------------------------------------------------------------------------------
 	{"doctype": "Item Price", "field": "price_list_rate", "property": "label", "value": "Price", "kind": "relabel", "why": "Plain word."},
+	# ---- Manager-only fields (permlevel 1): everyone who can open the document still SEES them; only Store Manager /
+	# Store Owner / Store Admin can change them (setup/roles.py apply_level1_permissions grants exactly that) ----------
+	{"doctype": "Customer", "field": "payment_terms", "property": "permlevel", "value": 1, "kind": "restrict", "why": "The customer's default payment terms: a credit decision for a manager, not for the till."},
+	{"doctype": "Customer", "field": "credit_limits", "property": "permlevel", "value": 1, "kind": "restrict", "why": "Per-company credit limits: a credit decision for a manager, not for the till."},
+	{"doctype": "Sales Order", "field": "payment_terms_template", "property": "permlevel", "value": 1, "kind": "restrict", "why": "Setting a customer's payment terms (e.g. Net 30) is a manager's call; the till can still see them."},
+	{"doctype": "Sales Order", "field": "payment_schedule", "property": "permlevel", "value": 1, "kind": "restrict", "why": "The due-date schedule that follows the payment terms: manager-set, visible to the till."},
+	{"doctype": "Sales Invoice", "field": "payment_terms_template", "property": "permlevel", "value": 1, "kind": "restrict", "why": "Setting a customer's payment terms (e.g. Net 30) is a manager's call; the till can still see them."},
+	{"doctype": "Sales Invoice", "field": "payment_schedule", "property": "permlevel", "value": 1, "kind": "restrict", "why": "The due-date schedule that follows the payment terms: manager-set, visible to the till."},
+	{"doctype": "POS Invoice", "field": "payment_terms_template", "property": "permlevel", "value": 1, "kind": "restrict", "why": "Setting a customer's payment terms (e.g. Net 30) is a manager's call; the till can still see them."},
+	{"doctype": "POS Invoice", "field": "payment_schedule", "property": "permlevel", "value": 1, "kind": "restrict", "why": "The due-date schedule that follows the payment terms: manager-set, visible to the till."},
 ]
+
+
+# Hides generated from the field review (setup/form_hides.json: doctype, field, reason). Each one passed audit() when it was
+# added; audit() runs again on every migrate and refuses any that no longer does, so a bad entry can never reach a form.
+FORM_CHANGES.extend(
+	{"doctype": h["doctype"], "field": h["field"], "property": "hidden", "value": 1, "kind": "hide", "why": h["why"]}
+	for h in json.load(open(os.path.join(os.path.dirname(__file__), "form_hides.json")))
+)
 
 
 APPS = os.path.abspath(os.path.join(os.path.dirname(frappe.__file__), "..", ".."))
@@ -283,6 +302,13 @@ def audit(changes=None):
 					continue
 				if not re.search(r"doc\.%s\b" % re.escape(f.fieldname), flat):
 					problems.append((change, f"does not show the tab for data in {f.fieldname}"))
+		elif kind == "restrict":
+			if change["property"] != "permlevel" or str(change["value"]) != "1":
+				problems.append((change, "only permlevel 1 is supported"))
+			if field.reqd or field.mandatory_depends_on:
+				problems.append((change, "required: staff who cannot edit it could not save the document"))
+			if field.fieldtype in LAYOUT:
+				problems.append((change, "restrict fields, not layout"))
 		elif kind == "relabel":
 			if not str(change["value"]).strip():
 				problems.append((change, "empty label"))

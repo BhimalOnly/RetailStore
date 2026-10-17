@@ -44,7 +44,11 @@ def _audit():
 	check("audit: every shipped change passes", not problems, [(c["field"], p) for c, p in problems])
 	check("audit: every change states its reason", all(c.get("why") for c in forms.FORM_CHANGES))
 	hides = [c["field"] for c in forms.FORM_CHANGES if c["kind"] == "hide"]
-	check("audit: only the three zero-reference fields are hidden", sorted(hides) == ["account_manager", "customer_pos_id", "supplier_numbers"], hides)
+	customer_hides = {c["field"] for c in forms.FORM_CHANGES if c["kind"] == "hide" and c["doctype"] == "Customer"}
+	check("audit: the three zero-reference Customer fields are still hidden", {"account_manager", "customer_pos_id", "supplier_numbers"} <= customer_hides, sorted(customer_hides))
+	# fields a hide must never take: the messaging-consent boxes staff tick (customer_quick_entry.js, messaging/consent.py) and tax category (picks the tax template)
+	protected = {"custom_sms_optin", "custom_whatsapp_optin", "tax_category", "customer_name", "customer_type", "customer_group", "territory", "loyalty_program", "tax_id", "disabled", "language"}
+	check("audit: no hide takes a consent box or a protected Customer field", not (customer_hides & protected), sorted(customer_hides & protected))
 
 	# the audit must be able to FAIL: each of these is a mistake somebody could make
 	cases = [
@@ -102,7 +106,7 @@ def _applied():
 
 	i = frappe.get_meta("Item")
 	check("applied: Item reads Product Code / Name / Category, Item Price reads Price", (i.get_field("item_code").label, i.get_field("item_name").label, i.get_field("item_group").label) == ("Product Code", "Product Name", "Product Category") and frappe.get_meta("Item Price").get_field("price_list_rate").label == "Price")
-	check("applied: no Item field is hidden by us", not [c for c in forms.FORM_CHANGES if c["doctype"] == "Item" and c["kind"] == "hide"])
+	check("applied: every Item hide took effect (each passed audit)", all(i.get_field(c["field"]).hidden for c in forms.FORM_CHANGES if c["doctype"] == "Item" and c["kind"] == "hide"))
 	check("applied: Deferred Accounting and Customer Details are collapsed with auto-open, Foreign Trade now opens on data", all(i.get_field(f).collapsible and i.get_field(f).collapsible_depends_on for f in ("deferred_accounting_section", "customer_details", "foreign_trade_details")))
 	for tab, orig in (("manufacturing", "is_stock_item"), ("purchasing_tab", "doc.is_purchase_item"), ("quality_tab", None)):
 		dep = i.get_field(tab).depends_on or ""

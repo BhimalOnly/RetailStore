@@ -428,9 +428,44 @@ def apply_portal_permissions():
 	frappe.clear_cache(doctype="Customer")
 
 
+# Fields moved to permlevel 1 (setup/forms.py kind "restrict"): whoever can work with the document still READS them,
+# only managers can WRITE them. Additive, like apply_role_permissions: nothing existing is removed or lowered, so Frappe's
+# own level-1 rows (e.g. "All" read on Sales Invoice / POS Invoice) are left exactly as they are.
+LEVEL1_DOCTYPES = ("Customer", "Sales Order", "Sales Invoice", "POS Invoice")
+LEVEL1_WRITERS = ("Store Manager", "Store Owner", "Store Admin")
+
+
+def apply_level1_permissions():
+	from frappe.permissions import setup_custom_perms
+
+	for doctype in LEVEL1_DOCTYPES:
+		if not frappe.db.exists("DocType", doctype):
+			continue
+		setup_custom_perms(doctype)
+		rows = frappe.get_all("Custom DocPerm", filters={"parent": doctype, "permlevel": 1}, fields=["role", "read", "if_owner"])
+		everyone_reads = any(r.role == "All" and r.read and not r.if_owner for r in rows)
+		wanted = {role: {"read": 1, "write": 1} for role in LEVEL1_WRITERS}
+		if not everyone_reads:
+			for role, perms in PERMISSIONS.items():
+				if role in ALL and "r" in perms.get(doctype, "").split():
+					wanted.setdefault(role, {"read": 1})
+		for role, flags in wanted.items():
+			name = frappe.db.get_value("Custom DocPerm", {"parent": doctype, "role": role, "permlevel": 1, "if_owner": 0})
+			perm = frappe.get_doc("Custom DocPerm", name) if name else frappe.get_doc({"doctype": "Custom DocPerm", "parent": doctype, "role": role, "permlevel": 1})
+			changed = perm.is_new()
+			for field in flags:
+				if not perm.get(field):
+					perm.set(field, 1)
+					changed = True
+			if changed:
+				perm.save(ignore_permissions=True)
+		frappe.clear_cache(doctype=doctype)
+
+
 def setup_roles_and_permissions():
 	create_roles()
 	apply_role_permissions()
+	apply_level1_permissions()
 	apply_settings_permissions()
 	apply_workspace_permissions()
 	apply_portal_permissions()
