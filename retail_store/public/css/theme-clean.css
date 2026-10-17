@@ -1,0 +1,147 @@
+/* Storefront preset: Clean (Apple-inspired minimal).
+   Loaded alongside storefront.css (branding.py, when Retail Store Settings >
+   Storefront Theme = "Clean"). Every selector here is prefixed with an extra
+   `html` ancestor so it outranks storefront.css's plain `body:not(.sl-split)`
+   rules on specificity alone -- this file's actual position in <head> relative
+   to storefront.css isn't guaranteed, so winning can't depend on load order.
+   No web font: the real system stack, so this theme adds no font request.
+   Re-skins the --rs-* look tokens (soft grey surface, near-black ink, hairlines,
+   12px corners), pill-shaped primary buttons, large tight headlines, a centred
+   full-width hero, a more translucent blurred nav and capped hover motion. The
+   client's own --rs-brand / --rs-accent still drive buttons and links underneath
+   this file. Markup: webshop's item-card / product-page, retail_store's
+   store-home + quick-view/cart-drawer (shop_ui.js) + the shopper sign-in page. */
+
+html body:not(.sl-split) {
+	--rs-surface: #f5f5f7;
+	--rs-paper: #ffffff;
+	--rs-ink: #1d1d1f;
+	--rs-line: #d2d2d7;
+	--rs-r: 12px;
+	--rs-display: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	-webkit-font-smoothing: antialiased;
+}
+
+/* nav: thin links, wide tracking, a more translucent / more blurred bar over a hairline */
+html body:not(.sl-split) nav.navbar { border-bottom: 1px solid rgba(0, 0, 0, 0.08); }
+html body:not(.sl-split) nav.navbar .nav-link { font-weight: 400; letter-spacing: 0.14em; font-size: 12px; color: var(--rs-ink); opacity: 0.85; }
+html body:not(.sl-split) nav.navbar .nav-link:hover, html body:not(.sl-split) nav.navbar .nav-link.active { opacity: 1; color: var(--rs-ink); }
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+	html body:not(.sl-split) nav.navbar {
+		background: color-mix(in srgb, var(--rs-paper) 72%, transparent);
+		-webkit-backdrop-filter: saturate(1.8) blur(20px);
+		backdrop-filter: saturate(1.8) blur(20px);
+	}
+}
+
+/* headlines: large, bold, slightly tight */
+html body:not(.sl-split) .product-details .product-title,
+html body:not(.sl-split) .product-details h2,
+html body:not(.sl-split) .rs-home h1, html body:not(.sl-split) .rs-home h2,
+html body:not(.sl-split) .page-header h1, html body:not(.sl-split) .page_content h1 {
+	font-weight: 700;
+	letter-spacing: -0.03em;
+}
+html body:not(.sl-split) .product-details .product-title { font-size: clamp(1.9rem, 3.4vw, 2.6rem); line-height: 1.1; }
+html body:not(.sl-split) .rs-section h2, html body:not(.sl-split) .rs-related-h {
+	font-size: clamp(1.4rem, 2.4vw, 1.9rem);
+	text-transform: none;
+	letter-spacing: -0.02em;
+	font-weight: 700;
+	color: var(--rs-ink);
+	margin-bottom: 22px;
+}
+html body:not(.sl-split) .rs-pdp-h { letter-spacing: 0.12em; font-weight: 600; }
+html body:not(.sl-split) .product-details .product-description, html body:not(.sl-split) .product-description { font-weight: 400; color: #424245; }
+
+/* cards and tiles: soft corners, sentence-case titles, a barely-there zoom */
+html body:not(.sl-split) .item-card .card { border-radius: var(--rs-r); }
+html body:not(.sl-split) .item-card .card-img-container, html body:not(.sl-split) .product-image { border-radius: var(--rs-r) var(--rs-r) 0 0; background: var(--rs-paper); }
+html body:not(.sl-split) .item-card .product-title,
+html body:not(.sl-split) .rs-cat-name, html body:not(.sl-split) .rs-prod-title {
+	font-family: var(--rs-display);
+	font-weight: 600;
+	text-transform: none;
+	letter-spacing: -0.01em;
+	font-size: 15px;
+}
+html body:not(.sl-split) .item-card .card-img-container img, html body:not(.sl-split) .rs-cat-img img, html body:not(.sl-split) .rs-prod-img img { transition: transform 0.35s ease, opacity 0.35s ease; }
+html body:not(.sl-split) .item-card:hover .card-img-container img,
+html body:not(.sl-split) .rs-cat:hover img, html body:not(.sl-split) .rs-prod:hover img { transform: scale(1.02); }
+html body:not(.sl-split) .rs-sw:hover:not(:disabled) { transform: none; }
+
+/* primary buttons: full pills (everything else keeps the soft 12px corner) */
+html body:not(.sl-split) .btn-primary,
+html body:not(.sl-split) .btn-add-to-cart,
+html body:not(.sl-split) .btn-add-to-cart-list,
+html body:not(.sl-split) .btn.btn-configure:not(.btn-md),
+html body:not(.sl-split) .rs-add,
+html body:not(.sl-split) .rs-btn,
+html body:not(.sl-split) .rs-hero-cta,
+html body:not(.sl-split) .rs-qv-btn,
+html body:not(.sl-split) .rs-noresults-btn {
+	border-radius: 980px;
+	font-weight: 500;
+	letter-spacing: 0.02em;
+	text-transform: none;
+	font-size: 15px;
+}
+html body:not(.sl-split) .rs-qv { border-radius: 18px; }
+
+/* ---- store-home hero: centred, spacious, image-led (no angles, no blobs) ---- */
+html body:not(.sl-split) .rs-hero { background-color: var(--rs-surface); color: var(--rs-ink); }
+html body:not(.sl-split) .rs-hero-inner { grid-template-columns: 1fr; text-align: center; justify-items: center; padding: 72px 20px 48px; gap: 40px; }
+html body:not(.sl-split) .rs-hero h1 {
+	color: var(--rs-ink);
+	font-weight: 700;
+	letter-spacing: -0.035em;
+	line-height: 1.05;
+	font-size: clamp(2.4rem, 6.4vw, 4.6rem);
+	max-width: 14em;
+	margin-left: auto;
+	margin-right: auto;
+}
+html body:not(.sl-split) .rs-hero p { color: #6e6e73; font-size: clamp(1.05rem, 1.8vw, 1.35rem); margin-left: auto; margin-right: auto; }
+html body:not(.sl-split) .rs-hero-cta:not(.btn-md) { background: var(--rs-b); border-color: var(--rs-b); color: #fff; padding: 0 30px; min-height: 46px; display: inline-flex; align-items: center; margin-top: 18px; }
+html body:not(.sl-split) .rs-hero-cta:hover, html body:not(.sl-split) .rs-hero-cta:focus { background: var(--rs-b); border-color: var(--rs-b); color: #fff; filter: brightness(1.1); }
+/* a client's own banner photo: full-bleed, centred white text on a light scrim */
+html body:not(.sl-split) .rs-hero.has-image { min-height: 560px; display: flex; align-items: center; }
+html body:not(.sl-split) .rs-hero.has-image::before { background: rgba(0, 0, 0, 0.28); }
+html body:not(.sl-split) .rs-hero.has-image h1 { color: #fff; }
+html body:not(.sl-split) .rs-hero.has-image p { color: rgba(255, 255, 255, 0.92); }
+html body:not(.sl-split) .rs-hero.has-image .rs-hero-cta:not(.btn-md) { background: #fff; border-color: #fff; color: var(--rs-ink); }
+/* no photo: the product collage becomes one wide, even row under the headline (same breakpoint as storefront.css) */
+@media (min-width: 900px) {
+	html body:not(.sl-split) .rs-hero-inner { grid-template-columns: 1fr; padding: 96px 20px 64px; }
+	html body:not(.sl-split) .rs-hero-art { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; width: 100%; max-width: 1000px; }
+	html body:not(.sl-split) .rs-hero-art.rs-art-1 { grid-template-columns: 1fr; max-width: 420px; justify-self: center; }
+	html body:not(.sl-split) .rs-hero-art.rs-art-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 520px; }
+	html body:not(.sl-split) .rs-hero-art.rs-art-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 760px; }
+	html body:not(.sl-split) .rs-hero-art a { aspect-ratio: 4 / 5; border-radius: var(--rs-r); background: var(--rs-paper); }
+	html body:not(.sl-split) .rs-hero-art a:nth-child(even) { transform: none; }
+}
+
+/* ---- shopper sign-in: as little chrome as possible ---- */
+html body.rs-shop-login, html body.rs-shop-login :is(h4, p, label, input, button, a, span) { font-family: inherit; }
+html body.rs-shop-login .for-login .login-content.page-card,
+html body.rs-shop-login .for-forgot .login-content.page-card,
+html body.rs-shop-login .for-signup .login-content.page-card {
+	background: transparent !important;
+	border: 0 !important;
+}
+html body.rs-shop-login .page-card-head h4 { font-size: 1.9rem; font-weight: 700; letter-spacing: -0.03em; }
+html body.rs-shop-login .page-card-head .page-card-subtitle { color: #6e6e73 !important; }
+html body.rs-shop-login .form-control { background: var(--rs-paper); border-color: var(--rs-line); border-radius: var(--rs-r); }
+html body.rs-shop-login .es-button.w-full:not(:disabled):not([disabled]),
+html body.rs-shop-login .for-login .btn-login,
+html body.rs-shop-login .for-login .btn-primary.btn-block,
+html body.rs-shop-login .for-forgot .btn-primary.btn-block,
+html body.rs-shop-login .for-signup .btn-primary.btn-block {
+	border-radius: 980px !important;
+	text-transform: none;
+	letter-spacing: 0.01em;
+	font-weight: 500;
+	font-size: 15px;
+}
+html body.rs-shop-login .es-button.w-full.btn-login-option:not(:disabled) { border-color: transparent !important; text-decoration: none; }

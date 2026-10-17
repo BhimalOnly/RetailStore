@@ -288,3 +288,28 @@ try {
 	);
 	document.addEventListener("DOMContentLoaded", setup);
 })();
+
+// ---- Logout: a shopper lands on the shopper sign-in page, not Solvronix's staff /login ----------------
+// The website's "Log out" link opens /logout, whose page runs frappe.logout(), and Frappe hard-codes
+// window.location.href = "/login" there. Frappe sets a system_user cookie at login ("yes" for staff, "no"
+// for a website user); it is read BEFORE the logout call clears it. Staff keep /login. /account/login
+// itself falls back to /login when the Online Store is off, so no store check is needed here.
+(function () {
+	function isStaff() {
+		return /(?:^|;\s*)system_user=yes(?:;|$)/.test(document.cookie);
+	}
+	function logout() {
+		var to = isStaff() ? "/login" : "/account/login";
+		frappe.call({
+			method: "logout",
+			callback: function (r) {
+				if (r.exc) return;
+				window.location.href = to;
+			},
+		});
+	}
+	if (window.frappe) frappe.logout = logout;
+	document.addEventListener("DOMContentLoaded", function () {
+		if (window.frappe) frappe.logout = logout;
+	});
+})();

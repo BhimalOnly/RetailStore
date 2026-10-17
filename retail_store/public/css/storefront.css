@@ -551,3 +551,14 @@ body:not(.sl-split) .rs-related .rs-prod-img { box-shadow: inset 0 0 0 1px var(-
 /* breathing room: picker -> description -> cross-sell, so the page does not stop at Add to cart */
 body:not(.sl-split) .product-container .product-page-content > .row.mb-5 { margin-bottom: 0.5rem !important; }
 body:not(.sl-split) .product-details .rs-pdp-picker { margin-bottom: 8px; }
+
+/* ---- Shopper login: fit one screen (Solvronix's spacing is sized for a tall staff page) -------------- */
+html body.rs-shop-login .login-content.page-card { padding-bottom: 26px !important; }
+html body.rs-shop-login .page-card-head { padding-top: 24px !important; padding-bottom: 6px !important; }
+html body.rs-shop-login .page-card-head .st-login-company-logo { height: 56px !important; width: auto; margin-bottom: 12px !important; }
+html body.rs-shop-login .page-card-head .page-card-subtitle { margin-top: 2px; }
+html body.rs-shop-login .form-group { margin-bottom: 10px !important; }
+html body.rs-shop-login .page-card-actions { margin-top: 0 !important; }
+html body.rs-shop-login .sign-up-message { margin-top: 10px !important; }
+html body.rs-shop-login .es-button.w-full + .es-button.w-full { margin-top: 10px; }
+@media (min-height: 700px) { html body.rs-shop-login .login-content.page-card { margin-top: 0; } }

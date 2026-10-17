@@ -36,6 +36,10 @@ STOREFRONT_THEMES = {
 		"css": "/assets/retail_store/css/theme-playful.css?v=3",
 		"font": "https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700&display=swap",
 	},
+	# system font stack: no "font" entry, so no extra request
+	"Clean": {
+		"css": "/assets/retail_store/css/theme-clean.css?v=2",
+	},
 }
 
 
@@ -89,9 +93,8 @@ def update_website_context(context):
 
 	theme = STOREFRONT_THEMES.get(branding.get("theme"))
 	if theme:
-		context.head_html = (context.get("head_html") or "") + (
-			f'<link rel="stylesheet" href="{theme["font"]}"><link rel="stylesheet" href="{theme["css"]}">'
-		)
+		font_link = f'<link rel="stylesheet" href="{theme["font"]}">' if theme.get("font") else ""
+		context.head_html = (context.get("head_html") or "") + f'{font_link}<link rel="stylesheet" href="{theme["css"]}">'
 
 
 def apply_branding(settings):
